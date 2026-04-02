@@ -1,37 +1,32 @@
-import { useState } from "react";
-import api from "./api";
-import { useNavigate } from "react-router-dom";
+import React from "react";
+import InputField from "../components/InputField";
+import logo from "../assets/logo.png";
+import "./Auth.css";
 
-export default function Register() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const navigate = useNavigate();
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const res = await api.post("/register", {
-      name,
-      email,
-      password,
-    });
-
-    localStorage.setItem("token", res.data.token);
-
-    navigate("/home");
-  };
-
+const Register: React.FC = () => {
   return (
-    <form onSubmit={handleRegister}>
-      <h2>Register</h2>
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-image-right" style={{ backgroundImage: "url('https://picsum.photos/201/400')" }}></div>
 
-      <input placeholder="Name" onChange={(e) => setName(e.target.value)} />
-      <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
-      <input placeholder="Password" type="password" onChange={(e) => setPassword(e.target.value)} />
+        <div className="auth-logo">
+          <img src={logo} alt="Logo INSTAT" />
+        </div>
 
-      <button type="submit">Register</button>
-    </form>
+        <h2 className="auth-title">S'INSCRIRE</h2>
+
+        <form>
+          <InputField type="text" placeholder="Nom complet" />
+          <InputField type="email" placeholder="Courriel" />
+          <InputField type="password" placeholder="Confirmer le mot de passe" />
+          <button type="submit" className="auth-button">S'inscrire</button>
+        </form>
+
+        <div className="auth-link">Déjà inscrit ? Connectez-vous</div>
+        <div className="auth-link">RETOUR À LA CONNEXION</div>
+      </div>
+    </div>
   );
-}
+};
+
+export default Register;

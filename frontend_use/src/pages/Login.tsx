@@ -1,35 +1,27 @@
 import React from "react";
-import Input from "../components/Input";
+import InputField from "../components/InputField";
+import logo from "../assets/logo.png";
+import "./Auth.css";
 
 const Login: React.FC = () => {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-indigo-600">
-      
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-96">
-        
-        {/* Title */}
-        <h2 className="text-2xl font-bold text-center mb-6">
-          Gestion Personnel
-        </h2>
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-image-left" style={{ backgroundImage: "url('https://picsum.photos/200/400')" }}></div>
 
-        {/* Form */}
+        <div className="auth-logo">
+          <img src={logo} alt="Logo INSTAT" />
+        </div>
+
+        <h2 className="auth-title">CONNECTER</h2>
+
         <form>
-          <Input type="email" placeholder="Email" />
-          <Input type="password" placeholder="Mot de passe" />
-
-          <button className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition duration-300">
-            Se connecter
-          </button>
+          <InputField type="email" placeholder="Courriel" />
+          <InputField type="password" placeholder="Mot de passe" />
+          <button type="submit" className="auth-button">Se Connecter</button>
         </form>
 
-        {/* Footer */}
-        <p className="text-center text-sm mt-4">
-          Pas de compte ?{" "}
-          <span className="text-blue-500 cursor-pointer">
-            S'inscrire
-          </span>
-        </p>
-
+        <div className="auth-link">Mot de passe oublié ?</div>
       </div>
     </div>
   );
