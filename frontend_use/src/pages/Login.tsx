@@ -1,29 +1,20 @@
 import React from "react";
-import InputField from "../components/InputField";
-import logo from "../assets/logo.png";
-import "./Auth.css";
+import AuthLayout from "../components/AuthLayout";
 
 const Login: React.FC = () => {
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <div className="auth-image-left" style={{ backgroundImage: "url('https://picsum.photos/200/400')" }}></div>
-
-        <div className="auth-logo">
-          <img src={logo} alt="Logo INSTAT" />
-        </div>
-
-        <h2 className="auth-title">CONNECTER</h2>
-
-        <form>
-          <InputField type="email" placeholder="Courriel" />
-          <InputField type="password" placeholder="Mot de passe" />
-          <button type="submit" className="auth-button">Se Connecter</button>
-        </form>
-
-        <div className="auth-link">Mot de passe oublié ?</div>
-      </div>
-    </div>
+    <AuthLayout background="https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0">
+      <h2 className="auth-title">CONNECTER</h2>
+      <form className="auth-form">
+        <input type="email" placeholder="Courriel" className="auth-input" />
+        <input type="password" placeholder="Mot de passe" className="auth-input" />
+        <button type="submit" className="auth-button">Se Connecter</button>
+        <a href="#" className="auth-link">Mot de passe oublié?</a>
+        <p className="auth-subtext">BIENVENUE CHEZ INSTAT MADAGASCAR</p>
+        {/* 🔽 Bouton ajouté pour aller vers l'inscription */}
+        <a href="/register" className="auth-secondary">S'inscrire</a>
+      </form>
+    </AuthLayout>
   );
 };
 

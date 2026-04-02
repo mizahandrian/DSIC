@@ -1,0 +1,116 @@
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-size: cover;
+    background-position: center;
+    animation: fadeIn 1s ease-in-out;
+  }
+  
+  .auth-card {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+    width: 380px;
+    text-align: center;
+    backdrop-filter: blur(6px);
+  }
+  
+  .auth-logo {
+    width: 90px;
+    margin-bottom: 1.5rem;
+  }
+  
+  .auth-title {
+    font-size: 1.6rem;
+    font-weight: bold;
+    margin-bottom: 1.2rem;
+    color: #2c3e50;
+  }
+  
+  .auth-form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .auth-input {
+    padding: 0.9rem;
+    margin: 0.6rem 0;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: border 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .auth-input:focus {
+    border-color: #0066cc;
+    box-shadow: 0 0 8px rgba(0,102,204,0.3);
+    outline: none;
+  }
+  
+  .auth-button {
+    background: linear-gradient(135deg, #0066cc, #004999);
+    color: white;
+    padding: 1rem;
+    border: none;
+    border-radius: 10px;
+    margin-top: 1rem;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .auth-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+  }
+  
+  .auth-secondary {
+    display: block;
+    background: transparent;
+    border: 1px solid #0066cc;
+    color: #0066cc;
+    padding: 0.9rem;
+    border-radius: 10px;
+    margin-top: 1rem;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+  
+  .auth-secondary:hover {
+    background: #0066cc;
+    color: white;
+  }
+  
+  .auth-link {
+    color: #0066cc;
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+  
+  .auth-link:hover {
+    text-decoration: underline;
+  }
+  
+  .auth-subtext {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #555;
+  }
+  
+  .auth-footer {
+    margin-top: 2rem;
+    font-size: 0.8rem;
+    color: #777;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
