@@ -67,7 +67,7 @@ const Login: React.FC = () => {
       {errors.general && <div className="error-message">{errors.general}</div>}
       
       <div className="form-group">
-        <label>@Nom complet</label>
+        <label>Nom complet</label>
         <input
           type="email"
           name="email"
