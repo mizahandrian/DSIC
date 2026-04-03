@@ -1,21 +1,41 @@
-import React from "react";
-import "../style/Auth.css"; // ✅ chemin corrigé
+import React, { useState } from 'react';
+import Login from '../pages/Login';
+import Register from '../pages/Register';
+import '../style/auth.css';
 
-interface AuthLayoutProps {
-  children: React.ReactNode;
-  background: string;
-}
+const AuthLayout: React.FC = () => {
+  const [isLogin, setIsLogin] = useState<boolean>(true);
 
-const AuthLayout: React.FC<AuthLayoutProps> = ({ children, background }) => {
   return (
-    <div className="auth-container" style={{ backgroundImage: `url(${background})` }}>
+    <div className="auth-container">
       <div className="auth-card">
-        {/* 🔽 Remplace cette image par ton logo PNG plus tard */}
-        <img src="/WhatsApp Image 2026-03-31 at 11.02.14.jpeg" alt="Logo" className="auth-logo" />
-        {children}
-        <footer className="auth-footer">
-          © 2024 INSTAT MADAGASCAR - Données et Statistiques
-        </footer>
+        <div className="auth-header">
+          <h2>Bienvenue Chez</h2>
+          <h1>INSTAT MADAGASCAR</h1>
+        </div>
+        
+        <div className="auth-tabs">
+          <button 
+            className={`tab-btn ${isLogin ? 'active' : ''}`}
+            onClick={() => setIsLogin(true)}
+            type="button"
+          >
+            SE CONNECTER
+          </button>
+          <button 
+            className={`tab-btn ${!isLogin ? 'active' : ''}`}
+            onClick={() => setIsLogin(false)}
+            type="button"
+          >
+            S'INSCRIRE
+          </button>
+        </div>
+        
+        {isLogin ? <Login /> : <Register />}
+        
+        <div className="auth-footer">
+          <p>© 2024 INSTAT MADAGASCAR - Données et Statistiques</p>
+        </div>
       </div>
     </div>
   );
