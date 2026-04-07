@@ -1,22 +1,28 @@
+// src/App.tsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import AuthLayout from './components/AuthLayout';
-import Home from './Home';
-import './App.css';
+import Personnels from './pages/Personnels';
 
 const App: React.FC = () => {
-  const isAuthenticated: boolean = !!localStorage.getItem('token');
+  const isAuthenticated = !!localStorage.getItem('token');
 
   return (
     <Router>
       <Routes>
-        <Route 
-          path="/login" 
-          element={!isAuthenticated ? <AuthLayout /> : <Navigate to="/" />} 
-        />
+        {/* Page de login/register */}
+        <Route path="/login" element={<AuthLayout />} />
+        
+        {/* Page principale = Formulaire de gestion des personnels */}
         <Route 
           path="/" 
-          element={isAuthenticated ? <Home /> : <Navigate to="/login" />} 
+          element={isAuthenticated ? <Personnels /> : <Navigate to="/login" />} 
+        />
+        
+        {/* Redirection pour toutes les autres routes */}
+        <Route 
+          path="*" 
+          element={<Navigate to="/" />} 
         />
       </Routes>
     </Router>
