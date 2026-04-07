@@ -14,7 +14,7 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required|min:2',
             'email' => 'required|email|unique:users',
-            'password' => 'required|min:8'
+            'password' => 'required|min:8',
         ]);
 
         $user = User::create([
@@ -29,7 +29,7 @@ class AuthController extends Controller
             'message' => 'User created successfully',
             'user' => $user,
             'token' => $token
-        ]);
+        ], 201);
     }
 
     // LOGIN
@@ -54,6 +54,16 @@ class AuthController extends Controller
             'message' => 'Login successful',
             'user' => $user,
             'token' => $token
+        ]);
+    }
+
+    // LOGOUT
+    public function logout(Request $request)
+    {
+        $request->user()->tokens()->delete();
+
+        return response()->json([
+            'message' => 'Logged out successfully'
         ]);
     }
 }

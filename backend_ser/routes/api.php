@@ -3,43 +3,36 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
+
 
 /*
-|--------------------------------------------------------------------------
-| PUBLIC ROUTES
-|--------------------------------------------------------------------------
+|--------------------------
+| AUTH ROUTES
+|--------------------------
 */
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 /*
-|--------------------------------------------------------------------------
-| PROTECTED ROUTES (SANCTUM)
-|--------------------------------------------------------------------------
+|--------------------------
+| PROTECTED ROUTES
+|--------------------------
 */
 Route::middleware('auth:sanctum')->group(function () {
 
-    // utilisateur connecté
     Route::get('/me', function (Request $request) {
-        return response()->json([
-            'user' => $request->user()
-        ]);
+        return response()->json($request->user());
     });
 
-    // logout
-    Route::post('/logout', function (Request $request) {
-        $request->user()->tokens()->delete();
+    Route::post('/logout', [AuthController::class, 'logout']);
 
-        return response()->json([
-            'message' => 'Logged out successfully'
-        ]);
-    });
-
-    // voir tous les utilisateurs (debug/admin)
-    Route::get('/users', function () {
-        return response()->json(
-            \App\Models\User::all()
-        );
-    });
 });
+
+/*
+|--------------------------
+| USERS LIST (DEBUG / ADMIN)
+|--------------------------
+*/
+Route::get('/users', [UserController::class, 'index']);
