@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { authAPI, setAuthToken } from '../TS/api';
+import { authAPI, setAuthToken } from '../Service/api';
 
 interface LoginFormData {
   email: string;
