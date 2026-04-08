@@ -15,7 +15,8 @@ import {
   faIdCard,
   faPhone,
   faVenusMars,
-  faCalendarCheck
+  faCalendarCheck,
+  faEye
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 import logoInstat from '../assets/image/WhatsApp Image 2026-03-31 at 11.02.14 - Copie.jpeg';
@@ -36,6 +37,8 @@ interface Personnel {
 const Personnels: React.FC = () => {
   const [personnels, setPersonnels] = useState<Personnel[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [viewingPersonnel, setViewingPersonnel] = useState<Personnel | null>(null);
   const [editingPersonnel, setEditingPersonnel] = useState<Personnel | null>(null);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -88,8 +91,8 @@ const Personnels: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce personnel ?')) {
+  const handleDelete = async (id: number, nom: string, prenom: string) => {
+    if (window.confirm(`Êtes-vous sûr de vouloir supprimer ${nom} ${prenom} ?`)) {
       try {
         await api.delete(`/personnels/${id}`);
         fetchPersonnels();
@@ -115,9 +118,9 @@ const Personnels: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleNext = () => {
-    // Navigation vers la page des directions
-    window.location.href = '/directions';
+  const handleView = (personnel: Personnel) => {
+    setViewingPersonnel(personnel);
+    setIsViewModalOpen(true);
   };
 
   const closeModal = () => {
@@ -133,6 +136,20 @@ const Personnels: React.FC = () => {
       date_entree: '',
       motif_entree: '',
     });
+  };
+
+  // ✅ CONDITION : Vérifier s'il y a au moins un personnel
+  const hasPersonnels = () => {
+    return personnels.length > 0;
+  };
+
+  // ✅ CONDITION : Redirection avec vérification
+  const handleNext = () => {
+    if (hasPersonnels()) {
+      window.location.href = '/directions';
+    } else {
+      alert('⚠️ Veuillez d\'abord ajouter au moins un personnel avant de passer à la section suivante.');
+    }
   };
 
   const filteredPersonnels = personnels.filter(p =>
@@ -172,7 +189,15 @@ const Personnels: React.FC = () => {
               <FontAwesomeIcon icon={faPlus} />
               Nouveau personnel
             </button>
-            <button className="btn-next" onClick={handleNext}>
+            {/* ✅ Bouton Suivant avec condition */}
+            <button 
+              className="btn-next" 
+              onClick={handleNext}
+              style={{ 
+                opacity: hasPersonnels() ? 1 : 0.6,
+                cursor: hasPersonnels() ? 'pointer' : 'not-allowed'
+              }}
+            >
               Suivant
               <FontAwesomeIcon icon={faArrowRight} />
             </button>
@@ -216,6 +241,13 @@ const Personnels: React.FC = () => {
                   </td>
                   <td style={{ textAlign: 'center' }}>
                     <button
+                      className="action-btn action-view"
+                      onClick={() => handleView(personnel)}
+                      title="Voir"
+                    >
+                      <FontAwesomeIcon icon={faEye} />
+                    </button>
+                    <button
                       className="action-btn action-edit"
                       onClick={() => handleEdit(personnel)}
                       title="Modifier"
@@ -224,7 +256,7 @@ const Personnels: React.FC = () => {
                     </button>
                     <button
                       className="action-btn action-delete"
-                      onClick={() => handleDelete(personnel.id_personnel)}
+                      onClick={() => handleDelete(personnel.id_personnel, personnel.nom, personnel.prenom)}
                       title="Supprimer"
                     >
                       <FontAwesomeIcon icon={faTrashAlt} />
@@ -389,6 +421,52 @@ const Personnels: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de visualisation */}
+      {isViewModalOpen && viewingPersonnel && (
+        <div className="modal-overlay">
+          <div className="modal" style={{ maxWidth: '500px' }}>
+            <div className="modal-header">
+              <h2 className="modal-title">
+                <FontAwesomeIcon icon={faUser} />
+                Détails du personnel
+              </h2>
+              <button className="modal-close" onClick={() => setIsViewModalOpen(false)}>
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ fontSize: '12px', color: '#8a9bb0' }}>Matricule</label>
+                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#2c3e50' }}>{viewingPersonnel.id_personnel}</div>
+              </div>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ fontSize: '12px', color: '#8a9bb0' }}>Nom complet</label>
+                <div style={{ fontSize: '16px', fontWeight: '500' }}>{viewingPersonnel.nom} {viewingPersonnel.prenom}</div>
+              </div>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ fontSize: '12px', color: '#8a9bb0' }}>CIN</label>
+                <div>{viewingPersonnel.numero_cin}</div>
+              </div>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ fontSize: '12px', color: '#8a9bb0' }}>Téléphone</label>
+                <div>{viewingPersonnel.tel || '-'}</div>
+              </div>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ fontSize: '12px', color: '#8a9bb0' }}>Date naissance</label>
+                <div>{new Date(viewingPersonnel.date_naissance).toLocaleDateString('fr-FR')}</div>
+              </div>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ fontSize: '12px', color: '#8a9bb0' }}>Date entrée</label>
+                <div>{new Date(viewingPersonnel.date_entree).toLocaleDateString('fr-FR')}</div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn-secondary" onClick={() => setIsViewModalOpen(false)}>Fermer</button>
+            </div>
           </div>
         </div>
       )}

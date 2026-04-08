@@ -16,7 +16,8 @@ import {
   faMapMarkerAlt,
   faUsers,
   faArrowDown,
-  faArrowUp
+  faArrowUp,
+  faEye
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 import logoInstat from '../assets/image/WhatsApp Image 2026-03-31 at 11.02.14 - Copie.jpeg';
@@ -26,42 +27,41 @@ interface Direction {
   id_direction: number;
   nom_direction: string;
   type: 'centrale' | 'regionale' | 'provinciale';
-  parent_id?: number;
   nombre_services?: number;
   nombre_personnels?: number;
+  description?: string;
 }
 
-// Données initiales des directions
 const initialDirections = [
-  { nom_direction: 'AC', type: 'centrale' },
-  { nom_direction: 'CGP', type: 'centrale' },
-  { nom_direction: 'DAAF', type: 'centrale' },
-  { nom_direction: 'DCNM', type: 'centrale' },
-  { nom_direction: 'DDSS', type: 'centrale' },
-  { nom_direction: 'DFRS', type: 'centrale' },
-  { nom_direction: 'DG', type: 'centrale' },
-  { nom_direction: 'DSCVM', type: 'centrale' },
-  { nom_direction: 'DSE', type: 'centrale' },
-  { nom_direction: 'DSIC', type: 'centrale' },
-  { nom_direction: 'BACE', type: 'centrale' },
-  { nom_direction: 'DAI/MEF', type: 'centrale' },
-  { nom_direction: 'DGT/DBIFA', type: 'centrale' },
-  { nom_direction: 'DRH/MEF', type: 'centrale' },
-  // Directions régionales
-  { nom_direction: 'DR/Antsiranana', type: 'regionale' },
-  { nom_direction: 'DR/Fianar', type: 'regionale' },
-  { nom_direction: 'DR/Mahajanga', type: 'regionale' },
-  { nom_direction: 'DR/Tana', type: 'regionale' },
-  { nom_direction: 'DR/Toamasina', type: 'regionale' },
-  { nom_direction: 'DR/Toliara', type: 'regionale' },
-  // Directions provinciales
-  { nom_direction: 'CRM DIANA', type: 'provinciale' },
-  { nom_direction: 'CRM Vakinankaratra', type: 'provinciale' },
+  { nom_direction: 'AC - Administration Centrale', type: 'centrale', description: 'Administration Centrale' },
+  { nom_direction: 'CGP - Cellule de Gestion des Projets', type: 'centrale', description: 'Cellule de Gestion des Projets' },
+  { nom_direction: 'DAAF - Direction des Affaires Administratives et Financières', type: 'centrale', description: 'Direction des Affaires Administratives et Financières' },
+  { nom_direction: 'DCNM - Direction de la Coordination Nationale et des Méthodologies', type: 'centrale', description: 'Direction de la Coordination Nationale et des Méthodologies' },
+  { nom_direction: 'DDSS - Direction des Données et des Systèmes Statistiques', type: 'centrale', description: 'Direction des Données et des Systèmes Statistiques' },
+  { nom_direction: 'DFRS - Direction des Finances et des Ressources Statistiques', type: 'centrale', description: 'Direction des Finances et des Ressources Statistiques' },
+  { nom_direction: 'DG - Direction Générale', type: 'centrale', description: 'Direction Générale' },
+  { nom_direction: 'DSCVM - Direction des Statistiques et des Comptes de la Vie et des Ménages', type: 'centrale', description: 'Direction des Statistiques et des Comptes de la Vie et des Ménages' },
+  { nom_direction: 'DSE - Direction des Statistiques Economiques', type: 'centrale', description: 'Direction des Statistiques Economiques' },
+  { nom_direction: 'DSIC - Direction des Systèmes d\'Information et de la Communication', type: 'centrale', description: 'Direction des Systèmes d\'Information et de la Communication' },
+  { nom_direction: 'BACE - Bureau d\'Appui et de Coordination Externe', type: 'centrale', description: 'Bureau d\'Appui et de Coordination Externe' },
+  { nom_direction: 'DAI/MEF - Direction des Affaires Internationales', type: 'centrale', description: 'Direction des Affaires Internationales / Ministère' },
+  { nom_direction: 'DGT/DBIFA - Direction Générale du Trésor', type: 'centrale', description: 'Direction Générale du Trésor' },
+  { nom_direction: 'DRH/MEF - Direction des Ressources Humaines', type: 'centrale', description: 'Direction des Ressources Humaines / Ministère' },
+  { nom_direction: 'DR/Antsiranana - Direction Régionale Antsiranana', type: 'regionale', description: 'Direction Régionale d\'Antsiranana' },
+  { nom_direction: 'DR/Fianar - Direction Régionale Fianarantsoa', type: 'regionale', description: 'Direction Régionale de Fianarantsoa' },
+  { nom_direction: 'DR/Mahajanga - Direction Régionale Mahajanga', type: 'regionale', description: 'Direction Régionale de Mahajanga' },
+  { nom_direction: 'DR/Tana - Direction Régionale Antananarivo', type: 'regionale', description: 'Direction Régionale d\'Antananarivo' },
+  { nom_direction: 'DR/Toamasina - Direction Régionale Toamasina', type: 'regionale', description: 'Direction Régionale de Toamasina' },
+  { nom_direction: 'DR/Toliara - Direction Régionale Toliara', type: 'regionale', description: 'Direction Régionale de Toliara' },
+  { nom_direction: 'CRM DIANA - Centre de Recherche et de Médiation DIANA', type: 'provinciale', description: 'Centre de Recherche et de Médiation - Région DIANA' },
+  { nom_direction: 'CRM Vakinankaratra - Centre de Recherche et de Médiation Vakinankaratra', type: 'provinciale', description: 'Centre de Recherche et de Médiation - Région Vakinankaratra' },
 ];
 
 const Directions: React.FC = () => {
   const [directions, setDirections] = useState<Direction[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [viewingDirection, setViewingDirection] = useState<Direction | null>(null);
   const [editingDirection, setEditingDirection] = useState<Direction | null>(null);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -75,6 +75,7 @@ const Directions: React.FC = () => {
   const [formData, setFormData] = useState({
     nom_direction: '',
     type: 'centrale' as 'centrale' | 'regionale' | 'provinciale',
+    description: '',
   });
 
   useEffect(() => {
@@ -87,11 +88,10 @@ const Directions: React.FC = () => {
       if (response.data && response.data.length > 0) {
         setDirections(response.data);
       } else {
-        // Si aucune direction n'existe, initialiser avec les données par défaut
         initializeDirections();
       }
     } catch (error) {
-      console.error('Erreur chargement directions:', error);
+      console.error('Erreur:', error);
       initializeDirections();
     }
   };
@@ -104,11 +104,11 @@ const Directions: React.FC = () => {
       const response = await api.get('/directions');
       setDirections(response.data);
     } catch (error) {
-      console.error('Erreur initialisation:', error);
+      console.error('Erreur:', error);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -149,16 +149,32 @@ const Directions: React.FC = () => {
     setFormData({
       nom_direction: direction.nom_direction,
       type: direction.type,
+      description: direction.description || '',
     });
     setIsModalOpen(true);
+  };
+
+  const handleView = (direction: Direction) => {
+    setViewingDirection(direction);
+    setIsViewModalOpen(true);
   };
 
   const handlePrevious = () => {
     window.location.href = '/personnels';
   };
 
+  // ✅ CONDITION : Vérifier s'il y a des directions
+  const hasDirections = () => {
+    return directions.length > 0;
+  };
+
+  // ✅ CONDITION : Redirection avec vérification
   const handleNext = () => {
-    window.location.href = '/services';
+    if (hasDirections()) {
+      window.location.href = '/services';
+    } else {
+      alert('⚠️ Veuillez d\'abord configurer les directions avant de continuer.');
+    }
   };
 
   const closeModal = () => {
@@ -167,6 +183,7 @@ const Directions: React.FC = () => {
     setFormData({
       nom_direction: '',
       type: 'centrale',
+      description: '',
     });
   };
 
@@ -174,14 +191,12 @@ const Directions: React.FC = () => {
     setExpandedTypes(prev => ({ ...prev, [type]: !prev[type] }));
   };
 
-  // Filtrer les directions
   const filteredDirections = directions.filter(d => {
     const matchesSearch = d.nom_direction.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === 'all' || d.type === filterType;
     return matchesSearch && matchesType;
   });
 
-  // Grouper par type
   const groupedDirections = {
     centrale: filteredDirections.filter(d => d.type === 'centrale'),
     regionale: filteredDirections.filter(d => d.type === 'regionale'),
@@ -218,7 +233,6 @@ const Directions: React.FC = () => {
   return (
     <div className="personnels-container">
       <div className="personnels-content">
-        {/* En-tête avec logo */}
         <div className="personnels-header">
           <div className="logo-wrapper">
             <div className="logo-circle">
@@ -229,7 +243,6 @@ const Directions: React.FC = () => {
           <p>Institut National de la Statistique - Madagascar</p>
         </div>
 
-        {/* Barre d'actions */}
         <div className="actions-bar">
           <div className="search-wrapper">
             <FontAwesomeIcon icon={faSearch} className="search-icon" />
@@ -246,12 +259,12 @@ const Directions: React.FC = () => {
             className="form-select"
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            style={{ width: '180px' }}
+            style={{ width: '200px' }}
           >
-            <option value="all">Tous les types</option>
-            <option value="centrale">Directions Centrales</option>
-            <option value="regionale">Directions Régionales</option>
-            <option value="provinciale">Directions Provinciales</option>
+            <option value="all">📋 Tous les types</option>
+            <option value="centrale">🏢 Directions Centrales</option>
+            <option value="regionale">📍 Directions Régionales</option>
+            <option value="provinciale">🏙️ Directions Provinciales</option>
           </select>
 
           <div style={{ display: 'flex', gap: '12px' }}>
@@ -263,134 +276,62 @@ const Directions: React.FC = () => {
               <FontAwesomeIcon icon={faPlus} />
               Nouvelle direction
             </button>
-            <button className="btn-next" onClick={handleNext}>
+            {/* ✅ Bouton Suivant avec condition */}
+            <button 
+              className="btn-next" 
+              onClick={handleNext}
+              style={{ 
+                opacity: hasDirections() ? 1 : 0.6,
+                cursor: hasDirections() ? 'pointer' : 'not-allowed'
+              }}
+            >
               Suivant
               <FontAwesomeIcon icon={faArrowRight} />
             </button>
           </div>
         </div>
 
-        {/* Liste des directions par catégorie */}
         {(['centrale', 'regionale', 'provinciale'] as const).map((type) => (
           groupedDirections[type].length > 0 && (
             <div key={type} style={{ marginBottom: '30px' }}>
-              {/* En-tête de catégorie */}
-              <div 
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  marginBottom: '15px',
-                  cursor: 'pointer',
-                  padding: '10px 0'
-                }}
-                onClick={() => toggleType(type)}
-              >
-                <div style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '12px',
-                  background: getTypeColor(type),
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white'
-                }}>
+              <div className="category-header" onClick={() => toggleType(type)}>
+                <div className="category-badge" style={{ background: getTypeColor(type) }}>
                   <FontAwesomeIcon icon={getTypeIcon(type)} />
                 </div>
-                <h2 style={{
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  color: '#2c3e50',
-                  margin: 0
-                }}>
-                  {getTypeLabel(type)}
-                </h2>
-                <span style={{
-                  background: '#e9ecef',
-                  padding: '2px 10px',
-                  borderRadius: '20px',
-                  fontSize: '12px',
-                  color: '#6c7a8a'
-                }}>
-                  {groupedDirections[type].length}
-                </span>
-                <FontAwesomeIcon 
-                  icon={expandedTypes[type] ? faArrowUp : faArrowDown}
-                  style={{ color: '#8a9bb0', marginLeft: 'auto' }}
-                />
+                <h2 className="category-title">{getTypeLabel(type)}</h2>
+                <span className="category-count">{groupedDirections[type].length} direction(s)</span>
+                <FontAwesomeIcon icon={expandedTypes[type] ? faArrowUp : faArrowDown} className="category-toggle" />
               </div>
 
-              {/* Liste des directions de la catégorie */}
               {expandedTypes[type] && (
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                  gap: '15px',
-                  marginBottom: '20px'
-                }}>
+                <div className="directions-grid">
                   {groupedDirections[type].map((direction) => (
-                    <div
-                      key={direction.id_direction}
-                      style={{
-                        background: 'white',
-                        borderRadius: '12px',
-                        padding: '16px 20px',
-                        border: '1px solid #e9ecef',
-                        transition: 'all 0.3s ease',
-                        cursor: 'pointer'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translateY(-2px)';
-                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div style={{
-                            width: '36px',
-                            height: '36px',
-                            borderRadius: '10px',
-                            background: `${getTypeColor(type)}15`,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: getTypeColor(type)
-                          }}>
+                    <div key={direction.id_direction} className="direction-card">
+                      <div className="direction-card-content">
+                        <div className="direction-icon-wrapper">
+                          <div className="direction-icon" style={{ background: `${getTypeColor(type)}15`, color: getTypeColor(type) }}>
                             <FontAwesomeIcon icon={getTypeIcon(type)} />
                           </div>
-                          <div>
-                            <h3 style={{ fontSize: '16px', fontWeight: '600', margin: 0, color: '#2c3e50' }}>
-                              {direction.nom_direction}
-                            </h3>
-                            <div style={{ display: 'flex', gap: '15px', marginTop: '5px' }}>
-                              <span style={{ fontSize: '12px', color: '#8a9bb0' }}>
-                                <FontAwesomeIcon icon={faUsers} style={{ marginRight: '5px' }} />
-                                {direction.nombre_personnels || 0} personnels
-                              </span>
-                              <span style={{ fontSize: '12px', color: '#8a9bb0' }}>
-                                Services: {direction.nombre_services || 0}
-                              </span>
-                            </div>
+                        </div>
+                        <div className="direction-info">
+                          <h3 className="direction-title">{direction.nom_direction}</h3>
+                          {direction.description && <p className="direction-description">{direction.description}</p>}
+                          <div className="direction-stats">
+                            <span className="direction-stat">
+                              <FontAwesomeIcon icon={faUsers} style={{ marginRight: '5px' }} />
+                              {direction.nombre_personnels || 0} personnels
+                            </span>
+                            <span className="direction-stat">Services: {direction.nombre_services || 0}</span>
                           </div>
                         </div>
-                        <div>
-                          <button
-                            className="action-btn action-edit"
-                            onClick={() => handleEdit(direction)}
-                            title="Modifier"
-                          >
+                        <div className="direction-actions">
+                          <button className="action-btn action-view" onClick={() => handleView(direction)}>
+                            <FontAwesomeIcon icon={faEye} />
+                          </button>
+                          <button className="action-btn action-edit" onClick={() => handleEdit(direction)}>
                             <FontAwesomeIcon icon={faEdit} />
                           </button>
-                          <button
-                            className="action-btn action-delete"
-                            onClick={() => handleDelete(direction.id_direction, direction.nom_direction)}
-                            title="Supprimer"
-                          >
+                          <button className="action-btn action-delete" onClick={() => handleDelete(direction.id_direction, direction.nom_direction)}>
                             <FontAwesomeIcon icon={faTrashAlt} />
                           </button>
                         </div>
@@ -405,9 +346,7 @@ const Directions: React.FC = () => {
 
         {filteredDirections.length === 0 && (
           <div className="empty-state">
-            <div className="empty-icon">
-              <FontAwesomeIcon icon={faBuilding} size="3x" />
-            </div>
+            <div className="empty-icon"><FontAwesomeIcon icon={faBuilding} size="3x" /></div>
             <p className="empty-text">Aucune direction trouvée</p>
           </div>
         )}
@@ -422,61 +361,63 @@ const Directions: React.FC = () => {
                 <FontAwesomeIcon icon={editingDirection ? faEdit : faBuilding} />
                 {editingDirection ? 'Modifier la direction' : 'Ajouter une direction'}
               </h2>
-              <button className="modal-close" onClick={closeModal}>
-                <FontAwesomeIcon icon={faTimes} />
-              </button>
+              <button className="modal-close" onClick={closeModal}><FontAwesomeIcon icon={faTimes} /></button>
             </div>
-            
             <form onSubmit={handleSubmit}>
               <div className="modal-body">
                 <div className="form-group">
-                  <label className="form-label">
-                    <FontAwesomeIcon icon={faBuilding} style={{ marginRight: '8px' }} />
-                    Nom de la direction *
-                  </label>
-                  <input
-                    type="text"
-                    name="nom_direction"
-                    className="form-input"
-                    value={formData.nom_direction}
-                    onChange={handleInputChange}
-                    placeholder="Ex: DSIC, DR/Tana, ..."
-                    required
-                  />
+                  <label className="form-label">Nom de la direction *</label>
+                  <input type="text" name="nom_direction" className="form-input" value={formData.nom_direction} onChange={handleInputChange} required />
                 </div>
-
                 <div className="form-group">
-                  <label className="form-label">
-                    <FontAwesomeIcon icon={faMapMarkerAlt} style={{ marginRight: '8px' }} />
-                    Type de direction *
-                  </label>
-                  <select
-                    name="type"
-                    className="form-select"
-                    value={formData.type}
-                    onChange={handleInputChange}
-                    required
-                  >
+                  <label className="form-label">Type de direction *</label>
+                  <select name="type" className="form-select" value={formData.type} onChange={handleInputChange} required>
                     <option value="centrale">Direction Centrale</option>
                     <option value="regionale">Direction Régionale</option>
                     <option value="provinciale">Direction Provinciale</option>
                   </select>
-                  <small style={{ fontSize: '11px', color: '#8a9bb0', marginTop: '5px', display: 'block' }}>
-                    Centrale: Siège principal | Régionale: DR/... | Provinciale: CRM...
-                  </small>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Description</label>
+                  <textarea name="description" className="form-input" value={formData.description} onChange={handleInputChange} rows={3} />
                 </div>
               </div>
-
               <div className="modal-footer">
-                <button type="button" className="btn-secondary" onClick={closeModal}>
-                  Annuler
-                </button>
+                <button type="button" className="btn-secondary" onClick={closeModal}>Annuler</button>
                 <button type="submit" className="btn-submit" disabled={loading}>
                   <FontAwesomeIcon icon={faSave} style={{ marginRight: '8px' }} />
                   {loading ? 'Enregistrement...' : (editingDirection ? 'Modifier' : 'Ajouter')}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Visualisation */}
+      {isViewModalOpen && viewingDirection && (
+        <div className="modal-overlay">
+          <div className="modal" style={{ maxWidth: '500px' }}>
+            <div className="modal-header">
+              <h2 className="modal-title"><FontAwesomeIcon icon={faBuilding} /> Détails de la direction</h2>
+              <button className="modal-close" onClick={() => setIsViewModalOpen(false)}><FontAwesomeIcon icon={faTimes} /></button>
+            </div>
+            <div className="modal-body">
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ fontSize: '12px', color: '#8a9bb0' }}>Nom</label>
+                <div style={{ fontSize: '18px', fontWeight: 'bold' }}>{viewingDirection.nom_direction}</div>
+              </div>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ fontSize: '12px', color: '#8a9bb0' }}>Type</label>
+                <div>{viewingDirection.type === 'centrale' ? 'Centrale' : viewingDirection.type === 'regionale' ? 'Régionale' : 'Provinciale'}</div>
+              </div>
+              {viewingDirection.description && (
+                <div><label style={{ fontSize: '12px', color: '#8a9bb0' }}>Description</label><div>{viewingDirection.description}</div></div>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button className="btn-secondary" onClick={() => setIsViewModalOpen(false)}>Fermer</button>
+            </div>
           </div>
         </div>
       )}

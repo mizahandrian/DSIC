@@ -4,13 +4,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PersonnelController;
+use App\Http\Controllers\DirectionController;
 
-
-/*
-|--------------------------
-| AUTH ROUTES
-|--------------------------
-*/
+Route::apiResource('directions', DirectionController::class);
+Route::apiResource('personnels', PersonnelController::class);
+Route::get('/personnels', [PersonnelController::class, 'index']);
+Route::post('/personnels', [PersonnelController::class, 'store']);
+Route::put('/personnels/{id}', [PersonnelController::class, 'update']);
+Route::delete('/personnels/{id}', [PersonnelController::class, 'destroy']);
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
