@@ -1,7 +1,7 @@
 // Nouveau (corrigé)
 import axios, { type AxiosInstance, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
 
-const API_URL: string = 'http://localhost:8000/api';
+const API_URL: string = 'http://127.0.0.1:8000/api';
 
 interface LoginData {
   email: string;
@@ -56,5 +56,6 @@ export const setAuthToken = (token: string | null): void => {
     delete api.defaults.headers.common['Authorization'];
   }
 };
+
 
 export default api;
