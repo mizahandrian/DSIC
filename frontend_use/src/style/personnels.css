@@ -641,3 +641,443 @@
   margin-left: auto;
   color: #8a9bb0;
 }
+
+
+/* Styles pour les cartes de services */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.service-card {
+  background: white;
+  border-radius: 14px;
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.service-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.service-card-content {
+  display: flex;
+  align-items: flex-start;
+  padding: 18px;
+  gap: 15px;
+}
+
+.service-icon-wrapper {
+  flex-shrink: 0;
+}
+
+.service-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.service-info {
+  flex: 1;
+}
+
+.service-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 5px 0;
+  color: #2c3e50;
+}
+
+.service-description {
+  font-size: 12px;
+  color: #6c7a8a;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.service-stats {
+  display: flex;
+  gap: 15px;
+}
+
+.service-stat {
+  font-size: 11px;
+  color: #8a9bb0;
+}
+
+.service-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.suggestion-btn {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #495057;
+}
+
+.suggestion-btn:hover {
+  background: #e9ecef;
+  border-color: #2c3e50;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .service-card-content {
+    flex-direction: column;
+  }
+  
+  .service-actions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+}
+
+
+/* Styles pour les cartes de postes */
+.postes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.poste-card {
+  background: white;
+  border-radius: 14px;
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.poste-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.poste-card-content {
+  display: flex;
+  align-items: flex-start;
+  padding: 18px;
+  gap: 15px;
+}
+
+.poste-icon-wrapper {
+  flex-shrink: 0;
+}
+
+.poste-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.poste-info {
+  flex: 1;
+}
+
+.poste-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 5px 0;
+  color: #2c3e50;
+}
+
+.poste-description {
+  font-size: 12px;
+  color: #6c7a8a;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.poste-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.poste-detail {
+  font-size: 11px;
+  color: #8a9bb0;
+  background: #f8f9fa;
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+.poste-stats {
+  display: flex;
+  gap: 15px;
+}
+
+.poste-stat {
+  font-size: 11px;
+  color: #8a9bb0;
+}
+
+.poste-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .postes-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .poste-card-content {
+    flex-direction: column;
+  }
+  
+  .poste-actions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+  
+  .poste-details {
+    flex-direction: column;
+    gap: 5px;
+  }
+}
+
+
+/* Styles pour les cartes de carrières */
+.carrieres-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.carriere-card {
+  background: white;
+  border-radius: 14px;
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.carriere-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.carriere-card-content {
+  display: flex;
+  align-items: flex-start;
+  padding: 18px;
+  gap: 15px;
+}
+
+.carriere-icon-wrapper {
+  flex-shrink: 0;
+}
+
+.carriere-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.carriere-info {
+  flex: 1;
+}
+
+.carriere-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #2c3e50;
+}
+
+.carriere-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.carriere-detail {
+  font-size: 11px;
+  color: #8a9bb0;
+  background: #f8f9fa;
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+.carriere-stats {
+  display: flex;
+  gap: 15px;
+}
+
+.carriere-stat {
+  font-size: 11px;
+  color: #8a9bb0;
+}
+
+.carriere-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .carrieres-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .carriere-card-content {
+    flex-direction: column;
+  }
+  
+  .carriere-actions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+  
+  .carriere-details {
+    flex-direction: column;
+    gap: 5px;
+  }
+}
+
+
+
+/* Styles pour les cartes d'historique */
+.historiques-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.historique-card {
+  background: white;
+  border-radius: 14px;
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.historique-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.historique-card-content {
+  display: flex;
+  align-items: flex-start;
+  padding: 20px;
+  gap: 18px;
+}
+
+.historique-icon-wrapper {
+  flex-shrink: 0;
+}
+
+.historique-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 22px;
+}
+
+.historique-info {
+  flex: 1;
+}
+
+.historique-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.historique-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  color: #2c3e50;
+}
+
+.historique-date {
+  font-size: 12px;
+  color: #8a9bb0;
+  background: #f8f9fa;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.historique-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.historique-detail {
+  font-size: 14px;
+  color: #495057;
+}
+
+.historique-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .historique-card-content {
+    flex-direction: column;
+  }
+  
+  .historique-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .historique-actions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+}
