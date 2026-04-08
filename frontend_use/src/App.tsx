@@ -3,6 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import AuthLayout from './components/AuthLayout';
 import Personnels from './pages/Personnels';
+import Directions from './pages/Directions';
 
 const App: React.FC = () => {
   const isAuthenticated = !!localStorage.getItem('token');
@@ -13,13 +14,21 @@ const App: React.FC = () => {
         {/* Page de login/register */}
         <Route path="/login" element={<AuthLayout />} />
         
-        {/* Page principale = Formulaire de gestion des personnels */}
+        {/* Pages principales */}
         <Route 
           path="/" 
           element={isAuthenticated ? <Personnels /> : <Navigate to="/login" />} 
         />
+        <Route 
+          path="/personnels" 
+          element={isAuthenticated ? <Personnels /> : <Navigate to="/login" />} 
+        />
+        <Route 
+          path="/directions" 
+          element={isAuthenticated ? <Directions /> : <Navigate to="/login" />} 
+        />
         
-        {/* Redirection pour toutes les autres routes */}
+        {/* Redirection */}
         <Route 
           path="*" 
           element={<Navigate to="/" />} 

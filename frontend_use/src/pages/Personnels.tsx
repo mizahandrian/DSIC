@@ -1,6 +1,24 @@
 // src/pages/Personnels.tsx
 import React, { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+  faSearch, 
+  faPlus, 
+  faArrowRight, 
+  faEdit, 
+  faTrashAlt,
+  faTimes,
+  faSave,
+  faUser,
+  faUsers,
+  faCalendarAlt,
+  faIdCard,
+  faPhone,
+  faVenusMars,
+  faCalendarCheck
+} from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
+import logoInstat from '../assets/image/WhatsApp Image 2026-03-31 at 11.02.14 - Copie.jpeg';
 import '../style/personnels.css';
 
 interface Personnel {
@@ -97,6 +115,11 @@ const Personnels: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  const handleNext = () => {
+    // Navigation vers la page des directions
+    window.location.href = '/directions';
+  };
+
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingPersonnel(null);
@@ -120,21 +143,22 @@ const Personnels: React.FC = () => {
 
   return (
     <div className="personnels-container">
-      <div className="grid-pattern"></div>
       <div className="personnels-content">
-        {/* En-tête */}
+        {/* En-tête avec logo */}
         <div className="personnels-header">
-          <div className="logo-circle">
-            <span className="logo-icon">👥</span>
+          <div className="logo-wrapper">
+            <div className="logo-circle">
+              <img src={logoInstat} alt="INSTAT Madagascar" className="logo-img" />
+            </div>
           </div>
           <h1>Gestion des Personnels</h1>
-          <p>Gérez les informations des employés</p>
+          <p>Institut National de la Statistique - Madagascar</p>
         </div>
 
         {/* Barre d'actions */}
         <div className="actions-bar">
           <div className="search-wrapper">
-            <span className="search-icon">🔍</span>
+            <FontAwesomeIcon icon={faSearch} className="search-icon" />
             <input
               type="text"
               className="search-input"
@@ -143,10 +167,16 @@ const Personnels: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <button className="btn-primary" onClick={() => setIsModalOpen(true)}>
-            <span>➕</span>
-            Nouveau personnel
-          </button>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button className="btn-primary" onClick={() => setIsModalOpen(true)}>
+              <FontAwesomeIcon icon={faPlus} />
+              Nouveau personnel
+            </button>
+            <button className="btn-next" onClick={handleNext}>
+              Suivant
+              <FontAwesomeIcon icon={faArrowRight} />
+            </button>
+          </div>
         </div>
 
         {/* Tableau */}
@@ -162,7 +192,7 @@ const Personnels: React.FC = () => {
                 <th>Date naissance</th>
                 <th>Date entrée</th>
                 <th>Motif</th>
-                <th style={{ textAlign: 'center' }}>Actions</th>
+                <th style={{ textAlign: 'center', width: '80px' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -181,21 +211,23 @@ const Personnels: React.FC = () => {
                   <td>{new Date(personnel.date_entree).toLocaleDateString('fr-FR')}</td>
                   <td>
                     <span className="badge-motif">
-                      {personnel.motif_entree || 'Nouveau'}
+                      {personnel.motif_entree || 'Nouveau recrutement'}
                     </span>
                   </td>
                   <td style={{ textAlign: 'center' }}>
                     <button
                       className="action-btn action-edit"
                       onClick={() => handleEdit(personnel)}
+                      title="Modifier"
                     >
-                      ✏️
+                      <FontAwesomeIcon icon={faEdit} />
                     </button>
                     <button
                       className="action-btn action-delete"
                       onClick={() => handleDelete(personnel.id_personnel)}
+                      title="Supprimer"
                     >
-                      🗑️
+                      <FontAwesomeIcon icon={faTrashAlt} />
                     </button>
                   </td>
                 </tr>
@@ -204,28 +236,36 @@ const Personnels: React.FC = () => {
           </table>
           {filteredPersonnels.length === 0 && (
             <div className="empty-state">
-              <div className="empty-icon">📭</div>
+              <div className="empty-icon">
+                <FontAwesomeIcon icon={faUsers} size="3x" />
+              </div>
               <p className="empty-text">Aucun personnel trouvé</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Modal Formulaire */}
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal">
             <div className="modal-header">
               <h2 className="modal-title">
-                {editingPersonnel ? '✏️ Modifier le personnel' : '➕ Ajouter un personnel'}
+                <FontAwesomeIcon icon={editingPersonnel ? faEdit : faUser} />
+                {editingPersonnel ? 'Modifier le personnel' : 'Ajouter un personnel'}
               </h2>
-              <button className="modal-close" onClick={closeModal}>✕</button>
+              <button className="modal-close" onClick={closeModal}>
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
             </div>
             
             <form onSubmit={handleSubmit}>
               <div className="modal-body">
                 <div className="form-group">
-                  <label className="form-label">Nom complet *</label>
+                  <label className="form-label">
+                    <FontAwesomeIcon icon={faUser} style={{ marginRight: '8px' }} />
+                    Nom complet *
+                  </label>
                   <div className="name-group">
                     <input
                       type="text"
@@ -249,7 +289,10 @@ const Personnels: React.FC = () => {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Numéro CIN *</label>
+                  <label className="form-label">
+                    <FontAwesomeIcon icon={faIdCard} style={{ marginRight: '8px' }} />
+                    Numéro CIN *
+                  </label>
                   <input
                     type="text"
                     name="numero_cin"
@@ -262,7 +305,10 @@ const Personnels: React.FC = () => {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Téléphone</label>
+                  <label className="form-label">
+                    <FontAwesomeIcon icon={faPhone} style={{ marginRight: '8px' }} />
+                    Téléphone
+                  </label>
                   <input
                     type="tel"
                     name="tel"
@@ -274,7 +320,10 @@ const Personnels: React.FC = () => {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Genre *</label>
+                  <label className="form-label">
+                    <FontAwesomeIcon icon={faVenusMars} style={{ marginRight: '8px' }} />
+                    Genre *
+                  </label>
                   <select
                     name="genre"
                     className="form-select"
@@ -288,7 +337,10 @@ const Personnels: React.FC = () => {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Date de naissance *</label>
+                  <label className="form-label">
+                    <FontAwesomeIcon icon={faCalendarAlt} style={{ marginRight: '8px' }} />
+                    Date de naissance *
+                  </label>
                   <input
                     type="date"
                     name="date_naissance"
@@ -300,7 +352,10 @@ const Personnels: React.FC = () => {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Date d'entrée *</label>
+                  <label className="form-label">
+                    <FontAwesomeIcon icon={faCalendarCheck} style={{ marginRight: '8px' }} />
+                    Date d'entrée *
+                  </label>
                   <input
                     type="date"
                     name="date_entree"
@@ -329,6 +384,7 @@ const Personnels: React.FC = () => {
                   Annuler
                 </button>
                 <button type="submit" className="btn-submit" disabled={loading}>
+                  <FontAwesomeIcon icon={faSave} style={{ marginRight: '8px' }} />
                   {loading ? 'Enregistrement...' : (editingPersonnel ? 'Modifier' : 'Enregistrer')}
                 </button>
               </div>
