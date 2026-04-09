@@ -15,4 +15,8 @@ class Direction extends Model
         'nombre_services',
         'nombre_personnels'
     ];
+     public function services()
+    {
+        return $this->hasMany(Service::class, 'id_direction');
+    }
 }
