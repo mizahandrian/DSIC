@@ -160,6 +160,18 @@ const Personnels: React.FC = () => {
 
   return (
     <div className="personnels-container">
+      {/* ============================================ */}
+      {/* FORMES GÉOMÉTRIQUES EN ARRIÈRE-PLAN */}
+      {/* ============================================ */}
+      <div className="bg-shape-1"></div>
+      <div className="bg-shape-2"></div>
+      <div className="bg-shape-3"></div>
+      <div className="wave-bg"></div>
+      <div className="grid-pattern"></div>
+      
+      {/* ============================================ */}
+      {/* CONTENU PRINCIPAL */}
+      {/* ============================================ */}
       <div className="personnels-content">
         {/* En-tête avec logo */}
         <div className="personnels-header">
@@ -203,7 +215,7 @@ const Personnels: React.FC = () => {
             </button>
           </div>
         </div>
-
+        
         {/* Tableau */}
         <div className="table-container">
           <table className="data-table">
