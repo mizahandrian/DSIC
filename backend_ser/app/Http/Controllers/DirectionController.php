@@ -2,59 +2,47 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Direction;
 use Illuminate\Http\Request;
+use App\Models\Direction;
 
 class DirectionController extends Controller
 {
+    // GET /directions
     public function index()
     {
-        return Direction::all();
+        return response()->json(Direction::all());
     }
 
+    // POST /directions
     public function store(Request $request)
     {
-        $request->validate([
-            'nom_direction' => 'required',
-            'type' => 'required|in:centrale,regionale,provinciale'
+        $validated = $request->validate([
+            'nom_direction' => 'required|string',
+            'type' => 'required|in:centrale,regionale,provinciale',
+            'description' => 'nullable|string',
         ]);
 
-        $direction = Direction::create([
-            'nom_direction' => $request->nom_direction,
-            'type' => $request->type,
-            'parent_id' => $request->parent_id ?? null,
-            'nombre_services' => 0,
-            'nombre_personnels' => 0
-        ]);
+        $direction = Direction::create($validated);
 
         return response()->json($direction, 201);
     }
 
-    public function show($id)
-    {
-        return Direction::findOrFail($id);
-    }
-
+    // PUT /directions/{id}
     public function update(Request $request, $id)
     {
         $direction = Direction::findOrFail($id);
 
-        $direction->update($request->only([
-            'nom_direction',
-            'type',
-            'parent_id',
-            'nombre_services',
-            'nombre_personnels'
-        ]));
+        $direction->update($request->all());
 
         return response()->json($direction);
     }
 
+    // DELETE /directions/{id}
     public function destroy($id)
     {
         $direction = Direction::findOrFail($id);
         $direction->delete();
 
-        return response()->json(['message' => 'Direction supprimée']);
+        return response()->json(['message' => 'Supprimé']);
     }
 }

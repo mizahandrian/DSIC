@@ -11,7 +11,7 @@ class Direction extends Model
     protected $fillable = [
         'nom_direction',
         'type',
-        'parent_id',
+        'description',
         'nombre_services',
         'nombre_personnels'
     ];

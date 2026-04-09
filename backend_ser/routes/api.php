@@ -5,9 +5,14 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PersonnelController;
+
 use App\Http\Controllers\DirectionController;
 
-Route::apiResource('directions', DirectionController::class);
+Route::get('/directions', [DirectionController::class, 'index']);
+Route::post('/directions', [DirectionController::class, 'store']);
+Route::put('/directions/{id}', [DirectionController::class, 'update']);
+Route::delete('/directions/{id}', [DirectionController::class, 'destroy']);
+
 Route::apiResource('personnels', PersonnelController::class);
 Route::get('/personnels', [PersonnelController::class, 'index']);
 Route::post('/personnels', [PersonnelController::class, 'store']);
