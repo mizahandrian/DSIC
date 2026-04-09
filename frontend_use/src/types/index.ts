@@ -72,3 +72,31 @@ export interface ApiResponse<T> {
   data: T;
   message?: string;
 }
+
+// BaseRohi
+
+export interface BaseRohi {
+  id_rohi: number;
+  immatricule: string;
+  nom: string;
+  prenom: string;
+  poste: string;
+  porte: string;
+  telephone: string;
+  direction: string;
+  service: string;
+  date_integration?: string;
+  statut?: string;
+  created_at?: string;
+}
+
+export interface PersonnelRohi {
+  id_personnel: number;
+  id_rohi: number;
+  date_liaison: string;
+  personnel_nom?: string;
+  personnel_prenom?: string;
+  rohi_immatricule?: string;
+  rohi_nom?: string;
+  rohi_prenom?: string;
+}

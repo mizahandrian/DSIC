@@ -8,6 +8,8 @@ import Services from './pages/Services';
 import Postes from './pages/Postes';
 import Carrieres from './pages/Carrieres';
 import Historique from './pages/Historique';
+import BaseRohi from './pages/BaseRohi';
+import BaseAugure from './pages/BaseAugure';
 
 const App: React.FC = () => {
   const isAuthenticated = !!localStorage.getItem('token');
@@ -23,6 +25,8 @@ const App: React.FC = () => {
         <Route path="/postes" element={isAuthenticated ? <Postes /> : <Navigate to="/login" />} />
         <Route path="/carrieres" element={isAuthenticated ? <Carrieres /> : <Navigate to="/login" />} />
         <Route path="/historique" element={isAuthenticated ? <Historique /> : <Navigate to="/login" />} />
+        <Route path="/base-rohi" element={isAuthenticated ? <BaseRohi /> : <Navigate to="/login" />} />
+        <Route path="/base-augure" element={isAuthenticated ? <BaseAugure /> : <Navigate to="/login" />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
