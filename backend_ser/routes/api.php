@@ -8,6 +8,12 @@ use App\Http\Controllers\PersonnelController;
 
 use App\Http\Controllers\DirectionController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\PosteController;
+
+Route::get('/postes', [PosteController::class, 'index']);
+Route::post('/postes', [PosteController::class, 'store']);
+Route::put('/postes/{id}', [PosteController::class, 'update']);
+Route::delete('/postes/{id}', [PosteController::class, 'destroy']);
 
 Route::get('/services', [ServiceController::class, 'index']);
 Route::post('/services', [ServiceController::class, 'store']);
