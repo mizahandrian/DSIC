@@ -19,6 +19,7 @@ use App\Http\Controllers\EtatController;
 // ==================== ROUTES POSTES ====================
 Route::get('/postes', [PosteController::class, 'index']);
 Route::post('/postes', [PosteController::class, 'store']);
+Route::get('/postes/{id}', [PosteController::class, 'show']);
 Route::put('/postes/{id}', [PosteController::class, 'update']);
 Route::delete('/postes/{id}', [PosteController::class, 'destroy']);
 
@@ -43,17 +44,20 @@ Route::delete('/personnels/{id}', [PersonnelController::class, 'destroy']);
 Route::get('/personnels/stats', [PersonnelController::class, 'stats']);
 
 // ==================== ROUTES CARRIERES ====================
+
+
 Route::get('/carrieres', [CarriereController::class, 'index']);
 Route::post('/carrieres', [CarriereController::class, 'store']);
+Route::get('/carrieres/{id}', [CarriereController::class, 'show']);
 Route::put('/carrieres/{id}', [CarriereController::class, 'update']);
 Route::delete('/carrieres/{id}', [CarriereController::class, 'destroy']);
 
 // ==================== ROUTES HISTORIQUE ====================
 Route::get('/historiques', [HistoriqueController::class, 'index']);
 Route::post('/historiques', [HistoriqueController::class, 'store']);
+Route::get('/historiques/{id}', [HistoriqueController::class, 'show']);
 Route::put('/historiques/{id}', [HistoriqueController::class, 'update']);
 Route::delete('/historiques/{id}', [HistoriqueController::class, 'destroy']);
-Route::get('/historiques/personnel/{personnelId}', [HistoriqueController::class, 'getByPersonnel']);
 
 // ==================== ROUTES BASE ROHI ====================
 Route::get('/base-rohi', [BaseRohiController::class, 'index']);
