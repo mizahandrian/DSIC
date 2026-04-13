@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Service;
+use App\Models\Carriere;
 
 class Poste extends Model
 {
@@ -10,20 +12,19 @@ class Poste extends Model
 
     protected $fillable = [
         'titre_poste',
-        'indive',
+        'indice',
         'id_service',
         'id_carriere',
         'description'
     ];
 
-    public fonction service()
+    public function service()
     {
-        return $this->belongsTo(service::class, 'id_service')
+        return $this->belongsTo(Service::class, 'id_service');
     }
 
-    public fonction carriere()
+    public function carriere()
     {
-        return $this->belongsTo(carriere::class, 'id_carriere')
+        return $this->belongsTo(Carriere::class, 'id_carriere');
     }
-
 }

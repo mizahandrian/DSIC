@@ -9,24 +9,21 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::create('postes', function (Blueprint $table) {
-            $table->id('id_poste');
-            $table->string('tite_poste');
-            $table->string('indice')->nullable();
+    public function up()
+{
+    Schema::create('postes', function (Blueprint $table) {
+        $table->id('id_poste');
+        $table->string('titre_poste');
+        $table->string('indice')->nullable();
+        $table->unsignedBigInteger('id_service');
+        $table->unsignedBigInteger('id_carriere');
+        $table->text('description')->nullable();
+        $table->timestamps();
 
-            $table->usingnebBigInteger('id_servive');
-            $table->usingnebBigInteger('id_carriere');
-
-            $table->text('description')->nullable();
-
-            $table->timestamps();
-
-            $table->foreign('id_service')->references('id_service')->on('service')->onDelete('cascade');
-            $table->foreign('id_carriere')->references('id_carriere')->on('carriere')->onDelete('cascade');
-        });
-    }
+        $table->foreign('id_service')->references('id_service')->on('services')->onDelete('cascade');
+        $table->foreign('id_carriere')->references('id_carriere')->on('carrieres')->onDelete('cascade');
+    });
+}
 
     /**
      * Reverse the migrations.
