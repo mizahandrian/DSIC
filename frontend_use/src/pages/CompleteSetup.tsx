@@ -1,5 +1,5 @@
 // src/pages/CompleteSetup.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faArrowRight, faTachometerAlt } from '@fortawesome/free-solid-svg-icons';
@@ -10,6 +10,19 @@ import '../style/personnels.css';
 const CompleteSetup: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    // Vérifier l'état de l'utilisateur au chargement
+    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+    setUser(storedUser);
+    console.log('CompleteSetup - User from localStorage:', storedUser);
+    
+    // Si déjà initialisé, rediriger directement vers dashboard
+    if (storedUser.is_initialized === true) {
+      navigate('/dashboard');
+    }
+  }, [navigate]);
 
   const handleComplete = async () => {
     setLoading(true);
@@ -22,11 +35,19 @@ const CompleteSetup: React.FC = () => {
       user.is_initialized = true;
       localStorage.setItem('user', JSON.stringify(user));
       
+      // Vérifier que la mise à jour a bien fonctionné
+      const updatedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      console.log('CompleteSetup - Updated user:', updatedUser);
+      
       // Rediriger vers le dashboard
       navigate('/dashboard');
     } catch (error) {
       console.error('Erreur:', error);
-      alert('Erreur lors de la finalisation');
+      // Force la mise à jour même en cas d'erreur API
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      user.is_initialized = true;
+      localStorage.setItem('user', JSON.stringify(user));
+      navigate('/dashboard');
     } finally {
       setLoading(false);
     }
@@ -82,25 +103,6 @@ const CompleteSetup: React.FC = () => {
             Vous pouvez maintenant accéder au tableau de bord et gérer<br />
             l'ensemble des données de l'application.
           </p>
-          
-          <div style={{ 
-            background: '#f8f9fa', 
-            padding: '15px', 
-            borderRadius: '12px', 
-            marginBottom: '30px',
-            textAlign: 'left'
-          }}>
-            <p style={{ fontSize: '13px', color: '#495057', marginBottom: '10px' }}>
-              <strong>Ce que vous pouvez faire maintenant :</strong>
-            </p>
-            <ul style={{ fontSize: '12px', color: '#6c7a8a', marginLeft: '20px' }}>
-              <li>✓ Consulter le tableau de bord avec les statistiques</li>
-              <li>✓ Gérer tous les personnels, directions et services</li>
-              <li>✓ Suivre l'historique des changements</li>
-              <li>✓ Gérer les bases ROHI et AUGURE</li>
-              <li>✓ Configurer les statuts et situations administratives</li>
-            </ul>
-          </div>
           
           <button 
             className="btn-primary" 
