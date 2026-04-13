@@ -3,11 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faSearch, faPlus, faArrowRight, faArrowLeft, faEdit, faTrashAlt,
-  faTimes, faSave, faUsers, faBuilding, faEye, faBriefcase, faTag,
-  faGraduationCap, faSitemap, faCheckCircle, faUserTie, faClipboardList
+  faTimes, faSave, faUsers, faEye, faBriefcase, faTag,
+  faGraduationCap, faSitemap, faCheckCircle, faUserTie, faClipboardList,
+  faExclamationTriangle
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
-import logoInstat from '../assets/image/WhatsApp Image 2026-03-31 at 11.02.14 - Copie.jpeg';
+import logoInstat from '../assets/image/Logo-INSTAT.png';
 import '../style/personnels.css';
 
 interface Service { id_service: number; nom_service: string; }
@@ -47,19 +48,21 @@ const Postes: React.FC = () => {
   const handleDelete = async (id: number, titre: string) => { if (window.confirm(`Supprimer "${titre}" ?`)) { await api.delete(`/postes/${id}`); fetchPostes(); } };
   const handleEdit = (poste: Poste) => { setEditingPoste(poste); setFormData({ titre_poste: poste.titre_poste, indice: poste.indice || '', id_service: poste.id_service.toString(), id_carriere: poste.id_carriere.toString(), description: poste.description || '' }); setIsModalOpen(true); };
   const handleView = (poste: Poste) => { setViewingPoste(poste); setIsViewModalOpen(true); };
-  const handlePrevious = () => { window.location.href = '/services'; };
+  const handlePrevious = () => { window.location.href = '/carrieres'; };
   
-  // ✅ CONDITION
+  // ✅ MODIFIÉ : Redirige vers Historique
   const hasPostes = () => postes.length > 0;
-  const handleNext = () => { if (hasPostes()) window.location.href = '/carrieres'; else alert('⚠️ Veuillez d\'abord ajouter au moins un poste.'); };
+  const handleNext = () => { if (hasPostes()) window.location.href = '/historique'; else alert('⚠️ Veuillez d\'abord ajouter au moins un poste.'); };
 
   const closeModal = () => { setIsModalOpen(false); setEditingPoste(null); setFormData({ titre_poste: '', indice: '', id_service: '', id_carriere: '', description: '' }); };
   const filteredPostes = postes.filter(p => p.titre_poste.toLowerCase().includes(searchTerm.toLowerCase()) && (filterService === 'all' || p.id_service.toString() === filterService));
   const groupedPostes = filteredPostes.reduce((acc, p) => { const sn = p.service_nom || `Service ${p.id_service}`; if (!acc[sn]) acc[sn] = []; acc[sn].push(p); return acc; }, {} as Record<string, Poste[]>);
   const getCarriereInfo = (id: number) => carrieres.find(c => c.id_carriere === id);
+  const hasCarrieres = () => carrieres.length > 0;
 
   return (
     <div className="personnels-container">
+      <div className="bg-shape-1"></div><div className="bg-shape-2"></div><div className="bg-shape-3"></div><div className="wave-bg"></div><div className="grid-pattern"></div>
       <div className="personnels-content">
         <div className="personnels-header"><div className="logo-wrapper"><div className="logo-circle"><img src={logoInstat} alt="INSTAT" className="logo-img" /></div></div><h1>Gestion des Postes</h1><p>Institut National de la Statistique - Madagascar</p></div>
         <div className="actions-bar">
@@ -87,16 +90,100 @@ const Postes: React.FC = () => {
       </div>
 
       {/* Modal */}
-      {isModalOpen && (<div className="modal-overlay"><div className="modal" style={{ maxWidth: '600px' }}><div className="modal-header"><h2 className="modal-title"><FontAwesomeIcon icon={editingPoste ? faEdit : faUserTie} />{editingPoste ? 'Modifier' : 'Spécifier un poste'}</h2><button className="modal-close" onClick={closeModal}><FontAwesomeIcon icon={faTimes} /></button></div>
-        <form onSubmit={handleSubmit}><div className="modal-body">
-          <div style={{ background: '#e8f4f8', padding: '15px', borderRadius: '12px', marginBottom: '20px' }}><FontAwesomeIcon icon={faClipboardList} style={{ marginRight: '12px' }} /><strong>Spécification du poste</strong><br /><small>Renseignez toutes les informations relatives au poste</small></div>
-          <div className="form-group"><label className="form-label">1. Service *</label><select name="id_service" className="form-select" value={formData.id_service} onChange={handleInputChange} required><option value="">Sélectionner</option>{services.map(s => <option key={s.id_service} value={s.id_service}>{s.nom_service}</option>)}</select></div>
-          <div className="form-group"><label className="form-label">2. Intitulé du poste *</label><input type="text" name="titre_poste" className="form-input" value={formData.titre_poste} onChange={handleInputChange} placeholder="Ex: Administrateur Réseau..." required /></div>
-          <div className="form-group"><label className="form-label">3. Indice / Grade</label><input type="text" name="indice" className="form-input" value={formData.indice} onChange={handleInputChange} placeholder="Ex: Indice 450" /></div>
-          <div className="form-group"><label className="form-label">4. Carrière associée *</label><select name="id_carriere" className="form-select" value={formData.id_carriere} onChange={handleInputChange} required><option value="">Sélectionner</option>{carrieres.map(c => <option key={c.id_carriere} value={c.id_carriere}>{c.categorie} - {c.corps} ({c.grade})</option>)}</select></div>
-          <div className="form-group"><label className="form-label">5. Description</label><textarea name="description" className="form-input" value={formData.description} onChange={handleInputChange} rows={3} /></div>
-          {(formData.id_service || formData.titre_poste || formData.id_carriere) && <div style={{ background: '#f0f7f0', padding: '15px', borderRadius: '12px' }}><FontAwesomeIcon icon={faCheckCircle} style={{ marginRight: '8px', color: '#27ae60' }} /><strong>Récapitulatif</strong><br />{formData.titre_poste && <div>Poste: {formData.titre_poste}</div>}{formData.id_service && <div>Service: {services.find(s => s.id_service.toString() === formData.id_service)?.nom_service}</div>}</div>}
-        </div><div className="modal-footer"><button type="button" className="btn-secondary" onClick={closeModal}>Annuler</button><button type="submit" className="btn-submit" disabled={loading}><FontAwesomeIcon icon={faSave} /> {loading ? 'Enregistrement...' : (editingPoste ? 'Modifier' : 'Créer')}</button></div></form></div></div>)}
+      {isModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal" style={{ maxWidth: '600px' }}>
+            <div className="modal-header">
+              <h2 className="modal-title"><FontAwesomeIcon icon={editingPoste ? faEdit : faUserTie} />{editingPoste ? 'Modifier' : 'Spécifier un poste'}</h2>
+              <button className="modal-close" onClick={closeModal}><FontAwesomeIcon icon={faTimes} /></button>
+            </div>
+            <form onSubmit={handleSubmit}>
+              <div className="modal-body">
+                <div style={{ background: '#e8f4f8', padding: '15px', borderRadius: '12px', marginBottom: '20px' }}>
+                  <FontAwesomeIcon icon={faClipboardList} style={{ marginRight: '12px' }} />
+                  <strong>Spécification du poste</strong><br />
+                  <small>Renseignez toutes les informations relatives au poste</small>
+                </div>
+
+                {/* ✅ Vérification si des carrières existent */}
+                {!hasCarrieres() && (
+                  <div style={{ background: '#fff3e0', padding: '15px', borderRadius: '12px', marginBottom: '20px', border: '1px solid #f39c12' }}>
+                    <FontAwesomeIcon icon={faExclamationTriangle} style={{ marginRight: '12px', color: '#f39c12' }} />
+                    <strong style={{ color: '#e65100' }}>Attention :</strong>
+                    <p style={{ marginTop: '8px', fontSize: '13px', color: '#e65100' }}>
+                      Aucune carrière n'a été créée. Veuillez d'abord créer des carrières avant de pouvoir créer des postes.
+                    </p>
+                    <button 
+                      type="button"
+                      className="btn-primary"
+                      style={{ marginTop: '10px', padding: '8px 16px', fontSize: '12px' }}
+                      onClick={() => window.location.href = '/carrieres'}
+                    >
+                      <FontAwesomeIcon icon={faGraduationCap} /> Créer des carrières
+                    </button>
+                  </div>
+                )}
+
+                <div className="form-group">
+                  <label className="form-label">1. Service *</label>
+                  <select name="id_service" className="form-select" value={formData.id_service} onChange={handleInputChange} required>
+                    <option value="">Sélectionner</option>
+                    {services.map(s => <option key={s.id_service} value={s.id_service}>{s.nom_service}</option>)}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">2. Intitulé du poste *</label>
+                  <input type="text" name="titre_poste" className="form-input" value={formData.titre_poste} onChange={handleInputChange} placeholder="Ex: Administrateur Réseau..." required />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">3. Indice / Grade</label>
+                  <input type="text" name="indice" className="form-input" value={formData.indice} onChange={handleInputChange} placeholder="Ex: Indice 450" />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">4. Carrière associée *</label>
+                  <select name="id_carriere" className="form-select" value={formData.id_carriere} onChange={handleInputChange} required disabled={!hasCarrieres()}>
+                    <option value="">{hasCarrieres() ? 'Sélectionner' : 'Aucune carrière disponible'}</option>
+                    {carrieres.map(c => (
+                      <option key={c.id_carriere} value={c.id_carriere}>
+                        {c.categorie} - {c.corps} ({c.grade})
+                      </option>
+                    ))}
+                  </select>
+                  {!hasCarrieres() && (
+                    <small style={{ fontSize: '11px', color: '#e74c3c', marginTop: '5px', display: 'block' }}>
+                      ⚠️ Veuillez d'abord créer des carrières dans l'onglet "Carrières"
+                    </small>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">5. Description</label>
+                  <textarea name="description" className="form-input" value={formData.description} onChange={handleInputChange} rows={3} />
+                </div>
+
+                {(formData.id_service || formData.titre_poste || formData.id_carriere) && (
+                  <div style={{ background: '#f0f7f0', padding: '15px', borderRadius: '12px' }}>
+                    <FontAwesomeIcon icon={faCheckCircle} style={{ marginRight: '8px', color: '#27ae60' }} />
+                    <strong>Récapitulatif</strong>
+                    {formData.titre_poste && <div style={{ marginTop: '8px' }}>Poste: {formData.titre_poste}</div>}
+                    {formData.id_service && <div>Service: {services.find(s => s.id_service.toString() === formData.id_service)?.nom_service}</div>}
+                    {formData.id_carriere && <div>Carrière: {carrieres.find(c => c.id_carriere.toString() === formData.id_carriere)?.corps}</div>}
+                  </div>
+                )}
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn-secondary" onClick={closeModal}>Annuler</button>
+                <button type="submit" className="btn-submit" disabled={loading || !hasCarrieres()}>
+                  <FontAwesomeIcon icon={faSave} /> {loading ? 'Enregistrement...' : (editingPoste ? 'Modifier' : 'Créer')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Modal View */}
       {isViewModalOpen && viewingPoste && (<div className="modal-overlay"><div className="modal" style={{ maxWidth: '550px' }}><div className="modal-header"><h2 className="modal-title"><FontAwesomeIcon icon={faUserTie} /> Détails</h2><button className="modal-close" onClick={() => setIsViewModalOpen(false)}><FontAwesomeIcon icon={faTimes} /></button></div>

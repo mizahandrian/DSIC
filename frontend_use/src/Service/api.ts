@@ -12,7 +12,6 @@ interface RegisterData {
   name: string;
   email: string;
   password: string;
-  password_confirmation?: string;
 }
 
 interface AuthResponse {
@@ -43,14 +42,9 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig): InternalAxios
 
 export const authAPI = {
   login: (data: LoginData): Promise<AxiosResponse<AuthResponse>> => api.post('/login', data),
-  register: (data: RegisterData): Promise<AxiosResponse<AuthResponse>> => 
-    api.post('/register', {
-      name: data.name,
-      email: data.email,
-      password: data.password,
-    }),
+  register: (data: RegisterData): Promise<AxiosResponse<AuthResponse>> => api.post('/register', data),
   logout: (): Promise<AxiosResponse<void>> => api.post('/logout'),
-  getUser: (): Promise<AxiosResponse<AuthResponse['user']>> => api.get('/user'),
+  getUser: (): Promise<AxiosResponse<AuthResponse['user']>> => api.get('/me'),
   completeSetup: (): Promise<AxiosResponse<{ message: string }>> => api.post('/user/complete-setup'),
   checkInitialized: (): Promise<AxiosResponse<{ is_initialized: boolean }>> => api.get('/user/check-initialized'),
 };

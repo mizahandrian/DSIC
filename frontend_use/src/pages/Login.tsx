@@ -7,21 +7,12 @@ interface LoginFormData {
   password: string;
 }
 
-interface ApiErrorResponse {
-  response?: {
-    data?: {
-      errors?: Record<string, string[]>;
-      message?: string;
-    };
-  };
-}
-
 const Login: React.FC = () => {
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: ''
   });
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -35,7 +26,7 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setLoading(true);
-    setErrors({});
+    setError('');
 
     try {
       const response = await authAPI.login(formData);
@@ -44,24 +35,21 @@ const Login: React.FC = () => {
       setAuthToken(token);
       localStorage.setItem('user', JSON.stringify(user));
       
-      // ✅ Vérification CORRECTE : si l'utilisateur a déjà complété les formulaires
+      console.log('Login response:', response.data);
+      console.log('is_initialized:', user.is_initialized);
+      
+      // Redirection en fonction du statut d'initialisation
       if (user.is_initialized === true) {
         window.location.href = '/dashboard';
       } else {
         window.location.href = '/personnels';
       }
-    } catch (err: unknown) {
-      const error = err as ApiErrorResponse;
-      if (error.response?.data?.errors) {
-        const formattedErrors: Record<string, string> = {};
-        Object.entries(error.response.data.errors).forEach(([key, value]) => {
-          formattedErrors[key] = value[0];
-        });
-        setErrors(formattedErrors);
-      } else if (error.response?.data?.message) {
-        setErrors({ general: error.response.data.message });
+    } catch (err: any) {
+      console.error('Login error:', err);
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
       } else {
-        setErrors({ general: 'Email ou mot de passe incorrect' });
+        setError('Email ou mot de passe incorrect');
       }
     } finally {
       setLoading(false);
@@ -70,7 +58,7 @@ const Login: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit} className="auth-form">
-      {errors.general && <div className="error-message">{errors.general}</div>}
+      {error && <div className="error-message">{error}</div>}
       
       <div className="form-group">
         <label>Email</label>
@@ -83,7 +71,6 @@ const Login: React.FC = () => {
           required
           disabled={loading}
         />
-        {errors.email && <span className="error-text">{errors.email}</span>}
       </div>
 
       <div className="form-group">
@@ -97,7 +84,6 @@ const Login: React.FC = () => {
           required
           disabled={loading}
         />
-        {errors.password && <span className="error-text">{errors.password}</span>}
       </div>
 
       <div className="form-options">
