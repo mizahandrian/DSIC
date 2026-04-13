@@ -8,8 +8,8 @@ import {
   faLink, faUnlink, faCheckCircle, faTag, faChartLine,
   faGavel, faEnvelope, faMapMarkerAlt, faGraduationCap
 } from '@fortawesome/free-solid-svg-icons';
-import api from '../Service/api';
-import logoInstat from '../assets/image/WhatsApp Image 2026-03-31 at 11.02.14 - Copie.jpeg';
+import api, { authAPI } from '../Service/api';
+import logoInstat from '../assets/image/Logo-INSTAT.png';
 import '../style/personnels.css';
 
 interface BaseAugure {
@@ -236,8 +236,28 @@ const BaseAugure: React.FC = () => {
     window.location.href = '/base-rohi';
   };
 
-  const handleNext = () => {
-    window.location.href = '/dashboard';
+  // ✅ MODIFICATION ICI : handleNext corrigé
+  const handleNext = async () => {
+    if (hasBaseAugure()) {
+      try {
+        // Appel API pour marquer l'utilisateur comme initialisé
+        await authAPI.completeSetup();
+        
+        // Mettre à jour l'utilisateur dans localStorage
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        user.is_initialized = true;
+        localStorage.setItem('user', JSON.stringify(user));
+        
+        // Rediriger vers la page de confirmation
+        window.location.href = '/complete-setup';
+      } catch (error) {
+        console.error('Erreur lors de la finalisation:', error);
+        // Même en cas d'erreur, on redirige vers complete-setup
+        window.location.href = '/complete-setup';
+      }
+    } else {
+      alert('⚠️ Veuillez d\'abord ajouter au moins une entrée AUGURE avant de terminer la configuration.');
+    }
   };
 
   const closeModal = () => {
@@ -290,6 +310,13 @@ const BaseAugure: React.FC = () => {
 
   return (
     <div className="personnels-container">
+      {/* Formes géométriques */}
+      <div className="bg-shape-1"></div>
+      <div className="bg-shape-2"></div>
+      <div className="bg-shape-3"></div>
+      <div className="wave-bg"></div>
+      <div className="grid-pattern"></div>
+
       <div className="personnels-content">
         {/* En-tête avec logo */}
         <div className="personnels-header">
@@ -321,7 +348,7 @@ const BaseAugure: React.FC = () => {
             onChange={(e) => setFilterStructure(e.target.value)}
             style={{ width: '200px' }}
           >
-            <option value="all">📋 Toutes les structures</option>
+            <option value="all">Toutes les structures</option>
             {uniqueStructures.map(struct => (
               <option key={struct} value={struct}>{struct}</option>
             ))}
@@ -344,7 +371,7 @@ const BaseAugure: React.FC = () => {
                 cursor: hasBaseAugure() ? 'pointer' : 'not-allowed'
               }}
             >
-              Suivant
+              Terminer
               <FontAwesomeIcon icon={faArrowRight} />
             </button>
           </div>
@@ -396,8 +423,8 @@ const BaseAugure: React.FC = () => {
                         <button className="action-btn action-delete" onClick={() => handleDelete(item.id_augure, item.agentNom, item.agentMatricule)} title="Supprimer">
                           <FontAwesomeIcon icon={faTrashAlt} />
                         </button>
-                       </td>
-                     </tr>
+                      </td>
+                    </tr>
                   ))}
                 </tbody>
               </table>

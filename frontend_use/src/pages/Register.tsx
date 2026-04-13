@@ -1,3 +1,4 @@
+// src/pages/Register.tsx
 import React, { useState } from 'react';
 import { authAPI, setAuthToken } from '../Service/api';
 
@@ -70,7 +71,8 @@ const Register: React.FC = () => {
       setAuthToken(token);
       localStorage.setItem('user', JSON.stringify(user));
       
-      window.location.href = '/';
+      // ✅ Nouvel utilisateur : is_initialized = false, rediriger vers Personnels
+      window.location.href = '/personnels';
     } catch (err: unknown) {
       const error = err as ApiErrorResponse;
       if (error.response?.data?.errors) {
