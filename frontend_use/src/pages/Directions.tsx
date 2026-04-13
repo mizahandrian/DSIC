@@ -246,7 +246,7 @@ const Directions: React.FC = () => {
               <img src={logoInstat} alt="INSTAT Madagascar" className="logo-img" />
             </div>
           </div>
-          <h1>Directions et Affectations</h1>
+          <h1>Gestions des Directions</h1>
           <p>Visualisation des directions et affectation des personnels</p>
         </div>
 

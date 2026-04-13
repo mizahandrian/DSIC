@@ -1,3 +1,4 @@
+// src/pages/Login.tsx
 import React, { useState } from 'react';
 import { authAPI, setAuthToken } from '../Service/api';
 
@@ -43,7 +44,12 @@ const Login: React.FC = () => {
       setAuthToken(token);
       localStorage.setItem('user', JSON.stringify(user));
       
-      window.location.href = '/';
+      // ✅ Vérification CORRECTE : si l'utilisateur a déjà complété les formulaires
+      if (user.is_initialized === true) {
+        window.location.href = '/dashboard';
+      } else {
+        window.location.href = '/personnels';
+      }
     } catch (err: unknown) {
       const error = err as ApiErrorResponse;
       if (error.response?.data?.errors) {
@@ -67,7 +73,7 @@ const Login: React.FC = () => {
       {errors.general && <div className="error-message">{errors.general}</div>}
       
       <div className="form-group">
-        <label>Nom complet</label>
+        <label>Email</label>
         <input
           type="email"
           name="email"

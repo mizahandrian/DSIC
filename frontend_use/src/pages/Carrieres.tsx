@@ -7,7 +7,7 @@ import {
   faTags, faLayerGroup, faBriefcase
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
-import logoInstat from '../assets/image/WhatsApp Image 2026-03-31 at 11.02.14 - Copie.jpeg';
+import logoInstat from '../assets/image/Logo-INSTAT.png';
 import '../style/personnels.css';
 
 interface Carriere { id_carriere: number; categorie: string; indice: string; corps: string; grade: string; date_effet: string; nombre_postes?: number; description?: string; }

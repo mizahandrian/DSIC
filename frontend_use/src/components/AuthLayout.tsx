@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
-import logoInstat from '../assets/image/WhatsApp Image 2026-03-31 at 11.02.14 - Copie.jpeg';
+import logoInstat from '../assets/image/Logo-INSTAT.png';
 import '../style/auth.css';
 
 const AuthLayout: React.FC = () => {

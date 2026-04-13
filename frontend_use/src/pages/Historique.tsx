@@ -7,7 +7,7 @@ import {
   faCalendarAlt, faExchangeAlt, faEye, faCheckCircle, faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
-import logoInstat from '../assets/image/WhatsApp Image 2026-03-31 at 11.02.14 - Copie.jpeg';
+import logoInstat from '../assets/image/Logo-INSTAT.png';
 import '../style/personnels.css';
 
 interface Personnel { id_personnel: number; nom: string; prenom: string; poste_titre?: string; }

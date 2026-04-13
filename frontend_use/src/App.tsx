@@ -1,5 +1,5 @@
 // src/App.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import AuthLayout from './components/AuthLayout';
 import Personnels from './pages/Personnels';
@@ -14,16 +14,51 @@ import Dashboard from './pages/Dashboard';
 import StatutAdmin from './pages/StatutAdmin';
 import SituationAdmin from './pages/SituationAdmin';
 import Etats from './pages/Etats';
+import CompleteSetup from './pages/CompleteSetup';
+import api from './Service/api';
 
 const App: React.FC = () => {
+  const [isInitialized, setIsInitialized] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState(true);
   const isAuthenticated = !!localStorage.getItem('token');
+
+  useEffect(() => {
+    const checkUserInitialization = async () => {
+      if (isAuthenticated) {
+        try {
+          // ✅ Vérifier auprès du backend si l'utilisateur est initialisé
+          const response = await api.get('/user/check-initialized');
+          const userFromStorage = JSON.parse(localStorage.getItem('user') || '{}');
+          userFromStorage.is_initialized = response.data.is_initialized;
+          localStorage.setItem('user', JSON.stringify(userFromStorage));
+          setIsInitialized(response.data.is_initialized);
+        } catch (error) {
+          console.error('Erreur vérification:', error);
+          const user = JSON.parse(localStorage.getItem('user') || '{}');
+          setIsInitialized(user.is_initialized === true);
+        }
+      }
+      setLoading(false);
+    };
+
+    checkUserInitialization();
+  }, [isAuthenticated]);
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <div style={{ width: '50px', height: '50px', border: '3px solid #e9ecef', borderTopColor: '#2c3e50', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></div>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
 
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<AuthLayout />} />
-        <Route path="/" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
-        <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
+        
+        {/* Routes accessibles à tous les utilisateurs authentifiés */}
         <Route path="/personnels" element={isAuthenticated ? <Personnels /> : <Navigate to="/login" />} />
         <Route path="/directions" element={isAuthenticated ? <Directions /> : <Navigate to="/login" />} />
         <Route path="/services" element={isAuthenticated ? <Services /> : <Navigate to="/login" />} />
@@ -35,7 +70,27 @@ const App: React.FC = () => {
         <Route path="/statut-admin" element={isAuthenticated ? <StatutAdmin /> : <Navigate to="/login" />} />
         <Route path="/situation-admin" element={isAuthenticated ? <SituationAdmin /> : <Navigate to="/login" />} />
         <Route path="/etats" element={isAuthenticated ? <Etats /> : <Navigate to="/login" />} />
-        <Route path="*" element={<Navigate to="/dashboard" />} />
+        <Route path="/complete-setup" element={isAuthenticated ? <CompleteSetup /> : <Navigate to="/login" />} />
+        
+        {/* Dashboard accessible uniquement si l'utilisateur est initialisé */}
+        <Route 
+          path="/dashboard" 
+          element={isAuthenticated && isInitialized === true ? <Dashboard /> : <Navigate to="/personnels" />} 
+        />
+        
+        {/* Redirection racine */}
+        <Route 
+          path="/" 
+          element={
+            isAuthenticated ? (
+              isInitialized === true ? <Navigate to="/dashboard" /> : <Navigate to="/personnels" />
+            ) : (
+              <Navigate to="/login" />
+            )
+          } 
+        />
+        
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
   );
