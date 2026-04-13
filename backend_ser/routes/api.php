@@ -8,6 +8,7 @@ use App\Http\Controllers\PersonnelController;
 use App\Http\Controllers\DirectionController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\PosteController;
+use App\Http\Controllers\CarriereController;
 
 // ==================== ROUTES AUTH ====================
 Route::post('/register', [AuthController::class, 'register']);
