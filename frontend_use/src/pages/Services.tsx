@@ -6,7 +6,7 @@ import {
   faTimes, faSave, faUsers, faBuilding, faEye, faBriefcase
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
-import logoInstat from '../assets/image/WhatsApp Image 2026-03-31 at 11.02.14 - Copie.jpeg';
+import logoInstat from '../assets/image/Logo-INSTAT.png';
 import '../style/personnels.css';
 
 interface Direction { id_direction: number; nom_direction: string; }
@@ -44,9 +44,9 @@ const Services: React.FC = () => {
   const handleView = (service: Service) => { setViewingService(service); setIsViewModalOpen(true); };
   const handlePrevious = () => { window.location.href = '/directions'; };
   
-  // ✅ CONDITION
+  // ✅ MODIFIÉ : Redirige vers Carrières
   const hasServices = () => services.length > 0;
-  const handleNext = () => { if (hasServices()) window.location.href = '/postes'; else alert('⚠️ Veuillez d\'abord ajouter au moins un service.'); };
+  const handleNext = () => { if (hasServices()) window.location.href = '/carrieres'; else alert('⚠️ Veuillez d\'abord ajouter au moins un service.'); };
 
   const closeModal = () => { setIsModalOpen(false); setEditingService(null); setFormData({ nom_service: '', id_direction: '', description: '' }); };
   const filteredServices = services.filter(s => s.nom_service.toLowerCase().includes(searchTerm.toLowerCase()) && (filterDirection === 'all' || s.id_direction.toString() === filterDirection));
@@ -54,6 +54,7 @@ const Services: React.FC = () => {
 
   return (
     <div className="personnels-container">
+      <div className="bg-shape-1"></div><div className="bg-shape-2"></div><div className="bg-shape-3"></div><div className="wave-bg"></div><div className="grid-pattern"></div>
       <div className="personnels-content">
         <div className="personnels-header">
           <div className="logo-wrapper"><div className="logo-circle"><img src={logoInstat} alt="INSTAT" className="logo-img" /></div></div>
@@ -82,14 +83,12 @@ const Services: React.FC = () => {
         )) : <div className="empty-state"><div className="empty-icon"><FontAwesomeIcon icon={faBriefcase} size="3x" /></div><p className="empty-text">Aucun service trouvé</p></div>}
       </div>
 
-      {/* Modal */}
       {isModalOpen && (<div className="modal-overlay"><div className="modal"><div className="modal-header"><h2 className="modal-title"><FontAwesomeIcon icon={editingService ? faEdit : faBriefcase} />{editingService ? 'Modifier' : 'Ajouter'}</h2><button className="modal-close" onClick={closeModal}><FontAwesomeIcon icon={faTimes} /></button></div>
         <form onSubmit={handleSubmit}><div className="modal-body"><div className="form-group"><label className="form-label">Direction *</label><select name="id_direction" className="form-select" value={formData.id_direction} onChange={handleInputChange} required><option value="">Sélectionner</option>{directions.map(d => <option key={d.id_direction} value={d.id_direction}>{d.nom_direction}</option>)}</select></div>
         <div className="form-group"><label className="form-label">Nom du service *</label><input type="text" name="nom_service" className="form-input" value={formData.nom_service} onChange={handleInputChange} required /></div>
         <div className="form-group"><label className="form-label">Description</label><textarea name="description" className="form-input" value={formData.description} onChange={handleInputChange} rows={3} /></div></div>
         <div className="modal-footer"><button type="button" className="btn-secondary" onClick={closeModal}>Annuler</button><button type="submit" className="btn-submit" disabled={loading}><FontAwesomeIcon icon={faSave} /> {loading ? 'Enregistrement...' : (editingService ? 'Modifier' : 'Ajouter')}</button></div></form></div></div>)}
 
-      {/* Modal View */}
       {isViewModalOpen && viewingService && (<div className="modal-overlay"><div className="modal" style={{ maxWidth: '500px' }}><div className="modal-header"><h2 className="modal-title"><FontAwesomeIcon icon={faBriefcase} /> Détails</h2><button className="modal-close" onClick={() => setIsViewModalOpen(false)}><FontAwesomeIcon icon={faTimes} /></button></div>
         <div className="modal-body"><div><label>Direction</label><div>{viewingService.direction_nom}</div></div><div><label>Nom</label><div>{viewingService.nom_service}</div></div>{viewingService.description && <div><label>Description</label><div>{viewingService.description}</div></div>}</div>
         <div className="modal-footer"><button className="btn-secondary" onClick={() => setIsViewModalOpen(false)}>Fermer</button></div></div></div>)}

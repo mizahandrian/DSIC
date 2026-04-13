@@ -8,13 +8,10 @@ use App\Http\Controllers\PersonnelController;
 use App\Http\Controllers\DirectionController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\PosteController;
-use App\Http\Controllers\CarriereController;
-use App\Http\Controllers\HistoriqueController;
-use App\Http\Controllers\BaseRohiController;
-use App\Http\Controllers\BaseAugureController;
-use App\Http\Controllers\StatutAdminController;
-use App\Http\Controllers\SituationAdminController;
-use App\Http\Controllers\EtatController;
+
+// ==================== ROUTES AUTH ====================
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
 
 // ==================== ROUTES POSTES ====================
 Route::get('/postes', [PosteController::class, 'index']);
@@ -44,20 +41,17 @@ Route::delete('/personnels/{id}', [PersonnelController::class, 'destroy']);
 Route::get('/personnels/stats', [PersonnelController::class, 'stats']);
 
 // ==================== ROUTES CARRIERES ====================
-
-
 Route::get('/carrieres', [CarriereController::class, 'index']);
 Route::post('/carrieres', [CarriereController::class, 'store']);
-Route::get('/carrieres/{id}', [CarriereController::class, 'show']);
 Route::put('/carrieres/{id}', [CarriereController::class, 'update']);
 Route::delete('/carrieres/{id}', [CarriereController::class, 'destroy']);
 
 // ==================== ROUTES HISTORIQUE ====================
 Route::get('/historiques', [HistoriqueController::class, 'index']);
 Route::post('/historiques', [HistoriqueController::class, 'store']);
-Route::get('/historiques/{id}', [HistoriqueController::class, 'show']);
 Route::put('/historiques/{id}', [HistoriqueController::class, 'update']);
 Route::delete('/historiques/{id}', [HistoriqueController::class, 'destroy']);
+Route::get('/historiques/personnel/{personnelId}', [HistoriqueController::class, 'getByPersonnel']);
 
 // ==================== ROUTES BASE ROHI ====================
 Route::get('/base-rohi', [BaseRohiController::class, 'index']);

@@ -10,7 +10,16 @@ import api from '../Service/api';
 import logoInstat from '../assets/image/Logo-INSTAT.png';
 import '../style/personnels.css';
 
-interface Carriere { id_carriere: number; categorie: string; indice: string; corps: string; grade: string; date_effet: string; nombre_postes?: number; description?: string; }
+interface Carriere {
+  id_carriere: number;
+  categorie: string;
+  indice: string;
+  corps: string;
+  grade: string;
+  date_effet: string;
+  nombre_postes?: number;
+  description?: string;
+}
 
 const initialCarrieres = [
   { categorie: 'A1', indice: '450', corps: 'Ingénieur des Travaux Statistiques', grade: 'Ingénieur Principal', date_effet: '2024-01-01' },
@@ -53,11 +62,11 @@ const Carrieres: React.FC = () => {
   const handleDelete = async (id: number, corps: string) => { if (window.confirm(`Supprimer "${corps}" ?`)) { await api.delete(`/carrieres/${id}`); fetchCarrieres(); } };
   const handleEdit = (c: Carriere) => { setEditingCarriere(c); setFormData({ categorie: c.categorie, indice: c.indice, corps: c.corps, grade: c.grade, date_effet: c.date_effet, description: c.description || '' }); setIsModalOpen(true); };
   const handleView = (c: Carriere) => { setViewingCarriere(c); setIsViewModalOpen(true); };
-  const handlePrevious = () => { window.location.href = '/postes'; };
+  const handlePrevious = () => { window.location.href = '/services'; };
   
-  //  CONDITION pour se connecter 
+  // ✅ MODIFIÉ : Redirige vers Postes
   const hasCarrieres = () => carrieres.length > 0;
-  const handleNext = () => { if (hasCarrieres()) window.location.href = '/historique'; else alert('⚠️ Veuillez d\'abord ajouter au moins une carrière.'); };
+  const handleNext = () => { if (hasCarrieres()) window.location.href = '/postes'; else alert('⚠️ Veuillez d\'abord ajouter au moins une carrière.'); };
 
   const closeModal = () => { setIsModalOpen(false); setEditingCarriere(null); setFormData({ categorie: '', indice: '', corps: '', grade: '', date_effet: '', description: '' }); };
   const filteredCarrieres = carrieres.filter(c => (c.categorie.toLowerCase().includes(searchTerm.toLowerCase()) || c.corps.toLowerCase().includes(searchTerm.toLowerCase()) || c.grade.toLowerCase().includes(searchTerm.toLowerCase())) && (filterCategorie === 'all' || c.categorie === filterCategorie));
@@ -67,6 +76,7 @@ const Carrieres: React.FC = () => {
 
   return (
     <div className="personnels-container">
+      <div className="bg-shape-1"></div><div className="bg-shape-2"></div><div className="bg-shape-3"></div><div className="wave-bg"></div><div className="grid-pattern"></div>
       <div className="personnels-content">
         <div className="personnels-header"><div className="logo-wrapper"><div className="logo-circle"><img src={logoInstat} alt="INSTAT" className="logo-img" /></div></div><h1>Gestion des Carrières</h1><p>Institut National de la Statistique - Madagascar</p></div>
         <div className="actions-bar">
@@ -93,7 +103,6 @@ const Carrieres: React.FC = () => {
         )) : <div className="empty-state"><div className="empty-icon"><FontAwesomeIcon icon={faGraduationCap} size="3x" /></div><p className="empty-text">Aucune carrière trouvée</p></div>}
       </div>
 
-      {/* Modal */}
       {isModalOpen && (<div className="modal-overlay"><div className="modal"><div className="modal-header"><h2 className="modal-title"><FontAwesomeIcon icon={editingCarriere ? faEdit : faGraduationCap} />{editingCarriere ? 'Modifier' : 'Ajouter'}</h2><button className="modal-close" onClick={closeModal}><FontAwesomeIcon icon={faTimes} /></button></div>
         <form onSubmit={handleSubmit}><div className="modal-body"><div className="form-group"><label className="form-label">Catégorie *</label><select name="categorie" className="form-select" value={formData.categorie} onChange={handleInputChange} required><option value="">Sélectionner</option><option value="A1">A1 - Cadres Supérieurs</option><option value="A2">A2 - Cadres Moyens</option><option value="B1">B1 - Techniciens</option><option value="C1">C1 - Agents</option></select></div>
         <div className="form-group"><label className="form-label">Indice *</label><input type="text" name="indice" className="form-input" value={formData.indice} onChange={handleInputChange} required /></div>
@@ -103,7 +112,6 @@ const Carrieres: React.FC = () => {
         <div className="form-group"><label className="form-label">Description</label><textarea name="description" className="form-input" value={formData.description} onChange={handleInputChange} rows={3} /></div></div>
         <div className="modal-footer"><button type="button" className="btn-secondary" onClick={closeModal}>Annuler</button><button type="submit" className="btn-submit" disabled={loading}><FontAwesomeIcon icon={faSave} /> {loading ? 'Enregistrement...' : (editingCarriere ? 'Modifier' : 'Ajouter')}</button></div></form></div></div>)}
 
-      {/* Modal View */}
       {isViewModalOpen && viewingCarriere && (<div className="modal-overlay"><div className="modal" style={{ maxWidth: '500px' }}><div className="modal-header"><h2 className="modal-title"><FontAwesomeIcon icon={faGraduationCap} /> Détails</h2><button className="modal-close" onClick={() => setIsViewModalOpen(false)}><FontAwesomeIcon icon={faTimes} /></button></div>
         <div className="modal-body"><div><label>Catégorie</label><div>{getCategorieLabel(viewingCarriere.categorie)}</div></div><div><label>Corps</label><div style={{ fontSize: '18px', fontWeight: 'bold' }}>{viewingCarriere.corps}</div></div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}><div><label>Indice</label><div>{viewingCarriere.indice}</div></div><div><label>Grade</label><div>{viewingCarriere.grade}</div></div></div>

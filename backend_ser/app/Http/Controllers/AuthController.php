@@ -8,7 +8,7 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
-    // REGISTER - MODIFIÉ
+    // REGISTER
     public function register(Request $request)
     {
         $request->validate([
@@ -21,12 +21,11 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'is_initialized' => false, // ✅ NOUVEAU : par défaut non initialisé
+            'is_initialized' => false,
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        // ✅ MODIFIÉ : retourner is_initialized
         return response()->json([
             'message' => 'User created successfully',
             'user' => [
@@ -39,7 +38,7 @@ class AuthController extends Controller
         ], 201);
     }
 
-    // LOGIN - MODIFIÉ
+    // LOGIN
     public function login(Request $request)
     {
         $request->validate([
@@ -57,7 +56,6 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        // ✅ MODIFIÉ : retourner is_initialized
         return response()->json([
             'message' => 'Login successful',
             'user' => [
@@ -70,7 +68,7 @@ class AuthController extends Controller
         ]);
     }
 
-    // LOGOUT - Inchangé
+    // LOGOUT
     public function logout(Request $request)
     {
         $request->user()->tokens()->delete();
@@ -80,30 +78,7 @@ class AuthController extends Controller
         ]);
     }
 
-    // ✅ NOUVEAU : Marquer l'utilisateur comme initialisé
-    public function completeSetup(Request $request)
-    {
-        $user = $request->user();
-        $user->is_initialized = true;
-        $user->save();
-
-        return response()->json([
-            'message' => 'Setup completed successfully',
-            'is_initialized' => true
-        ]);
-    }
-
-    // ✅ NOUVEAU : Vérifier si l'utilisateur est initialisé
-    public function checkInitialized(Request $request)
-    {
-        $user = $request->user();
-        
-        return response()->json([
-            'is_initialized' => $user->is_initialized ?? false
-        ]);
-    }
-
-    // ✅ NOUVEAU : Récupérer l'utilisateur connecté
+    // GET USER
     public function getUser(Request $request)
     {
         $user = $request->user();
@@ -113,6 +88,29 @@ class AuthController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'is_initialized' => $user->is_initialized ?? false,
+        ]);
+    }
+
+    // CHECK INITIALIZED
+    public function checkInitialized(Request $request)
+    {
+        $user = $request->user();
+        
+        return response()->json([
+            'is_initialized' => $user->is_initialized ?? false
+        ]);
+    }
+
+    // COMPLETE SETUP
+    public function completeSetup(Request $request)
+    {
+        $user = $request->user();
+        $user->is_initialized = true;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Setup completed successfully',
+            'is_initialized' => true
         ]);
     }
 }
