@@ -17,7 +17,6 @@ class Historique extends Model
         'motif_changement'
     ];
 
-    // relation personnel
     public function personnel()
     {
         return $this->belongsTo(Personnel::class, 'id_personnel');

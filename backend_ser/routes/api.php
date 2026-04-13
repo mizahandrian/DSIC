@@ -9,6 +9,13 @@ use App\Http\Controllers\DirectionController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\PosteController;
 use App\Http\Controllers\CarriereController;
+use App\Http\Controllers\HistoriqueController;
+use App\Http\Controllers\BaseRohiController;
+use App\Http\Controllers\BaseAugureController;
+use App\Http\Controllers\StatutAdminController;
+use App\Http\Controllers\SituationAdminController;
+use App\Http\Controllers\EtatController;
+use App\Http\Controllers\LiaisonController;
 
 // ==================== ROUTES AUTH ====================
 Route::post('/register', [AuthController::class, 'register']);
@@ -50,28 +57,33 @@ Route::delete('/carrieres/{id}', [CarriereController::class, 'destroy']);
 // ==================== ROUTES HISTORIQUE ====================
 Route::get('/historiques', [HistoriqueController::class, 'index']);
 Route::post('/historiques', [HistoriqueController::class, 'store']);
+Route::get('/historiques/{id}', [HistoriqueController::class, 'show']);
 Route::put('/historiques/{id}', [HistoriqueController::class, 'update']);
 Route::delete('/historiques/{id}', [HistoriqueController::class, 'destroy']);
-Route::get('/historiques/personnel/{personnelId}', [HistoriqueController::class, 'getByPersonnel']);
 
 // ==================== ROUTES BASE ROHI ====================
 Route::get('/base-rohi', [BaseRohiController::class, 'index']);
 Route::post('/base-rohi', [BaseRohiController::class, 'store']);
 Route::put('/base-rohi/{id}', [BaseRohiController::class, 'update']);
 Route::delete('/base-rohi/{id}', [BaseRohiController::class, 'destroy']);
-Route::get('/personnels-rohi', [BaseRohiController::class, 'getLiaisons']);
-Route::post('/personnels-rohi', [BaseRohiController::class, 'addLiaison']);
-Route::delete('/personnels-rohi/{personnelId}/{rohiId}', [BaseRohiController::class, 'removeLiaison']);
+
+Route::get('/personnels', [PersonnelController::class, 'index']);
+
+Route::get('/personnels-rohi', [LiaisonController::class, 'index']);
+Route::post('/personnels-rohi', [LiaisonController::class, 'store']);
+Route::delete('/personnels-rohi/{personnelId}/{rohiId}', [LiaisonController::class, 'destroy']);
 
 // ==================== ROUTES BASE AUGURE ====================
 Route::get('/base-augure', [BaseAugureController::class, 'index']);
 Route::post('/base-augure', [BaseAugureController::class, 'store']);
 Route::put('/base-augure/{id}', [BaseAugureController::class, 'update']);
 Route::delete('/base-augure/{id}', [BaseAugureController::class, 'destroy']);
-Route::get('/personnels-augure', [BaseAugureController::class, 'getLiaisons']);
-Route::post('/personnels-augure', [BaseAugureController::class, 'addLiaison']);
-Route::delete('/personnels-augure/{personnelId}/{augureId}', [BaseAugureController::class, 'removeLiaison']);
 
+Route::get('/personnels', [PersonnelController::class, 'index']);
+
+Route::get('/personnels-augure', [LiaisonController::class, 'index']);
+Route::post('/personnels-augure', [LiaisonController::class, 'store']);
+Route::delete('/personnels-augure/{personnelId}/{augureId}', [LiaisonController::class, 'destroy']);
 // ==================== ROUTES STATUTS ADMIN ====================
 Route::get('/statuts', [StatutAdminController::class, 'index']);
 Route::post('/statuts', [StatutAdminController::class, 'store']);

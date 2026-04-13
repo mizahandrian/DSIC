@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class HistoriqueController extends Controller
 {
-    // GET ALL (avec nom du personnel pour React)
+    // GET ALL (format compatible React)
     public function index()
     {
         $historiques = Historique::with('personnel')->get();
@@ -37,17 +37,16 @@ class HistoriqueController extends Controller
             'ancien_direction' => 'required',
         ]);
 
-        // ❗ règle métier : 1 seul historique par personnel
+        // ⚠️ règle métier : 1 seul historique par personnel
         $exists = Historique::where('id_personnel', $request->id_personnel)->first();
+
         if ($exists) {
             return response()->json([
                 'message' => 'Ce personnel a déjà un historique'
             ], 422);
         }
 
-        $historique = Historique::create($request->all());
-
-        return response()->json($historique, 201);
+        return Historique::create($request->all());
     }
 
     // SHOW
