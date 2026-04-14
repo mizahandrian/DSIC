@@ -5,7 +5,7 @@
   box-sizing: border-box;
 }
 
-/* Container principal du dashboard */
+/* Container principal */
 .dashboard-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #e8edf2 0%, #dce3ec 50%, #e8edf2 100%);
@@ -14,7 +14,7 @@
   overflow-x: hidden;
 }
 
-/* Formes géométriques en arrière-plan */
+/* Formes géométriques */
 .dashboard-container .bg-shape-1 {
   position: absolute;
   top: 15%;
@@ -78,8 +78,8 @@
   66% { transform: translate(10px, -10px) scale(0.98); }
 }
 
-/* Sidebar */
-.dashboard-sidebar {
+/* ========== SIDEBAR NORMAL (280px) - POUR TOUTES LES PAGES SAUF DASHBOARD ========== */
+.sidebar-normal {
   position: fixed;
   left: 0;
   top: 0;
@@ -90,16 +90,15 @@
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   z-index: 100;
   overflow-y: auto;
-  transition: all 0.3s ease;
 }
 
-.sidebar-header {
+.sidebar-header-normal {
   padding: 25px 20px;
   text-align: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.sidebar-logo {
+.sidebar-logo-normal {
   width: 70px;
   height: 70px;
   margin: 0 auto 15px;
@@ -111,29 +110,29 @@
   overflow: hidden;
 }
 
-.sidebar-logo img {
+.sidebar-logo-normal img {
   width: 55px;
   height: 55px;
   object-fit: contain;
 }
 
-.sidebar-header h2 {
+.sidebar-header-normal h2 {
   font-size: 18px;
   color: white;
   margin: 0;
 }
 
-.sidebar-header p {
+.sidebar-header-normal p {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.5);
   margin-top: 5px;
 }
 
-.sidebar-nav {
+.sidebar-nav-normal {
   padding: 20px 0;
 }
 
-.nav-item {
+.nav-item-normal {
   display: flex;
   align-items: center;
   padding: 12px 24px;
@@ -145,35 +144,121 @@
   gap: 12px;
 }
 
-.nav-item:hover {
+.nav-item-normal:hover {
   background: rgba(255, 255, 255, 0.1);
   color: white;
-  transform: translateX(5px);
 }
 
-.nav-item.active {
+.nav-item-normal.active {
   background: rgba(255, 215, 0, 0.15);
   color: #ffd700;
   border-left: 3px solid #ffd700;
 }
 
-.nav-icon {
+.nav-icon-normal {
   font-size: 18px;
   width: 24px;
   text-align: center;
 }
 
-.nav-text {
+.nav-text-normal {
   font-size: 14px;
   font-weight: 500;
 }
 
-/* Header */
-.dashboard-header {
+/* ========== SIDEBAR COMPACT (180px) - POUR LE DASHBOARD SEULEMENT ========== */
+.sidebar-compact {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 180px;
+  height: 100vh;
+  background: rgba(44, 62, 80, 0.98);
+  backdrop-filter: blur(10px);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 100;
+  overflow-y: auto;
+}
+
+.sidebar-header-compact {
+  padding: 20px 15px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-logo-compact {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 10px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.sidebar-logo-compact img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.sidebar-header-compact h2 {
+  font-size: 14px;
+  color: white;
+  margin: 0;
+}
+
+.sidebar-header-compact p {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 3px;
+}
+
+.sidebar-nav-compact {
+  padding: 15px 0;
+}
+
+.nav-item-compact {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  margin: 2px 8px;
+  border-radius: 10px;
+  gap: 10px;
+}
+
+.nav-item-compact:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.nav-item-compact.active {
+  background: rgba(255, 215, 0, 0.15);
+  color: #ffd700;
+  border-left: 3px solid #ffd700;
+}
+
+.nav-icon-compact {
+  font-size: 14px;
+  width: 20px;
+}
+
+.nav-text-compact {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ========== HEADER NORMAL (left: 280px) ========== */
+.header-normal {
   position: fixed;
   top: 0;
-  right: 0;
   left: 280px;
+  right: 0;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   padding: 12px 30px;
@@ -184,6 +269,43 @@
   z-index: 99;
 }
 
+/* ========== HEADER COMPACT (left: 180px) ========== */
+.header-compact {
+  position: fixed;
+  top: 0;
+  left: 180px;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 10px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  z-index: 99;
+}
+
+/* ========== MAIN NORMAL (margin-left: 280px) ========== */
+.main-normal {
+  margin-left: 280px;
+  margin-top: 70px;
+  padding: 30px;
+  position: relative;
+  z-index: 1;
+  min-height: calc(100vh - 70px);
+}
+
+/* ========== MAIN COMPACT (margin-left: 180px) ========== */
+.main-compact {
+  margin-left: 180px;
+  margin-top: 65px;
+  padding: 25px;
+  position: relative;
+  z-index: 1;
+  min-height: calc(100vh - 65px);
+}
+
+/* ========== COMPOSANTS COMMUNS ========== */
 .header-search {
   position: relative;
   width: 300px;
@@ -278,14 +400,8 @@
 }
 
 @keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .dropdown-header {
@@ -332,19 +448,10 @@
   background: #fff8f8;
 }
 
-/* Contenu principal */
-.dashboard-main {
-  margin-left: 280px;
-  margin-top: 70px;
-  padding: 30px;
-  position: relative;
-  z-index: 1;
-}
-
-/* Cartes de statistiques */
+/* ========== CARTES DE STATISTIQUES ========== */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 24px;
   margin-bottom: 30px;
 }
@@ -390,13 +497,8 @@
   gap: 5px;
 }
 
-.trend-up {
-  color: #27ae60;
-}
-
-.trend-down {
-  color: #e74c3c;
-}
+.trend-up { color: #27ae60; }
+.trend-down { color: #e74c3c; }
 
 .stat-icon {
   width: 55px;
@@ -408,7 +510,7 @@
   font-size: 24px;
 }
 
-/* Graphiques */
+/* ========== GRAPHIQUES ========== */
 .charts-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -437,15 +539,19 @@
 .chart-container {
   height: 300px;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Tableau récent */
+/* ========== TABLEAU RÉCENT ========== */
 .recent-table {
   background: white;
   border-radius: 20px;
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   border: 1px solid rgba(0, 0, 0, 0.05);
+  margin-bottom: 30px;
 }
 
 .recent-header {
@@ -493,12 +599,12 @@
   border-bottom: 1px solid #f0f2f5;
 }
 
-/* Boutons d'action rapide */
+/* ========== ACTIONS RAPIDES ========== */
 .quick-actions {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  margin-top: 30px;
+  margin-top: 0;
 }
 
 .quick-btn {
@@ -511,6 +617,7 @@
   gap: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
+  text-decoration: none;
 }
 
 .quick-btn:hover {
@@ -543,35 +650,24 @@
   margin: 3px 0 0 0;
 }
 
-/* Responsive */
+/* ========== RESPONSIVE ========== */
+@media (max-width: 1200px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .quick-actions { grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (max-width: 1024px) {
-  .dashboard-sidebar {
-    transform: translateX(-100%);
-  }
-  
-  .dashboard-header {
-    left: 0;
-  }
-  
-  .dashboard-main {
-    margin-left: 0;
-  }
-  
-  .charts-grid {
-    grid-template-columns: 1fr;
-  }
+  .sidebar-normal, .sidebar-compact { transform: translateX(-100%); }
+  .header-normal, .header-compact { left: 0; }
+  .main-normal, .main-compact { margin-left: 0; }
+  .charts-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 768px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .dashboard-main {
-    padding: 20px;
-  }
-  
-  .header-search {
-    display: none;
-  }
+  .stats-grid { grid-template-columns: 1fr; }
+  .quick-actions { grid-template-columns: 1fr; }
+  .main-normal, .main-compact { padding: 20px; }
+  .header-search { display: none; }
+  .recent-table { overflow-x: auto; }
+  .recent-table table { min-width: 600px; }
 }

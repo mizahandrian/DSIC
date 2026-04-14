@@ -1,7 +1,9 @@
 // src/App.tsx
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import AuthLayout from './components/AuthLayout';
+import LayoutNormal from './components/LayoutNormal';
+import LayoutCompact from './components/LayoutCompact';
 import Personnels from './pages/Personnels';
 import Directions from './pages/Directions';
 import Services from './pages/Services';
@@ -17,6 +19,8 @@ import Etats from './pages/Etats';
 import CompleteSetup from './pages/CompleteSetup';
 import api from './Service/api';
 
+const SimpleLayout: React.FC = () => <Outlet />;
+
 const App: React.FC = () => {
   const [isInitialized, setIsInitialized] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
@@ -30,7 +34,6 @@ const App: React.FC = () => {
           api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
           const response = await api.get('/user/check-initialized');
           setIsInitialized(response.data.is_initialized);
-          
           const user = JSON.parse(localStorage.getItem('user') || '{}');
           user.is_initialized = response.data.is_initialized;
           localStorage.setItem('user', JSON.stringify(user));
@@ -42,7 +45,6 @@ const App: React.FC = () => {
       }
       setLoading(false);
     };
-
     checkUserInitialization();
   }, [token]);
 
@@ -60,25 +62,38 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/login" element={<AuthLayout />} />
         
-        {/* Routes accessibles à tous les utilisateurs authentifiés */}
-        <Route path="/personnels" element={isAuthenticated ? <Personnels /> : <Navigate to="/login" />} />
-        <Route path="/directions" element={isAuthenticated ? <Directions /> : <Navigate to="/login" />} />
-        <Route path="/services" element={isAuthenticated ? <Services /> : <Navigate to="/login" />} />
-        <Route path="/carrieres" element={isAuthenticated ? <Carrieres /> : <Navigate to="/login" />} />
-        <Route path="/postes" element={isAuthenticated ? <Postes /> : <Navigate to="/login" />} />
-        <Route path="/historique" element={isAuthenticated ? <Historique /> : <Navigate to="/login" />} />
-        <Route path="/base-rohi" element={isAuthenticated ? <BaseRohi /> : <Navigate to="/login" />} />
-        <Route path="/base-augure" element={isAuthenticated ? <BaseAugure /> : <Navigate to="/login" />} />
-        <Route path="/statut-admin" element={isAuthenticated ? <StatutAdmin /> : <Navigate to="/login" />} />
-        <Route path="/situation-admin" element={isAuthenticated ? <SituationAdmin /> : <Navigate to="/login" />} />
-        <Route path="/etats" element={isAuthenticated ? <Etats /> : <Navigate to="/login" />} />
-        <Route path="/complete-setup" element={isAuthenticated ? <CompleteSetup /> : <Navigate to="/login" />} />
+        {/* Dashboard avec Layout Compact (Sidebar 180px) */}
+        <Route element={isAuthenticated && isInitialized === true ? <LayoutCompact /> : <Navigate to="/personnels" />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Route>
         
-        {/* Dashboard accessible uniquement si l'utilisateur est initialisé */}
-        <Route 
-          path="/dashboard" 
-          element={isAuthenticated && isInitialized === true ? <Dashboard /> : <Navigate to="/personnels" />} 
-        />
+        {/* Autres pages avec Layout Normal (Sidebar 280px) */}
+        <Route element={isAuthenticated && isInitialized === true ? <LayoutNormal /> : <Navigate to="/personnels" />}>
+          <Route path="/personnels" element={<Personnels />} />
+          <Route path="/directions" element={<Directions />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/carrieres" element={<Carrieres />} />
+          <Route path="/postes" element={<Postes />} />
+          <Route path="/historique" element={<Historique />} />
+          <Route path="/base-rohi" element={<BaseRohi />} />
+          <Route path="/base-augure" element={<BaseAugure />} />
+          <Route path="/statut-admin" element={<StatutAdmin />} />
+          <Route path="/situation-admin" element={<SituationAdmin />} />
+          <Route path="/etats" element={<Etats />} />
+        </Route>
+        
+        {/* Routes sans Sidebar (pendant l'initialisation) */}
+        <Route element={isAuthenticated ? <SimpleLayout /> : <Navigate to="/login" />}>
+          <Route path="/personnels" element={<Personnels />} />
+          <Route path="/directions" element={<Directions />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/carrieres" element={<Carrieres />} />
+          <Route path="/postes" element={<Postes />} />
+          <Route path="/historique" element={<Historique />} />
+          <Route path="/base-rohi" element={<BaseRohi />} />
+          <Route path="/base-augure" element={<BaseAugure />} />
+          <Route path="/complete-setup" element={<CompleteSetup />} />
+        </Route>
         
         {/* Redirection racine */}
         <Route 
