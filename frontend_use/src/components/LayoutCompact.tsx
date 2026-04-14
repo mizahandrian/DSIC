@@ -13,10 +13,14 @@ const LayoutCompact: React.FC = () => {
       <div className="bg-shape-3"></div>
       <div className="wave-bg"></div>
 
-      <Sidebar isCompact={true} />
-      <Header isCompact={true} />
+      {/* Sidebar avec largeur normale (280px) */}
+      <Sidebar isCompact={false} />
       
-      <main className="main-compact">
+      {/* Header avec left normal (280px) */}
+      <Header isCompact={false} />
+      
+      {/* Main avec margin-left normal (280px) */}
+      <main className="main-normal">
         <Outlet />
       </main>
     </div>

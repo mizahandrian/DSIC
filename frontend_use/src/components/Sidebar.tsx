@@ -7,7 +7,7 @@ import {
   faChartLine, faHistory, faDatabase, faAddressCard, faExchangeAlt,
   faUserCheck
 } from '@fortawesome/free-solid-svg-icons';
-import logoInstat from '../assets/image/WhatsApp Image 2026-03-31 at 11.02.14 - Copie.jpeg';
+import logoInstat from '../assets/image/Logo-INSTAT.png';
 
 interface SidebarProps {
   isCompact?: boolean;
@@ -29,17 +29,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isCompact = false }) => {
     { path: '/etats', name: 'États', icon: faUserCheck },
   ];
 
-  const sidebarWidth = isCompact ? 180 : 280;
-  const logoSize = isCompact ? 50 : 70;
-  const imgSize = isCompact ? 40 : 55;
-  const headerFontSize = isCompact ? 14 : 18;
-  const subFontSize = isCompact ? 9 : 11;
-  const navPadding = isCompact ? '10px 12px' : '12px 24px';
-  const navMargin = isCompact ? '2px 8px' : '4px 12px';
-  const navRadius = isCompact ? 10 : 12;
-  const iconSize = isCompact ? 14 : 18;
-  const textSize = isCompact ? 12 : 14;
-  const headerPadding = isCompact ? '20px 15px' : '25px 20px';
+  // Largeur uniforme de 280px pour tous
+  const sidebarWidth = 280;
+  const logoSize = 70;
+  const imgSize = 55;
+  const headerFontSize = 18;
+  const subFontSize = 11;
+  const navPadding = '12px 24px';
+  const navMargin = '4px 12px';
+  const navRadius = 12;
+  const iconSize = 18;
+  const textSize = 14;
+  const headerPadding = '25px 20px';
 
   return (
     <div style={{
@@ -68,7 +69,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCompact = false }) => {
         }}>
           <img src={logoInstat} alt="INSTAT" style={{ width: imgSize, height: imgSize, objectFit: 'contain' }} />
         </div>
-        <h2 style={{ fontSize: headerFontSize, color: 'white', margin: 0 }}>INSTAT{!isCompact && ' Madagascar'}</h2>
+        <h2 style={{ fontSize: headerFontSize, color: 'white', margin: 0 }}>INSTAT Madagascar</h2>
         <p style={{ fontSize: subFontSize, color: 'rgba(255,255,255,0.5)', marginTop: '5px' }}>Gestion Personnel</p>
       </div>
       <nav style={{ padding: '20px 0' }}>

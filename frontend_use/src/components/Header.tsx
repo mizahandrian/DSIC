@@ -17,19 +17,24 @@ const Header: React.FC<HeaderProps> = ({ isCompact = false }) => {
     window.location.href = '/login';
   };
 
+  
+  const leftValue = '280px';
+  
+
   const headerStyle = {
     position: 'fixed' as const,
     top: 0,
-    left: isCompact ? '180px' : '280px',
+    left: leftValue,
     right: 0,
     background: 'rgba(255, 255, 255, 0.95)',
     backdropFilter: 'blur(10px)',
-    padding: isCompact ? '10px 25px' : '12px 30px',
+    padding: '8px 25px',  
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
-    zIndex: 99
+    zIndex: 99,
+    height: '55px'  
   };
 
   return (
@@ -41,39 +46,40 @@ const Header: React.FC<HeaderProps> = ({ isCompact = false }) => {
           placeholder="Rechercher..."
           style={{
             width: '100%',
-            padding: '10px 15px 10px 40px',
+            padding: '8px 15px 8px 40px',  // Padding réduit
             border: '1px solid #e2e8f0',
             borderRadius: '12px',
-            fontSize: '14px',
+            fontSize: '13px',  // Police plus petite
             outline: 'none'
           }}
         />
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-        <button style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', position: 'relative' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>  
+        <button style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', position: 'relative' }}>  
           <FontAwesomeIcon icon={faBell} />
           <span style={{ position: 'absolute', top: '-5px', right: '-5px', background: '#e74c3c', color: 'white', fontSize: '10px', padding: '2px 5px', borderRadius: '10px' }}>3</span>
         </button>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => setUserMenuOpen(!userMenuOpen)}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => setUserMenuOpen(!userMenuOpen)}>
           <div style={{
-            width: '40px',
-            height: '40px',
+            width: '35px',
+            height: '35px', 
             background: 'linear-gradient(135deg, #2c3e50, #34495e)',
             borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             color: 'white',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            fontSize: '14px'
           }}>
             {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
           </div>
-          <span style={{ fontSize: '14px', fontWeight: 500, color: '#2c3e50' }}>{user.name || 'Utilisateur'}</span>
+          <span style={{ fontSize: '13px', fontWeight: 500, color: '#2c3e50' }}>{user.name || 'Utilisateur'}</span>
         </div>
         {userMenuOpen && (
           <div style={{
             position: 'absolute',
-            top: '60px',
+            top: '55px',
             right: '30px',
             background: 'white',
             borderRadius: '16px',
@@ -82,17 +88,17 @@ const Header: React.FC<HeaderProps> = ({ isCompact = false }) => {
             overflow: 'hidden',
             zIndex: 100
           }}>
-            <div style={{ padding: '15px', borderBottom: '1px solid #e9ecef' }}>
+            <div style={{ padding: '12px 15px', borderBottom: '1px solid #e9ecef' }}>
               <p style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: '#2c3e50' }}>{user.name || 'Utilisateur'}</p>
               <small style={{ fontSize: '11px', color: '#8a9bb0' }}>{user.email || ''}</small>
             </div>
-            <button style={{ width: '100%', padding: '12px 15px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', color: '#495057' }}>
+            <button style={{ width: '100%', padding: '10px 15px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', color: '#495057' }}>
               <FontAwesomeIcon icon={faUser} style={{ marginRight: '10px' }} /> Mon profil
             </button>
-            <button style={{ width: '100%', padding: '12px 15px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', color: '#495057' }}>
+            <button style={{ width: '100%', padding: '10px 15px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', color: '#495057' }}>
               <FontAwesomeIcon icon={faCog} style={{ marginRight: '10px' }} /> Paramètres
             </button>
-            <button onClick={handleLogout} style={{ width: '100%', padding: '12px 15px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', color: '#e74c3c' }}>
+            <button onClick={handleLogout} style={{ width: '100%', padding: '10px 15px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', color: '#e74c3c' }}>
               <FontAwesomeIcon icon={faSignOutAlt} style={{ marginRight: '10px' }} /> Déconnexion
             </button>
           </div>
