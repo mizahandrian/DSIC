@@ -19,7 +19,10 @@ import Etats from './pages/Etats';
 import CompleteSetup from './pages/CompleteSetup';
 import api from './Service/api';
 
-const SimpleLayout: React.FC = () => <Outlet />;
+// Layout simple sans sidebar (pour l'initialisation)
+const SimpleLayout: React.FC = () => {
+  return <Outlet />;
+};
 
 const App: React.FC = () => {
   const [isInitialized, setIsInitialized] = useState<boolean | null>(null);
@@ -33,10 +36,14 @@ const App: React.FC = () => {
         try {
           api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
           const response = await api.get('/user/check-initialized');
-          setIsInitialized(response.data.is_initialized);
+          const initialized = response.data.is_initialized === true;
+          setIsInitialized(initialized);
+          
           const user = JSON.parse(localStorage.getItem('user') || '{}');
-          user.is_initialized = response.data.is_initialized;
+          user.is_initialized = initialized;
           localStorage.setItem('user', JSON.stringify(user));
+          
+          console.log('User initialized:', initialized);
         } catch (error) {
           console.error('Erreur vérification:', error);
           const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -57,53 +64,62 @@ const App: React.FC = () => {
     );
   }
 
+  console.log('App render:', { isAuthenticated, isInitialized });
+
   return (
     <Router>
       <Routes>
+        {/* Page de login */}
         <Route path="/login" element={<AuthLayout />} />
         
-        {/* Dashboard avec Layout Compact (Sidebar 180px) */}
-        <Route element={isAuthenticated && isInitialized === true ? <LayoutCompact /> : <Navigate to="/personnels" />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-        </Route>
+        {/* ==================== UTILISATEUR NON INITIALISÉ ==================== */}
+        {/* Pendant l'initialisation : PAS de Sidebar, PAS de Header */}
+        {isAuthenticated && isInitialized === false && (
+          <Route element={<SimpleLayout />}>
+            <Route path="/personnels" element={<Personnels />} />
+            <Route path="/directions" element={<Directions />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/carrieres" element={<Carrieres />} />
+            <Route path="/postes" element={<Postes />} />
+            <Route path="/historique" element={<Historique />} />
+            <Route path="/base-rohi" element={<BaseRohi />} />
+            <Route path="/base-augure" element={<BaseAugure />} />
+            <Route path="/complete-setup" element={<CompleteSetup />} />
+          </Route>
+        )}
         
-        {/* Autres pages avec Layout Normal (Sidebar 280px) */}
-        <Route element={isAuthenticated && isInitialized === true ? <LayoutNormal /> : <Navigate to="/personnels" />}>
-          <Route path="/personnels" element={<Personnels />} />
-          <Route path="/directions" element={<Directions />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/carrieres" element={<Carrieres />} />
-          <Route path="/postes" element={<Postes />} />
-          <Route path="/historique" element={<Historique />} />
-          <Route path="/base-rohi" element={<BaseRohi />} />
-          <Route path="/base-augure" element={<BaseAugure />} />
-          <Route path="/statut-admin" element={<StatutAdmin />} />
-          <Route path="/situation-admin" element={<SituationAdmin />} />
-          <Route path="/etats" element={<Etats />} />
-        </Route>
+        {/* ==================== UTILISATEUR INITIALISÉ ==================== */}
+        {/* Après initialisation : AVEC Sidebar et Header */}
+        {isAuthenticated && isInitialized === true && (
+          <>
+            {/* Dashboard avec LayoutCompact */}
+            <Route element={<LayoutCompact />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+            </Route>
+            
+            {/* Autres pages avec LayoutNormal */}
+            <Route element={<LayoutNormal />}>
+              <Route path="/personnels" element={<Personnels />} />
+              <Route path="/directions" element={<Directions />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/carrieres" element={<Carrieres />} />
+              <Route path="/postes" element={<Postes />} />
+              <Route path="/historique" element={<Historique />} />
+              <Route path="/base-rohi" element={<BaseRohi />} />
+              <Route path="/base-augure" element={<BaseAugure />} />
+              <Route path="/statut-admin" element={<StatutAdmin />} />
+              <Route path="/situation-admin" element={<SituationAdmin />} />
+              <Route path="/etats" element={<Etats />} />
+            </Route>
+          </>
+        )}
         
-        {/* Routes sans Sidebar (pendant l'initialisation) */}
-        <Route element={isAuthenticated ? <SimpleLayout /> : <Navigate to="/login" />}>
-          <Route path="/personnels" element={<Personnels />} />
-          <Route path="/directions" element={<Directions />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/carrieres" element={<Carrieres />} />
-          <Route path="/postes" element={<Postes />} />
-          <Route path="/historique" element={<Historique />} />
-          <Route path="/base-rohi" element={<BaseRohi />} />
-          <Route path="/base-augure" element={<BaseAugure />} />
-          <Route path="/complete-setup" element={<CompleteSetup />} />
-        </Route>
-        
-        {/* Redirection racine */}
+        {/* Redirection par défaut */}
         <Route 
           path="/" 
           element={
-            isAuthenticated ? (
-              isInitialized === true ? <Navigate to="/dashboard" /> : <Navigate to="/personnels" />
-            ) : (
-              <Navigate to="/login" />
-            )
+            !isAuthenticated ? <Navigate to="/login" /> :
+            isInitialized === true ? <Navigate to="/dashboard" /> : <Navigate to="/personnels" />
           } 
         />
         
