@@ -18,6 +18,9 @@ import SituationAdmin from './pages/SituationAdmin';
 import Etats from './pages/Etats';
 import CompleteSetup from './pages/CompleteSetup';
 import api from './Service/api';
+import ForgotPassword from "./pages/ForgotPassword";
+import VerifyCode from "./pages/VerifyCode";
+import ResetPassword from "./pages/ResetPassword";
 
 // Layout simple sans sidebar (pour l'initialisation)
 const SimpleLayout: React.FC = () => {
@@ -66,11 +69,16 @@ const App: React.FC = () => {
 
   console.log('App render:', { isAuthenticated, isInitialized });
 
+ 
+
   return (
     <Router>
       <Routes>
         {/* Page de login */}
         <Route path="/login" element={<AuthLayout />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/verify-code" element={<VerifyCode />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         
         {/* ==================== UTILISATEUR NON INITIALISÉ ==================== */}
         {/* Pendant l'initialisation : PAS de Sidebar, PAS de Header */}
@@ -85,6 +93,7 @@ const App: React.FC = () => {
             <Route path="/base-rohi" element={<BaseRohi />} />
             <Route path="/base-augure" element={<BaseAugure />} />
             <Route path="/complete-setup" element={<CompleteSetup />} />
+             
           </Route>
         )}
         

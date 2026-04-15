@@ -16,6 +16,96 @@ use App\Http\Controllers\StatutAdminController;
 use App\Http\Controllers\SituationAdminController;
 use App\Http\Controllers\EtatController;
 use App\Http\Controllers\LiaisonController;
+use Illuminate\Support\Facades\Password;
+
+
+
+//test 
+use Illuminate\Support\Facades\Mail;
+
+Route::get('/test-mail', function () {
+    Mail::raw('Test Mailtrap OK', function ($msg) {
+        $msg->to('test@mail.com')
+            ->subject('Test');
+    });
+
+    return 'Email envoyé';
+});
+
+
+//mot de pass
+//use Illuminate\Support\Facades\Mail;
+use Carbon\Carbon;
+use App\Models\User;
+
+Route::post('/forgot-password', function (Request $request) {
+
+    $request->validate(['email' => 'required|email']);
+
+    $user = User::where('email', $request->email)->first();
+
+    if (!$user) {
+        return response()->json(['message' => 'Email introuvable'], 404);
+    }
+
+    $otp = rand(100000, 999999);
+
+    $user->otp_code = $otp;
+    $user->otp_expires_at = Carbon::now()->addMinutes(10);
+    $user->save();
+
+    Mail::raw("Votre code est : $otp", function ($message) use ($user) {
+        $message->to($user->email)
+                ->subject('Code de réinitialisation');
+    });
+
+    return response()->json(['message' => 'Code envoyé']);
+});
+
+//verifier le code
+
+Route::post('/verify-code', function (Request $request) {
+
+    $request->validate([
+        'email' => 'required|email',
+        'otp' => 'required'
+    ]);
+
+    $user = User::where('email', $request->email)->first();
+
+    if (!$user || $user->otp_code != $request->otp) {
+        return response()->json(['message' => 'Code invalide'], 400);
+    }
+
+    if (now()->greaterThan($user->otp_expires_at)) {
+        return response()->json(['message' => 'Code expiré'], 400);
+    }
+
+    return response()->json(['message' => 'Code valide']);
+});
+//reset mot de passe
+use Illuminate\Support\Facades\Hash;
+
+Route::post('/reset-password', function (Request $request) {
+
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|min:6|confirmed',
+    ]);
+
+    $user = User::where('email', $request->email)->first();
+
+    if (!$user) {
+        return response()->json(['message' => 'Utilisateur introuvable'], 404);
+    }
+
+    $user->password = Hash::make($request->password);
+    $user->otp_code = null;
+    $user->otp_expires_at = null;
+    $user->save();
+
+    return response()->json(['message' => 'Mot de passe changé']);
+});
 
 // ==================== ROUTES AUTH ====================
 Route::post('/register', [AuthController::class, 'register']);
