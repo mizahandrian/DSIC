@@ -1,16 +1,15 @@
 // src/pages/Directions.tsx
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faSearch, 
-  faArrowRight, 
+import {
+  faSearch,
+  faArrowRight,
   faArrowLeft,
   faUsers,
   faBuilding,
   faEye,
   faUserPlus,
   faCheckCircle,
-  faTimesCircle,
   faCity,
   faMapMarkerAlt,
   faLandmark,
@@ -24,7 +23,8 @@ import {
   faSave,
   faEye as faEyeIcon,
   faChevronDown,
-  faChevronUp
+  faChevronUp,
+  faUser
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 import logoInstat from '../assets/image/Logo-INSTAT.png';
@@ -96,10 +96,17 @@ const Directions: React.FC = () => {
     provinciale: true
   });
 
+  // Nouveaux états pour le formulaire d'affectation
+  const [showAddPersonnelModal, setShowAddPersonnelModal] = useState(false);
+  const [availablePersonnels, setAvailablePersonnels] = useState<Personnel[]>([]);
+  const [newPersonnelId, setNewPersonnelId] = useState<string>('');
+  const [targetDirectionId, setTargetDirectionId] = useState<string>('');
+
   useEffect(() => {
     initializeDirections();
     fetchServices();
     fetchPersonnels();
+    fetchAllPersonnels();
   }, []);
 
   const initializeDirections = async () => {
@@ -140,9 +147,51 @@ const Directions: React.FC = () => {
     }
   };
 
+  const fetchAllPersonnels = async () => {
+    try {
+      const response = await api.get('/personnels');
+      setAvailablePersonnels(response.data);
+    } catch (error) {
+      console.error('Erreur chargement personnels:', error);
+    }
+  };
+
+  // Nouvelle fonction pour affecter un personnel depuis le formulaire
+  const handleAffecterPersonnelViaFormulaire = async () => {
+    if (!newPersonnelId || !targetDirectionId) {
+      alert('Veuillez sélectionner un personnel et une direction');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const personnel = availablePersonnels.find(p => p.id_personnel.toString() === newPersonnelId);
+      if (!personnel) return;
+
+      await api.put(`/personnels/${newPersonnelId}`, {
+        ...personnel,
+        id_direction: parseInt(targetDirectionId)
+      });
+
+      // Rafraîchir les données
+      await fetchPersonnels();
+      await fetchAllPersonnels();
+
+      setShowAddPersonnelModal(false);
+      setNewPersonnelId('');
+      setTargetDirectionId('');
+      alert('Personnel affecté avec succès !');
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert('Erreur lors de l\'affectation');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleAffecterPersonnel = async () => {
     if (!personnelToAffect || !selectedDirectionId) return;
-    
+
     setLoading(true);
     try {
       await api.put(`/personnels/${personnelToAffect.id_personnel}`, {
@@ -150,6 +199,7 @@ const Directions: React.FC = () => {
         id_direction: parseInt(selectedDirectionId)
       });
       fetchPersonnels();
+      fetchAllPersonnels();
       setShowAffectationModal(false);
       setPersonnelToAffect(null);
       setSelectedDirectionId('');
@@ -166,6 +216,12 @@ const Directions: React.FC = () => {
     setPersonnelToAffect(personnel);
     setSelectedDirectionId(personnel.id_direction?.toString() || '');
     setShowAffectationModal(true);
+  };
+
+  const openAddPersonnelModal = () => {
+    setNewPersonnelId('');
+    setTargetDirectionId('');
+    setShowAddPersonnelModal(true);
   };
 
   const handlePrevious = () => {
@@ -204,8 +260,13 @@ const Directions: React.FC = () => {
     return personnels.filter(p => p.id_direction === directionId);
   };
 
+  const getPersonnelsNotAffected = () => {
+    const affectedIds = personnels.map(p => p.id_personnel);
+    return availablePersonnels.filter(p => !affectedIds.includes(p.id_personnel));
+  };
+
   const getTypeLabel = (type: string) => {
-    switch(type) {
+    switch (type) {
       case 'centrale': return 'Directions Centrales';
       case 'regionale': return 'Directions Régionales';
       case 'provinciale': return 'Directions Provinciales';
@@ -214,7 +275,7 @@ const Directions: React.FC = () => {
   };
 
   const getTypeIcon = (type: string) => {
-    switch(type) {
+    switch (type) {
       case 'centrale': return faLandmark;
       case 'regionale': return faMapMarkerAlt;
       case 'provinciale': return faCity;
@@ -223,7 +284,7 @@ const Directions: React.FC = () => {
   };
 
   const getTypeColor = (type: string) => {
-    switch(type) {
+    switch (type) {
       case 'centrale': return '#2c3e50';
       case 'regionale': return '#2980b9';
       case 'provinciale': return '#27ae60';
@@ -231,13 +292,16 @@ const Directions: React.FC = () => {
     }
   };
 
+  const personnelsNotAffected = getPersonnelsNotAffected();
+
   return (
     <div className="personnels-container">
-      <div className="bg-shape-1"></div>
-      <div className="bg-shape-2"></div>
-      <div className="bg-shape-3"></div>
-      <div className="wave-bg"></div>
-      <div className="grid-pattern"></div>
+      {/* ============================================ */}
+      {/* 🌊 FORMES ONDULÉES MODERNES */}
+      {/* ============================================ */}
+      <div className="wave-1"></div>
+      <div className="wave-2"></div>
+      <div className="wave-3"></div>
 
       <div className="personnels-content">
         <div className="personnels-header">
@@ -261,7 +325,7 @@ const Directions: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
+
           <select
             className="form-select"
             value={filterType}
@@ -277,6 +341,9 @@ const Directions: React.FC = () => {
           <div style={{ display: 'flex', gap: '12px' }}>
             <button className="btn-secondary" onClick={handlePrevious}>
               <FontAwesomeIcon icon={faArrowLeft} /> Précédent
+            </button>
+            <button className="btn-primary" onClick={openAddPersonnelModal}>
+              <FontAwesomeIcon icon={faUserPlus} /> Affecter un personnel
             </button>
             <button className="btn-next" onClick={handleNext}>
               Suivant <FontAwesomeIcon icon={faArrowRight} />
@@ -317,7 +384,7 @@ const Directions: React.FC = () => {
                             const servicesCount = getServicesCount(direction.id_direction);
                             const personnelsCount = getPersonnelsCount(direction.id_direction);
                             const directionPersonnels = getPersonnelsByDirection(direction.id_direction);
-                            
+
                             return (
                               <React.Fragment key={direction.id_direction}>
                                 <tr style={{ background: '#fafbfc' }}>
@@ -339,7 +406,7 @@ const Directions: React.FC = () => {
                                     </span>
                                   </td>
                                   <td style={{ textAlign: 'center' }}>
-                                    <button 
+                                    <button
                                       className="action-btn action-view"
                                       onClick={() => setSelectedDirection(selectedDirection?.id_direction === direction.id_direction ? null : direction)}
                                       title="Voir les personnels"
@@ -357,8 +424,8 @@ const Directions: React.FC = () => {
                                             <FontAwesomeIcon icon={faUsers} style={{ marginRight: '8px' }} />
                                             Personnels affectés à {direction.nom_direction}
                                           </strong>
-                                          <button 
-                                            className="btn-secondary" 
+                                          <button
+                                            className="btn-secondary"
                                             style={{ padding: '6px 12px', fontSize: '12px' }}
                                             onClick={() => setSelectedDirection(null)}
                                           >
@@ -383,7 +450,7 @@ const Directions: React.FC = () => {
                                                   <td style={{ padding: '8px' }}><strong>{p.nom}</strong> {p.prenom}</td>
                                                   <td style={{ padding: '8px' }}>{p.poste_titre || '-'}</td>
                                                   <td style={{ padding: '8px', textAlign: 'center' }}>
-                                                    <button 
+                                                    <button
                                                       className="action-btn action-edit"
                                                       onClick={() => openAffectationModal(p)}
                                                       title="Changer de direction"
@@ -427,14 +494,14 @@ const Directions: React.FC = () => {
         )}
       </div>
 
-      {/* Modal d'affectation */}
+      {/* Modal d'affectation (changer direction d'un personnel existant) */}
       {showAffectationModal && personnelToAffect && (
         <div className="modal-overlay">
           <div className="modal" style={{ maxWidth: '500px' }}>
             <div className="modal-header">
               <h2 className="modal-title">
                 <FontAwesomeIcon icon={faUserPlus} />
-                Affecter un personnel à une direction
+                Changer la direction du personnel
               </h2>
               <button className="modal-close" onClick={() => setShowAffectationModal(false)}>
                 <FontAwesomeIcon icon={faTimes} />
@@ -477,6 +544,82 @@ const Directions: React.FC = () => {
                 {loading ? 'Affectation...' : 'Affecter'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* NOUVEAU MODAL : Formulaire pour affecter un personnel à une direction */}
+      {showAddPersonnelModal && (
+        <div className="modal-overlay">
+          <div className="modal" style={{ maxWidth: '500px' }}>
+            <div className="modal-header">
+              <h2 className="modal-title">
+                <FontAwesomeIcon icon={faUserPlus} />
+                Affecter un personnel à une direction
+              </h2>
+              <button className="modal-close" onClick={() => setShowAddPersonnelModal(false)}>
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
+            </div>
+            <form onSubmit={(e) => { e.preventDefault(); handleAffecterPersonnelViaFormulaire(); }}>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label className="form-label">
+                    <FontAwesomeIcon icon={faUser} style={{ marginRight: '8px' }} />
+                    Sélectionner le personnel *
+                  </label>
+                  <select
+                    className="form-select"
+                    value={newPersonnelId}
+                    onChange={(e) => setNewPersonnelId(e.target.value)}
+                    required
+                  >
+                    <option value="">-- Sélectionner un personnel --</option>
+                    {availablePersonnels.map(p => (
+                      <option key={p.id_personnel} value={p.id_personnel}>
+                        {p.nom} {p.prenom} - {p.poste_titre || 'Sans poste'}
+                      </option>
+                    ))}
+                  </select>
+                  {availablePersonnels.length === 0 && (
+                    <small style={{ color: '#e74c3c', marginTop: '5px', display: 'block' }}>
+                      ⚠️ Aucun personnel disponible. Veuillez d'abord créer des personnels.
+                    </small>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">
+                    <FontAwesomeIcon icon={faBuilding} style={{ marginRight: '8px' }} />
+                    Direction d'affectation *
+                  </label>
+                  <select
+                    className="form-select"
+                    value={targetDirectionId}
+                    onChange={(e) => setTargetDirectionId(e.target.value)}
+                    required
+                  >
+                    <option value="">-- Sélectionner une direction --</option>
+                    {directions.map(dir => (
+                      <option key={dir.id_direction} value={dir.id_direction}>
+                        {dir.nom_direction}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div style={{ fontSize: '12px', color: '#8a9bb0', marginTop: '10px' }}>
+                  <FontAwesomeIcon icon={faCheckCircle} style={{ marginRight: '5px', color: '#27ae60' }} />
+                  Le personnel sera immédiatement affecté à cette direction
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn-secondary" onClick={() => setShowAddPersonnelModal(false)}>Annuler</button>
+                <button type="submit" className="btn-primary" disabled={loading || availablePersonnels.length === 0}>
+                  {loading ? 'Affectation...' : 'Affecter'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
