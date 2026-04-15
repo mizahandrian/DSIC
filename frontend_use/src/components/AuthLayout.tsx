@@ -56,7 +56,7 @@ const AuthLayout: React.FC = () => {
         </div>
         
         <div className="auth-footer">
-          <p>© 2024 INSTAT MADAGASCAR - Données et Statistiques</p>
+          <p>INSTAT MADAGASCAR - Données et Statistiques</p>
         </div>
       </div>
     </div>

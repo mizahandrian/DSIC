@@ -5,10 +5,39 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faUsers, faBuilding, faBriefcase, faUserTie,
   faArrowUp, faArrowDown, faEye, faPlus, 
-  faChartPie, faChartBar, faClock, faAddressCard, faExchangeAlt, faUserCheck
+  faChartPie, faChartBar, faChartLine, faClock, 
+  faAddressCard, faExchangeAlt, faUserCheck
 } from '@fortawesome/free-solid-svg-icons';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  Filler
+} from 'chart.js';
+import { Bar, Line, Pie } from 'react-chartjs-2';
 import api from '../Service/api';
 import '../style/dashboard.css';
+
+// Enregistrer les composants Chart.js
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  Filler
+);
 
 // Types
 interface Statistiques {
@@ -40,6 +69,11 @@ interface DirectionStat {
   nombre_personnels: number;
 }
 
+interface EvolutionData {
+  mois: string;
+  nombre: number;
+}
+
 const Dashboard: React.FC = () => {
   const [stats, setStats] = useState<Statistiques>({
     totalPersonnels: 0,
@@ -56,6 +90,7 @@ const Dashboard: React.FC = () => {
   });
   const [personnelsRecents, setPersonnelsRecents] = useState<PersonnelRecent[]>([]);
   const [directionsStats, setDirectionsStats] = useState<DirectionStat[]>([]);
+  const [evolutionData, setEvolutionData] = useState<EvolutionData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -84,9 +119,25 @@ const Dashboard: React.FC = () => {
 
       const dirStats = directions.map((dir: any) => ({
         id_direction: dir.id_direction,
-        nom_direction: dir.nom_direction.length > 25 ? dir.nom_direction.substring(0, 25) + '...' : dir.nom_direction,
+        nom_direction: dir.nom_direction.length > 20 ? dir.nom_direction.substring(0, 20) + '...' : dir.nom_direction,
         nombre_personnels: personnels.filter((p: any) => p.id_direction === dir.id_direction).length
-      })).sort((a: any, b: any) => b.nombre_personnels - a.nombre_personnels).slice(0, 5);
+      })).sort((a: any, b: any) => b.nombre_personnels - a.nombre_personnels).slice(0, 6);
+
+      // Données d'évolution (simulées - à remplacer par des données réelles de l'API)
+      const evolution = [
+        { mois: 'Jan', nombre: 12 },
+        { mois: 'Fév', nombre: 15 },
+        { mois: 'Mar', nombre: 18 },
+        { mois: 'Avr', nombre: 22 },
+        { mois: 'Mai', nombre: 25 },
+        { mois: 'Juin', nombre: 30 },
+        { mois: 'Juil', nombre: 35 },
+        { mois: 'Aoû', nombre: 38 },
+        { mois: 'Sep', nombre: 42 },
+        { mois: 'Oct', nombre: 45 },
+        { mois: 'Nov', nombre: 48 },
+        { mois: 'Déc', nombre: stats.totalPersonnels || 52 },
+      ];
 
       const recents = [...personnels].sort((a: any, b: any) => 
         new Date(b.date_entree).getTime() - new Date(a.date_entree).getTime()
@@ -115,11 +166,166 @@ const Dashboard: React.FC = () => {
 
       setDirectionsStats(dirStats);
       setPersonnelsRecents(recents);
+      setEvolutionData(evolution);
     } catch (error) {
       console.error('Erreur chargement dashboard:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Configuration du graphique en barres (bâtonnets)
+  const barChartData = {
+    labels: directionsStats.map(d => d.nom_direction),
+    datasets: [
+      {
+        label: 'Nombre de personnels',
+        data: directionsStats.map(d => d.nombre_personnels),
+        backgroundColor: 'rgba(44, 62, 80, 0.7)',
+        borderColor: 'rgba(44, 62, 80, 1)',
+        borderWidth: 1,
+        borderRadius: 8,
+        barPercentage: 0.6,
+        categoryPercentage: 0.8,
+      },
+    ],
+  };
+
+  const barChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+        labels: {
+          font: { size: 12 },
+          color: '#64748b',
+        },
+      },
+      tooltip: {
+        backgroundColor: '#1e293b',
+        titleColor: '#ffffff',
+        bodyColor: '#94a3b8',
+        callbacks: {
+          label: function(context: any) {
+            return `Personnels: ${context.raw}`;
+          }
+        }
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: { color: '#e2e8f0' },
+        ticks: { color: '#64748b', stepSize: 1 },
+        title: {
+          display: true,
+          text: 'Nombre de personnels',
+          color: '#64748b',
+        },
+      },
+      x: {
+        grid: { display: false },
+        ticks: { color: '#64748b', rotation: 0 },
+      },
+    },
+  };
+
+  // Configuration du graphique en ligne (évolution)
+  const lineChartData = {
+    labels: evolutionData.map(e => e.mois),
+    datasets: [
+      {
+        label: 'Évolution des effectifs',
+        data: evolutionData.map(e => e.nombre),
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+        borderWidth: 2,
+        pointBackgroundColor: '#10b981',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        tension: 0.3,
+        fill: true,
+      },
+    ],
+  };
+
+  const lineChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+        labels: {
+          font: { size: 12 },
+          color: '#64748b',
+        },
+      },
+      tooltip: {
+        backgroundColor: '#1e293b',
+        titleColor: '#ffffff',
+        bodyColor: '#94a3b8',
+        callbacks: {
+          label: function(context: any) {
+            return `Effectifs: ${context.raw} personnels`;
+          }
+        }
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: { color: '#e2e8f0' },
+        ticks: { color: '#64748b', stepSize: 10 },
+        title: {
+          display: true,
+          text: 'Nombre de personnels',
+          color: '#64748b',
+        },
+      },
+      x: {
+        grid: { display: false },
+        ticks: { color: '#64748b', rotation: 0 },
+      },
+    },
+  };
+
+  // Configuration du graphique en camembert (répartition genre)
+  const pieChartData = {
+    labels: ['Hommes', 'Femmes'],
+    datasets: [
+      {
+        data: [stats.hommes, stats.femmes],
+        backgroundColor: ['#3b82f6', '#ec4899'],
+        borderColor: ['#ffffff', '#ffffff'],
+        borderWidth: 2,
+      },
+    ],
+  };
+
+  const pieChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom' as const,
+        labels: {
+          font: { size: 12 },
+          color: '#64748b',
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context: any) {
+            const total = stats.hommes + stats.femmes;
+            const percentage = total > 0 ? Math.round((context.raw / total) * 100) : 0;
+            return `${context.label}: ${context.raw} (${percentage}%)`;
+          }
+        }
+      },
+    },
   };
 
   if (loading) {
@@ -185,56 +391,107 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Graphiques */}
+      {/* Graphiques - Première ligne */}
       <div className="charts-grid">
+        {/* Graphique en barres (bâtonnets) - Top directions */}
         <div className="chart-card">
           <h3 className="chart-title">
-            <FontAwesomeIcon icon={faChartPie} style={{ color: '#2980b9' }} />
-            Répartition par genre
+            <FontAwesomeIcon icon={faChartBar} style={{ color: '#2c3e50' }} />
+            Top directions
           </h3>
-          <div className="chart-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '250px' }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ 
-                width: '180px', 
-                height: '180px', 
-                borderRadius: '50%', 
-                background: `conic-gradient(#1976d2 0deg ${(stats.hommes / (stats.totalPersonnels || 1)) * 360}deg, #c2185b ${(stats.hommes / (stats.totalPersonnels || 1)) * 360}deg 360deg)`,
-                margin: '0 auto 20px'
-              }}></div>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-                <div><span style={{ background: '#1976d2', width: '12px', height: '12px', display: 'inline-block', borderRadius: '2px', marginRight: '5px' }}></span> Hommes: {stats.hommes}</div>
-                <div><span style={{ background: '#c2185b', width: '12px', height: '12px', display: 'inline-block', borderRadius: '2px', marginRight: '5px' }}></span> Femmes: {stats.femmes}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="chart-card">
-          <h3 className="chart-title">
-            <FontAwesomeIcon icon={faChartBar} style={{ color: '#27ae60' }} />
-            Top 5 directions
-          </h3>
-          <div className="chart-container">
-            {directionsStats.map((dir, idx) => (
-              <div key={dir.id_direction} style={{ marginBottom: '15px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '5px' }}>
-                  <span>{dir.nom_direction}</span>
-                  <span style={{ fontWeight: 'bold' }}>{dir.nombre_personnels}</span>
-                </div>
-                <div style={{ background: '#e9ecef', borderRadius: '10px', overflow: 'hidden' }}>
-                  <div style={{ 
-                    width: `${(dir.nombre_personnels / (directionsStats[0]?.nombre_personnels || 1)) * 100}%`, 
-                    height: '8px', 
-                    background: '#27ae60', 
-                    borderRadius: '10px' 
-                  }}></div>
-                </div>
-              </div>
-            ))}
-            {directionsStats.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '40px', color: '#8a9bb0' }}>
-                Aucune direction avec personnels
+          <div className="chart-container" style={{ height: '320px' }}>
+            {directionsStats.length > 0 ? (
+              <Bar data={barChartData} options={barChartOptions} />
+            ) : (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: '#94a3b8' }}>
+                Aucune donnée disponible
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Graphique en ligne - Évolution */}
+        <div className="chart-card">
+          <h3 className="chart-title">
+            <FontAwesomeIcon icon={faChartLine} style={{ color: '#10b981' }} />
+            Évolution des effectifs
+          </h3>
+          <div className="chart-container" style={{ height: '320px' }}>
+            <Line data={lineChartData} options={lineChartOptions} />
+          </div>
+        </div>
+      </div>
+
+      {/* Graphiques - Deuxième ligne */}
+      <div className="charts-grid">
+        {/* Graphique en camembert - Répartition par genre */}
+        <div className="chart-card">
+          <h3 className="chart-title">
+            <FontAwesomeIcon icon={faChartPie} style={{ color: '#3b82f6' }} />
+            Répartition par genre
+          </h3>
+          <div className="chart-container" style={{ height: '300px' }}>
+            {(stats.hommes > 0 || stats.femmes > 0) ? (
+              <Pie data={pieChartData} options={pieChartOptions} />
+            ) : (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: '#94a3b8' }}>
+                Aucune donnée disponible
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Statistiques des états (Actif/Inactif) */}
+        <div className="chart-card">
+          <h3 className="chart-title">
+            <FontAwesomeIcon icon={faUserCheck} style={{ color: '#10b981' }} />
+            États des personnels
+          </h3>
+          <div className="chart-container" style={{ height: '300px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%', gap: '20px' }}>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                  <span>Actifs</span>
+                  <span style={{ fontWeight: 'bold' }}>{stats.personnelsActifs}</span>
+                </div>
+                <div style={{ background: '#e2e8f0', borderRadius: '10px', overflow: 'hidden' }}>
+                  <div style={{ 
+                    width: `${(stats.personnelsActifs / (stats.totalPersonnels || 1)) * 100}%`, 
+                    height: '30px', 
+                    background: '#10b981', 
+                    borderRadius: '10px', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    color: 'white', 
+                    fontSize: '12px' 
+                  }}>
+                    {Math.round((stats.personnelsActifs / (stats.totalPersonnels || 1)) * 100)}%
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                  <span>Inactifs</span>
+                  <span style={{ fontWeight: 'bold' }}>{stats.personnelsInactifs}</span>
+                </div>
+                <div style={{ background: '#e2e8f0', borderRadius: '10px', overflow: 'hidden' }}>
+                  <div style={{ 
+                    width: `${(stats.personnelsInactifs / (stats.totalPersonnels || 1)) * 100}%`, 
+                    height: '30px', 
+                    background: '#ef4444', 
+                    borderRadius: '10px', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    color: 'white', 
+                    fontSize: '12px' 
+                  }}>
+                    {Math.round((stats.personnelsInactifs / (stats.totalPersonnels || 1)) * 100)}%
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -248,7 +505,7 @@ const Dashboard: React.FC = () => {
           </h3>
           <Link to="/personnels" className="view-all">Voir tout →</Link>
         </div>
-        <table>
+        <table className="data-table">
           <thead>
             <tr>
               <th>Matricule</th>

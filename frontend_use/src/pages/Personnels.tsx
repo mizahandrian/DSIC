@@ -19,7 +19,7 @@ import {
   faEye
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
-import logoInstat from '../assets/image/WhatsApp Image 2026-03-31 at 11.02.14 - Copie.jpeg';
+import logoInstat from '../assets/image/Logo-INSTAT.png';
 import '../style/personnels.css';
 
 interface Personnel {
@@ -161,13 +161,10 @@ const Personnels: React.FC = () => {
   return (
     <div className="personnels-container">
       {/* ============================================ */}
-      {/* FORMES GÉOMÉTRIQUES EN ARRIÈRE-PLAN */}
-      {/* ============================================ */}
-      <div className="bg-shape-1"></div>
-      <div className="bg-shape-2"></div>
-      <div className="bg-shape-3"></div>
-      <div className="wave-bg"></div>
-      <div className="grid-pattern"></div>
+    
+      <div className="wave-1"></div>
+      <div className="wave-2"></div>
+      <div className="wave-3"></div>
       
       {/* ============================================ */}
       {/* CONTENU PRINCIPAL */}

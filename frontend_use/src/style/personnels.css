@@ -16,130 +16,74 @@
 }
 
 /* ============================================ */
-/* FORMES GÉOMÉTRIQUES MODERNES EN ARRIÈRE-PLAN */
+/* 🌊 FORMES ONDULÉES MODERNES (comme sur l'image) */
 /* ============================================ */
 
-/* Grande forme circulaire en haut à droite */
+/* Bande striée transversale (effet de vague horizontale) */
 .personnels-container::before {
   content: '';
   position: absolute;
-  top: -100px;
-  right: -100px;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(44, 62, 80, 0.08) 0%, rgba(44, 62, 80, 0.02) 60%, transparent 80%);
-  border-radius: 50%;
+  top: 35%;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 280px;
+  background: repeating-linear-gradient(
+    transparent 0px,
+    transparent 40px,
+    rgba(44, 62, 80, 0.15) 40px,    /* RGBA plus visible (opacité 0.15) */
+    rgba(44, 62, 80, 0.15) 80px
+  );
+  transform: skewY(-3deg);
   pointer-events: none;
   z-index: 0;
-  animation: floatShape1 20s ease-in-out infinite;
 }
 
-/* Deuxième forme circulaire en bas à gauche */
-.personnels-container::after {
-  content: '';
+/* Première courbe qui descend */
+.personnels-container .wave-1 {
   position: absolute;
-  bottom: -100px;
-  left: -100px;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(52, 73, 94, 0.06) 0%, rgba(52, 73, 94, 0.02) 60%, transparent 80%);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 0;
-  animation: floatShape2 25s ease-in-out infinite;
-}
-
-/* Troisième forme (ellipse) au centre-gauche */
-.personnels-container .bg-shape-1 {
-  position: absolute;
-  top: 30%;
-  left: -150px;
-  width: 600px;
-  height: 350px;
-  background: linear-gradient(135deg, rgba(39, 174, 96, 0.04) 0%, rgba(44, 62, 80, 0.02) 100%);
-  border-radius: 50%;
-  transform: rotate(-15deg);
-  pointer-events: none;
-  z-index: 0;
-  animation: floatShape3 22s ease-in-out infinite;
-}
-
-/* Quatrième forme (petit cercle doré) */
-.personnels-container .bg-shape-2 {
-  position: absolute;
-  top: 60%;
-  right: 5%;
-  width: 180px;
-  height: 180px;
-  background: radial-gradient(circle, rgba(241, 196, 15, 0.06) 0%, rgba(241, 196, 15, 0.01) 70%, transparent 90%);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 0;
-  animation: pulseShape 4s ease-in-out infinite;
-}
-
-/* Cinquième forme (rectangle arrondi) */
-.personnels-container .bg-shape-3 {
-  position: absolute;
-  bottom: 10%;
-  right: 20%;
-  width: 300px;
+  top: 28%;
+  left: -5%;
+  width: 110%;
   height: 140px;
-  background: linear-gradient(135deg, rgba(44, 62, 80, 0.04) 0%, rgba(52, 73, 94, 0.02) 100%);
-  border-radius: 70px;
-  transform: rotate(25deg);
+  background: radial-gradient(ellipse at 50% 0%, rgba(44, 62, 80, 0.12) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: rotate(-2deg);
   pointer-events: none;
   z-index: 0;
-  animation: floatShape1 18s ease-in-out infinite reverse;
 }
 
-/* Vagues en bas */
-.personnels-container .wave-bg {
+/* Deuxième courbe qui monte (croisement avec wave-1) */
+.personnels-container .wave-2 {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 120px;
-  background: repeating-linear-gradient(transparent 0px, transparent 35px, rgba(44, 62, 80, 0.02) 35px, rgba(44, 62, 80, 0.02) 60px);
+  top: 40%;
+  left: -5%;
+  width: 110%;
+  height: 140px;
+  background: radial-gradient(ellipse at 50% 100%, rgba(52, 73, 94, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: rotate(2deg);
   pointer-events: none;
   z-index: 0;
 }
 
-/* Points décoratifs */
-.personnels-container .grid-pattern {
+/* Troisième vague plus légère (effet de texture) */
+.personnels-container .wave-3 {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: radial-gradient(circle at 2px 2px, rgba(44, 62, 80, 0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
+  top: 34%;
+  left: -10%;
+  width: 120%;
+  height: 100px;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 30px,
+    rgba(44, 62, 80, 0.08) 30px,   /* RGBA plus visible */
+    rgba(44, 62, 80, 0.08) 60px
+  );
+  transform: skewY(-1deg);
   pointer-events: none;
   z-index: 0;
-}
-
-/* Animations des formes */
-@keyframes floatShape1 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(15px, -15px) scale(1.02); }
-  66% { transform: translate(-10px, 10px) scale(0.98); }
-}
-
-@keyframes floatShape2 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(-15px, 15px) scale(1.02); }
-  66% { transform: translate(10px, -10px) scale(0.98); }
-}
-
-@keyframes floatShape3 {
-  0%, 100% { transform: translate(0, 0) rotate(-15deg) scale(1); }
-  33% { transform: translate(20px, -10px) rotate(-10deg) scale(1.02); }
-  66% { transform: translate(-15px, 15px) rotate(-20deg) scale(0.98); }
-}
-
-@keyframes pulseShape {
-  0%, 100% { transform: scale(1); opacity: 0.2; }
-  50% { transform: scale(1.15); opacity: 0.5; }
 }
 
 /* Contenu principal (z-index pour être au-dessus des formes) */
@@ -635,10 +579,18 @@
     max-width: 95%;
   }
   
-  /* Masquer certaines formes sur mobile */
-  .personnels-container .bg-shape-1,
-  .personnels-container .bg-shape-3 {
-    display: none;
+  /* Ajustement des vagues sur mobile */
+  .personnels-container::before {
+    top: 30%;
+    height: 200px;
+  }
+  
+  .personnels-container .wave-1 {
+    top: 25%;
+  }
+  
+  .personnels-container .wave-2 {
+    top: 35%;
   }
 }
 
