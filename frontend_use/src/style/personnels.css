@@ -8,7 +8,7 @@
 /* Container principal */
 .personnels-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #e8edf2 0%, #dce3ec 50%, #e8edf2 100%);
+  background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 50%, #f0f4f8 100%);
   padding: 40px 20px;
   font-family: 'Segoe UI', 'Roboto', 'Inter', sans-serif;
   position: relative;
@@ -16,62 +16,62 @@
 }
 
 /* ============================================ */
-/* NOUVELLE FORME GÉOMÉTRIQUE MODERNE EN ARRIÈRE-PLAN */
+/* FORMES GÉOMÉTRIQUES MODERNES EN ARRIÈRE-PLAN */
 /* ============================================ */
 
-/* Grande forme circulaire principale */
+/* Grande forme circulaire en haut à droite */
 .personnels-container::before {
   content: '';
   position: absolute;
-  top: 20%;
-  right: -10%;
+  top: -100px;
+  right: -100px;
   width: 500px;
   height: 500px;
   background: radial-gradient(circle, rgba(44, 62, 80, 0.08) 0%, rgba(44, 62, 80, 0.02) 60%, transparent 80%);
   border-radius: 50%;
   pointer-events: none;
   z-index: 0;
-  animation: floatShape 25s ease-in-out infinite;
+  animation: floatShape1 20s ease-in-out infinite;
 }
 
 /* Deuxième forme circulaire en bas à gauche */
 .personnels-container::after {
   content: '';
   position: absolute;
-  bottom: 10%;
-  left: -5%;
+  bottom: -100px;
+  left: -100px;
   width: 400px;
   height: 400px;
   background: radial-gradient(circle, rgba(52, 73, 94, 0.06) 0%, rgba(52, 73, 94, 0.02) 60%, transparent 80%);
   border-radius: 50%;
   pointer-events: none;
   z-index: 0;
-  animation: floatShapeReverse 30s ease-in-out infinite;
+  animation: floatShape2 25s ease-in-out infinite;
 }
 
 /* Troisième forme (ellipse) au centre-gauche */
 .personnels-container .bg-shape-1 {
   position: absolute;
-  top: 50%;
-  left: -15%;
+  top: 30%;
+  left: -150px;
   width: 600px;
-  height: 300px;
-  background: linear-gradient(135deg, rgba(44, 62, 80, 0.05) 0%, rgba(52, 73, 94, 0.02) 100%);
+  height: 350px;
+  background: linear-gradient(135deg, rgba(39, 174, 96, 0.04) 0%, rgba(44, 62, 80, 0.02) 100%);
   border-radius: 50%;
   transform: rotate(-15deg);
   pointer-events: none;
   z-index: 0;
-  animation: floatShape 20s ease-in-out infinite;
+  animation: floatShape3 22s ease-in-out infinite;
 }
 
-/* Quatrième forme (petit cercle) */
+/* Quatrième forme (petit cercle doré) */
 .personnels-container .bg-shape-2 {
   position: absolute;
   top: 60%;
-  right: 15%;
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(circle, rgba(39, 174, 96, 0.04) 0%, transparent 70%);
+  right: 5%;
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, rgba(241, 196, 15, 0.06) 0%, rgba(241, 196, 15, 0.01) 70%, transparent 90%);
   border-radius: 50%;
   pointer-events: none;
   z-index: 0;
@@ -81,69 +81,65 @@
 /* Cinquième forme (rectangle arrondi) */
 .personnels-container .bg-shape-3 {
   position: absolute;
-  bottom: 5%;
-  right: 25%;
+  bottom: 10%;
+  right: 20%;
   width: 300px;
-  height: 150px;
-  background: linear-gradient(135deg, rgba(44, 62, 80, 0.04) 0%, transparent 100%);
-  border-radius: 60px;
+  height: 140px;
+  background: linear-gradient(135deg, rgba(44, 62, 80, 0.04) 0%, rgba(52, 73, 94, 0.02) 100%);
+  border-radius: 70px;
   transform: rotate(25deg);
   pointer-events: none;
   z-index: 0;
-  animation: floatShape 22s ease-in-out infinite reverse;
+  animation: floatShape1 18s ease-in-out infinite reverse;
 }
 
-/* Animations des formes */
-@keyframes floatShape {
-  0%, 100% {
-    transform: translate(0, 0) scale(1);
-  }
-  33% {
-    transform: translate(20px, -20px) scale(1.02);
-  }
-  66% {
-    transform: translate(-15px, 15px) scale(0.98);
-  }
-}
-
-@keyframes floatShapeReverse {
-  0%, 100% {
-    transform: translate(0, 0) scale(1);
-  }
-  33% {
-    transform: translate(-20px, 20px) scale(1.02);
-  }
-  66% {
-    transform: translate(15px, -15px) scale(0.98);
-  }
-}
-
-@keyframes pulseShape {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.3;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.6;
-  }
-}
-
-/* Effet de vagues subtiles (conservé) */
+/* Vagues en bas */
 .personnels-container .wave-bg {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 200px;
-  background: repeating-linear-gradient(
-    transparent 0px,
-    transparent 50px,
-    rgba(44, 62, 80, 0.02) 50px,
-    rgba(44, 62, 80, 0.02) 80px
-  );
+  height: 120px;
+  background: repeating-linear-gradient(transparent 0px, transparent 35px, rgba(44, 62, 80, 0.02) 35px, rgba(44, 62, 80, 0.02) 60px);
   pointer-events: none;
   z-index: 0;
+}
+
+/* Points décoratifs */
+.personnels-container .grid-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(circle at 2px 2px, rgba(44, 62, 80, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Animations des formes */
+@keyframes floatShape1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(15px, -15px) scale(1.02); }
+  66% { transform: translate(-10px, 10px) scale(0.98); }
+}
+
+@keyframes floatShape2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-15px, 15px) scale(1.02); }
+  66% { transform: translate(10px, -10px) scale(0.98); }
+}
+
+@keyframes floatShape3 {
+  0%, 100% { transform: translate(0, 0) rotate(-15deg) scale(1); }
+  33% { transform: translate(20px, -10px) rotate(-10deg) scale(1.02); }
+  66% { transform: translate(-15px, 15px) rotate(-20deg) scale(0.98); }
+}
+
+@keyframes pulseShape {
+  0%, 100% { transform: scale(1); opacity: 0.2; }
+  50% { transform: scale(1.15); opacity: 0.5; }
 }
 
 /* Contenu principal (z-index pour être au-dessus des formes) */
@@ -210,13 +206,13 @@
 .personnels-header h1 {
   font-size: 28px;
   font-weight: 700;
-  color: #2c3e50;
+  color: #1e293b;
   margin: 0;
   letter-spacing: 1px;
 }
 
 .personnels-header p {
-  color: #6c7a8a;
+  color: #64748b;
   margin-top: 8px;
   font-size: 14px;
 }
@@ -233,7 +229,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 15px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   border: 1px solid rgba(0, 0, 0, 0.05);
   position: relative;
   z-index: 10;
@@ -250,7 +246,7 @@
   left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: #8a9bb0;
+  color: #94a3b8;
   font-size: 16px;
 }
 
@@ -295,7 +291,7 @@
 
 /* Bouton suivant */
 .btn-next {
-  background: #27ae60;
+  background: #10b981;
   color: white;
   border: none;
   padding: 12px 28px;
@@ -311,9 +307,9 @@
 }
 
 .btn-next:hover {
-  background: #229954;
+  background: #059669;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
 
 /* Tableau */
@@ -321,7 +317,7 @@
   background: white;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   border: 1px solid rgba(0, 0, 0, 0.05);
   position: relative;
   z-index: 10;
@@ -333,8 +329,8 @@
 }
 
 .data-table thead {
-  background: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .data-table th {
@@ -342,7 +338,7 @@
   text-align: left;
   font-size: 12px;
   font-weight: 600;
-  color: #495057;
+  color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -350,12 +346,12 @@
 .data-table td {
   padding: 14px 20px;
   font-size: 14px;
-  color: #495057;
-  border-bottom: 1px solid #f0f2f5;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .data-table tbody tr:hover {
-  background: #f8f9fa;
+  background: #f8fafc;
 }
 
 /* Badges */
@@ -363,8 +359,8 @@
   display: inline-block;
   padding: 4px 12px;
   border-radius: 20px;
-  background: #e3f2fd;
-  color: #1976d2;
+  background: #dbeafe;
+  color: #2563eb;
   font-size: 12px;
   font-weight: 500;
 }
@@ -373,8 +369,8 @@
   display: inline-block;
   padding: 4px 12px;
   border-radius: 20px;
-  background: #fce4ec;
-  color: #c2185b;
+  background: #fce7f3;
+  color: #db2777;
   font-size: 12px;
   font-weight: 500;
 }
@@ -383,8 +379,8 @@
   display: inline-block;
   padding: 4px 12px;
   border-radius: 20px;
-  background: #fff3e0;
-  color: #e65100;
+  background: #fef3c7;
+  color: #d97706;
   font-size: 12px;
   font-weight: 500;
 }
@@ -398,26 +394,26 @@
   margin: 0 4px;
   border-radius: 6px;
   transition: all 0.2s ease;
-  color: #6c757d;
+  color: #64748b;
 }
 
 .action-btn:hover {
-  background: #f8f9fa;
+  background: #f1f5f9;
 }
 
 .action-edit:hover {
-  color: #1976d2;
+  color: #2563eb;
 }
 
 .action-delete:hover {
-  color: #dc3545;
+  color: #ef4444;
 }
 
 /* Empty state */
 .empty-state {
   text-align: center;
   padding: 60px;
-  color: #adb5bd;
+  color: #94a3b8;
 }
 
 .empty-icon {
@@ -478,7 +474,7 @@
 
 .modal-header {
   padding: 22px 25px;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid #e2e8f0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -491,7 +487,7 @@
 .modal-title {
   font-size: 18px;
   font-weight: 600;
-  color: #2c3e50;
+  color: #1e293b;
   margin: 0;
   display: flex;
   align-items: center;
@@ -503,12 +499,12 @@
   border: none;
   font-size: 20px;
   cursor: pointer;
-  color: #adb5bd;
+  color: #94a3b8;
   transition: all 0.2s ease;
 }
 
 .modal-close:hover {
-  color: #dc3545;
+  color: #ef4444;
 }
 
 .modal-body {
@@ -523,7 +519,7 @@
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
-  color: #495057;
+  color: #334155;
   font-size: 13px;
 }
 
@@ -531,7 +527,7 @@
 .form-select {
   width: 100%;
   padding: 11px 14px;
-  border: 1px solid #dee2e6;
+  border: 1px solid #e2e8f0;
   border-radius: 10px;
   font-size: 14px;
   transition: all 0.3s ease;
@@ -557,25 +553,25 @@
   gap: 12px;
   margin-top: 25px;
   padding-top: 20px;
-  border-top: 1px solid #e9ecef;
+  border-top: 1px solid #e2e8f0;
 }
 
 .btn-secondary {
   padding: 10px 20px;
   background: white;
-  border: 1px solid #dee2e6;
+  border: 1px solid #e2e8f0;
   border-radius: 10px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: inherit;
-  color: #6c757d;
+  color: #64748b;
 }
 
 .btn-secondary:hover {
-  background: #f8f9fa;
-  border-color: #adb5bd;
+  background: #f8fafc;
+  border-color: #94a3b8;
 }
 
 .btn-submit {
@@ -638,6 +634,12 @@
   .modal {
     max-width: 95%;
   }
+  
+  /* Masquer certaines formes sur mobile */
+  .personnels-container .bg-shape-1,
+  .personnels-container .bg-shape-3 {
+    display: none;
+  }
 }
 
 /* Scrollbar */
@@ -647,17 +649,17 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #f1f5f9;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: #cbd5e1;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: #94a3b8;
 }
 
 /* ============================================ */
@@ -675,7 +677,7 @@
 .direction-card {
   background: white;
   border-radius: 14px;
-  border: 1px solid #e9ecef;
+  border: 1px solid #e2e8f0;
   transition: all 0.3s ease;
   overflow: hidden;
 }
@@ -706,12 +708,12 @@
   font-size: 16px;
   font-weight: 700;
   margin: 0 0 5px 0;
-  color: #2c3e50;
+  color: #1e293b;
 }
 
 .direction-description {
   font-size: 12px;
-  color: #6c7a8a;
+  color: #64748b;
   margin: 0 0 8px 0;
   line-height: 1.4;
 }
@@ -724,7 +726,7 @@
 
 .direction-stat {
   font-size: 11px;
-  color: #8a9bb0;
+  color: #64748b;
 }
 
 .direction-actions {
@@ -755,21 +757,21 @@
 .category-title {
   font-size: 18px;
   font-weight: 600;
-  color: #2c3e50;
+  color: #1e293b;
   margin: 0;
 }
 
 .category-count {
-  background: #e9ecef;
+  background: #f1f5f9;
   padding: 2px 10px;
   border-radius: 20px;
   font-size: 12px;
-  color: #6c7a8a;
+  color: #64748b;
 }
 
 .category-toggle {
   margin-left: auto;
-  color: #8a9bb0;
+  color: #64748b;
 }
 
 /* Styles pour les cartes de services */
@@ -783,7 +785,7 @@
 .service-card {
   background: white;
   border-radius: 14px;
-  border: 1px solid #e9ecef;
+  border: 1px solid #e2e8f0;
   transition: all 0.3s ease;
   overflow: hidden;
 }
@@ -822,12 +824,12 @@
   font-size: 16px;
   font-weight: 700;
   margin: 0 0 5px 0;
-  color: #2c3e50;
+  color: #1e293b;
 }
 
 .service-description {
   font-size: 12px;
-  color: #6c7a8a;
+  color: #64748b;
   margin: 0 0 8px 0;
   line-height: 1.4;
 }
@@ -839,7 +841,7 @@
 
 .service-stat {
   font-size: 11px;
-  color: #8a9bb0;
+  color: #64748b;
 }
 
 .service-actions {
@@ -849,18 +851,18 @@
 }
 
 .suggestion-btn {
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-radius: 20px;
   padding: 6px 12px;
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #495057;
+  color: #334155;
 }
 
 .suggestion-btn:hover {
-  background: #e9ecef;
+  background: #f1f5f9;
   border-color: #2c3e50;
 }
 
@@ -875,7 +877,7 @@
 .poste-card {
   background: white;
   border-radius: 14px;
-  border: 1px solid #e9ecef;
+  border: 1px solid #e2e8f0;
   transition: all 0.3s ease;
   overflow: hidden;
 }
@@ -914,12 +916,12 @@
   font-size: 16px;
   font-weight: 700;
   margin: 0 0 5px 0;
-  color: #2c3e50;
+  color: #1e293b;
 }
 
 .poste-description {
   font-size: 12px;
-  color: #6c7a8a;
+  color: #64748b;
   margin: 0 0 8px 0;
   line-height: 1.4;
 }
@@ -933,8 +935,8 @@
 
 .poste-detail {
   font-size: 11px;
-  color: #8a9bb0;
-  background: #f8f9fa;
+  color: #64748b;
+  background: #f8fafc;
   padding: 3px 10px;
   border-radius: 12px;
 }
@@ -946,7 +948,7 @@
 
 .poste-stat {
   font-size: 11px;
-  color: #8a9bb0;
+  color: #64748b;
 }
 
 .poste-actions {
@@ -966,7 +968,7 @@
 .carriere-card {
   background: white;
   border-radius: 14px;
-  border: 1px solid #e9ecef;
+  border: 1px solid #e2e8f0;
   transition: all 0.3s ease;
   overflow: hidden;
 }
@@ -1005,7 +1007,7 @@
   font-size: 16px;
   font-weight: 700;
   margin: 0 0 8px 0;
-  color: #2c3e50;
+  color: #1e293b;
 }
 
 .carriere-details {
@@ -1017,8 +1019,8 @@
 
 .carriere-detail {
   font-size: 11px;
-  color: #8a9bb0;
-  background: #f8f9fa;
+  color: #64748b;
+  background: #f8fafc;
   padding: 3px 10px;
   border-radius: 12px;
 }
@@ -1030,7 +1032,7 @@
 
 .carriere-stat {
   font-size: 11px;
-  color: #8a9bb0;
+  color: #64748b;
 }
 
 .carriere-actions {
@@ -1050,7 +1052,7 @@
 .historique-card {
   background: white;
   border-radius: 14px;
-  border: 1px solid #e9ecef;
+  border: 1px solid #e2e8f0;
   transition: all 0.3s ease;
   overflow: hidden;
 }
@@ -1100,13 +1102,13 @@
   font-size: 18px;
   font-weight: 700;
   margin: 0;
-  color: #2c3e50;
+  color: #1e293b;
 }
 
 .historique-date {
   font-size: 12px;
-  color: #8a9bb0;
-  background: #f8f9fa;
+  color: #64748b;
+  background: #f8fafc;
   padding: 4px 12px;
   border-radius: 20px;
 }
@@ -1119,7 +1121,7 @@
 
 .historique-detail {
   font-size: 14px;
-  color: #495057;
+  color: #334155;
 }
 
 .historique-actions {

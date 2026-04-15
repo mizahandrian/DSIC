@@ -1,3 +1,4 @@
+/* src/style/auth.css */
 * {
   margin: 0;
   padding: 0;
@@ -13,58 +14,134 @@
   font-family: 'Segoe UI', 'Roboto', 'Inter', sans-serif;
   position: relative;
   overflow: hidden;
-  /* Dégradé neutre élégant qui s'adaptera à n'importe quel logo */
   background: linear-gradient(135deg, #e8edf2 0%, #dce3ec 50%, #e8edf2 100%);
 }
 
-/* Effet de vagues subtiles */
+/* ============================================ */
+/* FORMES GÉOMÉTRIQUES MODERNES EN ARRIÈRE-PLAN */
+/* ============================================ */
+
+/* Grand cercle flou en haut à droite */
 .auth-container::before {
   content: '';
   position: absolute;
-  top: -50%;
-  left: -20%;
-  width: 80%;
-  height: 120%;
-  background: radial-gradient(circle, rgba(0,0,0,0.03) 0%, transparent 70%);
+  top: -100px;
+  right: -100px;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(44, 62, 80, 0.1) 0%, rgba(44, 62, 80, 0.03) 60%, transparent 80%);
   border-radius: 50%;
-  animation: floatAround 20s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+  animation: floatShape1 20s ease-in-out infinite;
 }
 
+/* Cercle en bas à gauche */
 .auth-container::after {
   content: '';
   position: absolute;
-  bottom: -30%;
-  right: -10%;
-  width: 60%;
-  height: 100%;
-  background: radial-gradient(circle, rgba(0,0,0,0.02) 0%, transparent 70%);
+  bottom: -100px;
+  left: -100px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(52, 73, 94, 0.08) 0%, rgba(52, 73, 94, 0.02) 60%, transparent 80%);
   border-radius: 50%;
-  animation: floatAround 25s ease-in-out infinite reverse;
+  pointer-events: none;
+  z-index: 0;
+  animation: floatShape2 25s ease-in-out infinite;
 }
 
-@keyframes floatAround {
-  0%, 100% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-  33% {
-    transform: translate(5%, 5%) rotate(5deg);
-  }
-  66% {
-    transform: translate(-3%, 8%) rotate(-3deg);
-  }
+/* Troisième forme (ellipse) */
+.auth-container .bg-shape-1 {
+  position: absolute;
+  top: 30%;
+  left: -150px;
+  width: 600px;
+  height: 350px;
+  background: linear-gradient(135deg, #677b91 0%, #4c637a 100%);
+  border-radius: 50%;
+  transform: rotate(-15deg);
+  pointer-events: none;
+  z-index: 0;
+  animation: floatShape3 22s ease-in-out infinite;
 }
 
-/* Points décoratifs subtils */
+/* Petit cercle doré */
+.auth-container .bg-shape-2 {
+  position: absolute;
+  bottom: 20%;
+  right: 5%;
+  width: 180px;
+  height: 180px;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  animation: pulseShape 4s ease-in-out infinite;
+}
+
+/* Rectangle arrondi */
+.auth-container .bg-shape-3 {
+  position: absolute;
+  bottom: 10%;
+  right: 20%;
+  width: 300px;
+  height: 140px;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  border-radius: 70px;
+  transform: rotate(25deg);
+  pointer-events: none;
+  z-index: 0;
+  animation: floatShape1 18s ease-in-out infinite reverse;
+}
+
+/* Vagues en bas */
+.auth-container .wave-bg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 150px;
+  background: repeating-linear-gradient(transparent 0px, transparent 40px, rgba(44, 62, 80, 0.03) 40px, rgba(79, 112, 146, 0.03) 70px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Points décoratifs */
 .auth-container .grid-pattern {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: 
-    radial-gradient(circle at 2px 2px, rgba(0,0,0,0.04) 1px, transparent 1px);
+  background-image: radial-gradient(circle at 2px 2px, rgba(0,0,0,0.04) 1px, transparent 1px);
   background-size: 40px 40px;
   pointer-events: none;
+  z-index: 0;
+}
+
+/* Animations des formes */
+@keyframes floatShape1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(15px, -15px) scale(1.02); }
+  66% { transform: translate(-10px, 10px) scale(0.98); }
+}
+
+@keyframes floatShape2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-15px, 15px) scale(1.02); }
+  66% { transform: translate(10px, -10px) scale(0.98); }
+}
+
+@keyframes floatShape3 {
+  0%, 100% { transform: translate(0, 0) rotate(-15deg) scale(1); }
+  33% { transform: translate(20px, -10px) rotate(-10deg) scale(1.02); }
+  66% { transform: translate(-15px, 15px) rotate(-20deg) scale(0.98); }
+}
+
+@keyframes pulseShape {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.15); opacity: 0.6; }
 }
 
 /* Carte principale */
@@ -74,7 +151,7 @@
   border-radius: 32px;
   box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.15);
   width: 100%;
-  max-width: 500px;
+  max-width: 520px;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -108,7 +185,7 @@
   overflow: hidden;
 }
 
-/* Logo avec style élégant */
+/* Logo avec style élégant - TAILLE AGRANDIE */
 .logo-wrapper {
   display: flex;
   justify-content: center;
@@ -117,10 +194,10 @@
   position: relative;
 }
 
-/* Cercle décoratif derrière le logo */
+/* Cercle décoratif derrière le logo - PLUS GRAND */
 .logo-circle {
-  width: 150px;
-  height: 150px;
+  width: 180px;
+  height: 180px;
   background: #ffffff;
   border-radius: 50%;
   display: flex;
@@ -139,9 +216,10 @@
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
 }
 
+/* Logo image - PLUS GRANDE */
 .auth-logo {
-  width: 110px;
-  height: 110px;
+  width: 130px;
+  height: 130px;
   object-fit: contain;
   transition: transform 0.3s ease;
 }
@@ -150,7 +228,7 @@
   transform: scale(1.02);
 }
 
-/* Texte d'en-tête - s'adapte aux couleurs du logo via CSS variables */
+/* Texte d'en-tête */
 .auth-header h2 {
   color: #6c7a8a;
   font-size: 14px;
@@ -165,7 +243,7 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  font-size: 30px;
+  font-size: 32px;
   font-weight: 800;
   margin: 0;
   letter-spacing: 1.5px;
@@ -484,14 +562,15 @@
     font-size: 24px;
   }
   
+  /* Logo responsive - plus petit sur mobile */
   .logo-circle {
-    width: 120px;
-    height: 120px;
+    width: 130px;
+    height: 130px;
   }
   
   .auth-logo {
-    width: 85px;
-    height: 85px;
+    width: 95px;
+    height: 95px;
   }
   
   .tab-btn {
@@ -501,6 +580,12 @@
   
   .auth-tabs {
     padding: 0 20px;
+  }
+  
+  /* Masquer certaines formes sur mobile */
+  .auth-container .bg-shape-1,
+  .auth-container .bg-shape-3 {
+    display: none;
   }
 }
 
