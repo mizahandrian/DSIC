@@ -12,7 +12,7 @@ use App\Http\Controllers\CarriereController;
 use App\Http\Controllers\HistoriqueController;
 use App\Http\Controllers\BaseRohiController;
 use App\Http\Controllers\BaseAugureController;
-use App\Http\Controllers\StatutAdminController;
+use App\Http\Controllers\StatutController;
 use App\Http\Controllers\SituationAdminController;
 use App\Http\Controllers\EtatController;
 use App\Http\Controllers\LiaisonController;
@@ -175,10 +175,10 @@ Route::get('/personnels-augure', [LiaisonController::class, 'index']);
 Route::post('/personnels-augure', [LiaisonController::class, 'store']);
 Route::delete('/personnels-augure/{personnelId}/{augureId}', [LiaisonController::class, 'destroy']);
 // ==================== ROUTES STATUTS ADMIN ====================
-Route::get('/statuts', [StatutAdminController::class, 'index']);
-Route::post('/statuts', [StatutAdminController::class, 'store']);
-Route::put('/statuts/{id}', [StatutAdminController::class, 'update']);
-Route::delete('/statuts/{id}', [StatutAdminController::class, 'destroy']);
+Route::get('/statuts', [StatutController::class, 'index']);
+Route::post('/statuts', [StatutController::class, 'store']);
+Route::put('/statuts/{id}', [StatutController::class, 'update']);
+Route::delete('/statuts/{id}', [StatutController::class, 'destroy']);
 
 // ==================== ROUTES SITUATIONS ADMIN ====================
 Route::get('/situations-admin', [SituationAdminController::class, 'index']);
