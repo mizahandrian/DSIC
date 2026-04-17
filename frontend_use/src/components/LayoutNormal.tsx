@@ -1,8 +1,8 @@
 // src/components/LayoutNormal.tsx
 import React from 'react';
-import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import AnimatedOutlet from './AnimatedOutlet';
 import '../style/dashboard.css';
 
 const LayoutNormal: React.FC = () => {
@@ -17,7 +17,7 @@ const LayoutNormal: React.FC = () => {
       <Header isCompact={false} />
       
       <main className="main-normal">
-        <Outlet />
+        <AnimatedOutlet />
       </main>
     </div>
   );

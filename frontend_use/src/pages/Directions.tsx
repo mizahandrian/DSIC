@@ -27,7 +27,7 @@ import {
   faUser
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
-import logoInstat from '../assets/image/Logo-INSTAT.png';
+import logoInstat from '../assets/image/Logo2.png';
 import '../style/personnels.css';
 
 interface Direction {

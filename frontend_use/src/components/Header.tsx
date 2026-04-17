@@ -1,5 +1,5 @@
 // src/components/Header.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell, faSearch, faUser, faSignOutAlt, faCog } from '@fortawesome/free-solid-svg-icons';
 
@@ -9,7 +9,16 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ isCompact = false }) => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -17,52 +26,51 @@ const Header: React.FC<HeaderProps> = ({ isCompact = false }) => {
     window.location.href = '/login';
   };
 
-  
-  const leftValue = '280px';
-  
+  // Sur mobile, laisser la place pour le bouton hamburger (55px)
+  const leftValue = isMobile ? '55px' : (isCompact ? '200px' : '280px');
 
   const headerStyle = {
     position: 'fixed' as const,
     top: 0,
     left: leftValue,
     right: 0,
-    background: 'rgba(255, 255, 255, 0.95)',
+    background: 'rgba(255, 255, 255, 0.98)',
     backdropFilter: 'blur(10px)',
-    padding: '8px 25px',  
+    padding: isCompact ? '8px 20px' : '12px 30px',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
     zIndex: 99,
-    height: '55px'  
+    height: isCompact ? '55px' : '60px'
   };
 
   return (
     <div style={headerStyle}>
-      <div style={{ position: 'relative', width: '300px' }}>
-        <FontAwesomeIcon icon={faSearch} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#8a9bb0' }} />
+      <div style={{ position: 'relative', width: isMobile ? 'calc(100% - 40px)' : '300px' }}>
+        <FontAwesomeIcon icon={faSearch} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
         <input
           type="text"
           placeholder="Rechercher..."
           style={{
             width: '100%',
-            padding: '8px 15px 8px 40px',  // Padding réduit
+            padding: '8px 15px 8px 40px',
             border: '1px solid #e2e8f0',
             borderRadius: '12px',
-            fontSize: '13px',  // Police plus petite
+            fontSize: '13px',
             outline: 'none'
           }}
         />
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>  
-        <button style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', position: 'relative' }}>  
+      <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+        <button style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', position: 'relative' }}>
           <FontAwesomeIcon icon={faBell} />
           <span style={{ position: 'absolute', top: '-5px', right: '-5px', background: '#e74c3c', color: 'white', fontSize: '10px', padding: '2px 5px', borderRadius: '10px' }}>3</span>
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => setUserMenuOpen(!userMenuOpen)}>
           <div style={{
             width: '35px',
-            height: '35px', 
+            height: '35px',
             background: 'linear-gradient(135deg, #2c3e50, #34495e)',
             borderRadius: '50%',
             display: 'flex',
@@ -74,13 +82,13 @@ const Header: React.FC<HeaderProps> = ({ isCompact = false }) => {
           }}>
             {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
           </div>
-          <span style={{ fontSize: '13px', fontWeight: 500, color: '#2c3e50' }}>{user.name || 'Utilisateur'}</span>
+          {!isMobile && <span style={{ fontSize: '13px', fontWeight: 500, color: '#2c3e50' }}>{user.name || 'Utilisateur'}</span>}
         </div>
         {userMenuOpen && (
           <div style={{
             position: 'absolute',
             top: '55px',
-            right: '30px',
+            right: '20px',
             background: 'white',
             borderRadius: '16px',
             boxShadow: '0 20px 40px -12px rgba(0, 0, 0, 0.15)',

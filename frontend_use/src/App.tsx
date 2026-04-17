@@ -17,10 +17,10 @@ import StatutAdmin from './pages/StatutAdmin';
 import SituationAdmin from './pages/SituationAdmin';
 import Etats from './pages/Etats';
 import CompleteSetup from './pages/CompleteSetup';
-import api from './Service/api';
 import ForgotPassword from "./pages/ForgotPassword";
 import VerifyCode from "./pages/VerifyCode";
 import ResetPassword from "./pages/ResetPassword";
+import api from './Service/api';
 
 // Layout simple sans sidebar (pour l'initialisation)
 const SimpleLayout: React.FC = () => {
@@ -69,8 +69,6 @@ const App: React.FC = () => {
 
   console.log('App render:', { isAuthenticated, isInitialized });
 
- 
-
   return (
     <Router>
       <Routes>
@@ -93,7 +91,6 @@ const App: React.FC = () => {
             <Route path="/base-rohi" element={<BaseRohi />} />
             <Route path="/base-augure" element={<BaseAugure />} />
             <Route path="/complete-setup" element={<CompleteSetup />} />
-             
           </Route>
         )}
         

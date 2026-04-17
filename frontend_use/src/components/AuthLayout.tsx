@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
-import logoInstat from '../assets/image/Logo-INSTAT.png';
+import logoInstat from '../assets/image/Logo2.png';
 import '../style/auth.css';
 
 const AuthLayout: React.FC = () => {

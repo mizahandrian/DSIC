@@ -1,8 +1,8 @@
 // src/components/LayoutCompact.tsx
 import React from 'react';
-import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import AnimatedOutlet from './AnimatedOutlet';
 import '../style/dashboard.css';
 
 const LayoutCompact: React.FC = () => {
@@ -13,15 +13,11 @@ const LayoutCompact: React.FC = () => {
       <div className="bg-shape-3"></div>
       <div className="wave-bg"></div>
 
-      {/* Sidebar avec largeur normale (280px) */}
       <Sidebar isCompact={false} />
-      
-      {/* Header avec left normal (280px) */}
       <Header isCompact={false} />
       
-      {/* Main avec margin-left normal (280px) */}
       <main className="main-normal">
-        <Outlet />
+        <AnimatedOutlet />
       </main>
     </div>
   );

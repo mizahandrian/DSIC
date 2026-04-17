@@ -1,0 +1,118 @@
+/* src/styles/animations.css */
+
+/* Fade In / Fade Out */
+.fade-enter {
+    opacity: 0;
+  }
+  
+  .fade-enter-active {
+    opacity: 1;
+    transition: opacity 300ms ease-in;
+  }
+  
+  .fade-exit {
+    opacity: 1;
+  }
+  
+  .fade-exit-active {
+    opacity: 0;
+    transition: opacity 300ms ease-out;
+  }
+  
+  /* Slide In / Slide Out (horizontal) */
+  .slide-enter {
+    transform: translateX(30px);
+    opacity: 0;
+  }
+  
+  .slide-enter-active {
+    transform: translateX(0);
+    opacity: 1;
+    transition: transform 300ms ease-out, opacity 300ms ease-out;
+  }
+  
+  .slide-exit {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  
+  .slide-exit-active {
+    transform: translateX(-30px);
+    opacity: 0;
+    transition: transform 300ms ease-in, opacity 300ms ease-in;
+  }
+  
+  /* Slide Up / Slide Down */
+  .slide-up-enter {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  
+  .slide-up-enter-active {
+    transform: translateY(0);
+    opacity: 1;
+    transition: transform 300ms ease-out, opacity 300ms ease-out;
+  }
+  
+  .slide-up-exit {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  
+  .slide-up-exit-active {
+    transform: translateY(-30px);
+    opacity: 0;
+    transition: transform 300ms ease-in, opacity 300ms ease-in;
+  }
+  
+  /* Animation des cartes au chargement */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Animation des lignes du tableau */
+  @keyframes fadeInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  /* Styles pour la page animée */
+  .animated-page {
+    width: 100%;
+    min-height: 100%;
+  }
+  
+  /* Animation d'apparition des éléments */
+  .stat-card {
+    animation: fadeInUp 0.5s ease-out forwards;
+    opacity: 0;
+  }
+  
+  .stat-card:nth-child(1) { animation-delay: 0.05s; }
+  .stat-card:nth-child(2) { animation-delay: 0.1s; }
+  .stat-card:nth-child(3) { animation-delay: 0.15s; }
+  .stat-card:nth-child(4) { animation-delay: 0.2s; }
+  
+  .data-table tbody tr {
+    animation: fadeInLeft 0.3s ease-out forwards;
+    opacity: 0;
+  }
+  
+  .data-table tbody tr:nth-child(1) { animation-delay: 0.05s; }
+  .data-table tbody tr:nth-child(2) { animation-delay: 0.1s; }
+  .data-table tbody tr:nth-child(3) { animation-delay: 0.15s; }
+  .data-table tbody tr:nth-child(4) { animation-delay: 0.2s; }
+  .data-table tbody tr:nth-child(5) { animation-delay: 0.25s; }
