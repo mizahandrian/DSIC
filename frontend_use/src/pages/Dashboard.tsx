@@ -4,21 +4,17 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faUsers, faBuilding, faBriefcase, faUserTie,
-  faArrowUp, faUserCheck, faDatabase, faEye, faPlus, 
-  faHistory, faChartLine, faChartPie, faCalendarAlt,
-  faChevronRight
+  faUserPlus, faUserEdit, faUserCheck,
+  faFileAlt, faChevronRight, faChartLine, faChartSimple
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
-import logoInstat from '../assets/image/Logo-INSTAT.png';
 
 interface DashboardStats {
   totalPersonnels: number;
   totalDirections: number;
   totalServices: number;
   totalPostes: number;
-  personnelsActifs: number;
   evolutionData: number[];
-  directionsData: { name: string; count: number }[];
   recents: any[];
 }
 
@@ -28,9 +24,7 @@ const Dashboard: React.FC = () => {
     totalDirections: 0,
     totalServices: 0,
     totalPostes: 0,
-    personnelsActifs: 0,
     evolutionData: [12, 15, 18, 22, 25, 30, 35, 38, 42, 45, 48, 52],
-    directionsData: [],
     recents: []
   });
   const [loading, setLoading] = useState(true);
@@ -49,22 +43,13 @@ const Dashboard: React.FC = () => {
       ]);
 
       const personnels = personnelsRes.data;
-      const directions = directionsRes.data;
-      const actifs = personnels.filter((p: any) => p.id_etat === 1 || p.etat_nom === 'Actif').length;
-
-      const directionsData = directions.slice(0, 6).map((d: any) => ({
-        name: d.nom_direction.length > 12 ? d.nom_direction.substring(0, 12) + '...' : d.nom_direction,
-        count: personnels.filter((p: any) => p.id_direction === d.id_direction).length
-      }));
 
       setStats({
         totalPersonnels: personnels.length,
-        totalDirections: directions.length,
+        totalDirections: directionsRes.data.length,
         totalServices: servicesRes.data.length,
         totalPostes: postesRes.data.length,
-        personnelsActifs: actifs,
         evolutionData: [12, 15, 18, 22, 25, 30, 35, 38, 42, 45, 48, personnels.length],
-        directionsData: directionsData,
         recents: [...personnels].slice(0, 5)
       });
     } catch (error) {
@@ -75,19 +60,41 @@ const Dashboard: React.FC = () => {
   };
 
   const statCards = [
-    { title: 'Personnels', value: stats.totalPersonnels, icon: faUsers, color: '#10b981', bg: '#e8f5e9' },
-    { title: 'Directions', value: stats.totalDirections, icon: faBuilding, color: '#10b981', bg: '#e8f5e9' },
-    { title: 'Services', value: stats.totalServices, icon: faBriefcase, color: '#10b981', bg: '#e8f5e9' },
-    { title: 'Postes', value: stats.totalPostes, icon: faUserTie, color: '#10b981', bg: '#e8f5e9' },
+    { title: 'Personnels', value: stats.totalPersonnels, icon: faUsers, link: '/recrutement' },
+    { title: 'Directions', value: stats.totalDirections, icon: faBuilding, link: '/recrutement' },
+    { title: 'Services', value: stats.totalServices, icon: faBriefcase, link: '/recrutement' },
+    { title: 'Postes', value: stats.totalPostes, icon: faUserTie, link: '/recrutement' },
+  ];
+
+  const quickActions = [
+    { title: 'Nouveau personnel', icon: faUserPlus, desc: 'Ajouter un employé', link: '/recrutement' },
+    { title: 'Modifier personnel', icon: faUserEdit, desc: 'Mettre à jour', link: '/recrutement' },
+    { title: 'Gérer statuts', icon: faUserCheck, desc: 'Actif/Inactif', link: '/statut-admin' },
+    { title: 'Voir rapports', icon: faFileAlt, desc: 'Export données', link: '/recrutement' },
   ];
 
   const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
-  const maxEvolution = Math.max(...stats.evolutionData);
+  const maxEvolution = Math.max(...stats.evolutionData, 1);
+
+  // Calcul des points pour la courbe (coordonnées SVG)
+  const getCurvePoints = () => {
+    const width = 100;
+    const height = 60;
+    const step = width / (stats.evolutionData.length - 1);
+    
+    return stats.evolutionData.map((value, index) => {
+      const x = index * step;
+      const y = height - (value / maxEvolution) * height;
+      return `${x},${y}`;
+    }).join(' ');
+  };
+
+  const points = getCurvePoints();
 
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-        <div style={{ width: '40px', height: '40px', border: '2px solid #e2e8f0', borderTopColor: '#10b981', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+        <div style={{ width: '40px', height: '40px', border: '2px solid #eef2f6', borderTopColor: '#10b981', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
@@ -95,122 +102,162 @@ const Dashboard: React.FC = () => {
 
   return (
     <div>
-      {/* En-tête avec logo */}
-      <div className="dashboard-header">
-        <div className="dashboard-logo">
-          <img src={logoInstat} alt="INSTAT" />
-        </div>
-        <div>
-          <h1>Tableau de bord</h1>
-          <p>Bienvenue sur votre espace de gestion RH</p>
-        </div>
+      {/* Message de bienvenue */}
+      <div className="dashboard-welcome">
+        <p>Bienvenue sur votre espace de gestion </p>
       </div>
 
-      {/* Cartes statistiques */}
+      {/* Cartes statistiques - sans ligne de tendance */}
       <div className="stats-grid">
         {statCards.map((card, i) => (
-          <div className="stat-card" key={i}>
+          <Link to={card.link} key={i} className="stat-card">
             <div className="stat-info">
               <h3>{card.title}</h3>
               <p className="stat-number">{card.value}</p>
-              <div className="stat-trend">
-                <FontAwesomeIcon icon={faArrowUp} /> +12% ce mois
-              </div>
             </div>
-            <div className="stat-icon" style={{ background: card.bg, color: card.color }}>
+            <div className="stat-icon">
               <FontAwesomeIcon icon={card.icon} />
             </div>
-          </div>
+          </Link>
         ))}
       </div>
 
-      {/* Graphiques */}
+      {/* Section des 2 courbes */}
       <div className="charts-grid">
-        {/* Graphique en barres */}
+        {/* Courbe 1 : Évolution des effectifs */}
         <div className="chart-card">
-          <h3 className="chart-title">
-            <div className="chart-title-icon">
+          <div className="chart-header">
+            <div className="chart-icon">
               <FontAwesomeIcon icon={faChartLine} />
             </div>
-            Évolution des effectifs
-          </h3>
-          <div className="bar-chart">
-            {stats.evolutionData.map((value, index) => (
-              <div key={index} className="bar-item">
-                <div 
-                  className="bar" 
-                  style={{ 
-                    height: `${(value / maxEvolution) * 160}px`,
-                    backgroundColor: '#10b981'
-                  }}
+            <div>
+              <h3 className="chart-title">Évolution des effectifs</h3>
+              <p className="chart-subtitle">Comparaison 2024 vs 2025</p>
+            </div>
+          </div>
+          <div className="curve-container">
+            <svg viewBox="0 0 100 60" preserveAspectRatio="none" className="curve-svg">
+              {/* Courbe 2024 */}
+              <polyline
+                points="0,50 9,48 18,45 27,40 36,35 45,30 54,25 63,22 72,18 81,15 90,12 100,10"
+                fill="none"
+                stroke="#94a3b8"
+                strokeWidth="1.5"
+                strokeDasharray="4"
+                className="curve-line"
+              />
+              {/* Courbe 2025 (données réelles) */}
+              <polyline
+                points={points}
+                fill="none"
+                stroke="#10b981"
+                strokeWidth="2"
+                className="curve-line curve-active"
+              />
+              {/* Points sur la courbe active */}
+              {stats.evolutionData.map((_, idx) => (
+                <circle
+                  key={idx}
+                  cx={idx * (100 / (stats.evolutionData.length - 1))}
+                  cy={60 - (stats.evolutionData[idx] / maxEvolution) * 60}
+                  r="1.2"
+                  fill="#10b981"
+                  className="curve-dot"
                 />
-                <span className="bar-label">{months[index]}</span>
-              </div>
-            ))}
+              ))}
+            </svg>
+            <div className="curve-labels">
+              {months.map((month, idx) => (
+                <span key={idx} className="curve-label">{month}</span>
+              ))}
+            </div>
+            <div className="curve-legend">
+              <span className="legend-dot dashed"></span>
+              <span className="legend-text">2024 (prévision)</span>
+              <span className="legend-dot solid"></span>
+              <span className="legend-text">2025 (réel)</span>
+            </div>
           </div>
         </div>
 
-        {/* Graphique en donut */}
+        {/* Courbe 2 : Répartition par catégorie */}
         <div className="chart-card">
-          <h3 className="chart-title">
-            <div className="chart-title-icon">
-              <FontAwesomeIcon icon={faChartPie} />
+          <div className="chart-header">
+            <div className="chart-icon">
+              <FontAwesomeIcon icon={faChartSimple} />
             </div>
-            État des personnels
-          </h3>
-          <div className="donut-chart">
-            <div className="donut">
-              <div className="donut-inner">
-                <span className="donut-value">{Math.round((stats.personnelsActifs / stats.totalPersonnels) * 100) || 0}%</span>
-                <span className="donut-label">Actifs</span>
-              </div>
+            <div>
+              <h3 className="chart-title">Répartition par catégorie</h3>
+              <p className="chart-subtitle">Cadres vs Techniciens vs Agents</p>
             </div>
-            <div className="donut-legend">
-              <div className="legend-item">
-                <div className="legend-color" style={{ background: '#10b981' }}></div>
-                <span>Actifs ({stats.personnelsActifs})</span>
-              </div>
-              <div className="legend-item">
-                <div className="legend-color" style={{ background: '#e2e8f0' }}></div>
-                <span>Inactifs ({stats.totalPersonnels - stats.personnelsActifs})</span>
-              </div>
+          </div>
+          <div className="curve-container">
+            <svg viewBox="0 0 100 60" preserveAspectRatio="none" className="curve-svg">
+              {/* Cadres */}
+              <polyline
+                points="0,45 9,42 18,38 27,35 36,30 45,28 54,25 63,22 72,20 81,18 90,15 100,12"
+                fill="none"
+                stroke="#3b82f6"
+                strokeWidth="2"
+                className="curve-line"
+              />
+              {/* Techniciens */}
+              <polyline
+                points="0,52 9,50 18,48 27,45 36,42 45,40 54,38 63,35 72,32 81,30 90,28 100,25"
+                fill="none"
+                stroke="#f59e0b"
+                strokeWidth="2"
+                className="curve-line"
+              />
+              {/* Agents */}
+              <polyline
+                points="0,58 9,56 18,55 27,53 36,52 45,50 54,48 63,46 72,44 81,42 90,40 100,38"
+                fill="none"
+                stroke="#8b5cf6"
+                strokeWidth="2"
+                className="curve-line"
+              />
+            </svg>
+            <div className="curve-labels">
+              {months.map((month, idx) => (
+                <span key={idx} className="curve-label">{month}</span>
+              ))}
+            </div>
+            <div className="curve-legend">
+              <span className="legend-dot" style={{ background: '#3b82f6' }}></span>
+              <span className="legend-text">Cadres</span>
+              <span className="legend-dot" style={{ background: '#f59e0b' }}></span>
+              <span className="legend-text">Techniciens</span>
+              <span className="legend-dot" style={{ background: '#8b5cf6' }}></span>
+              <span className="legend-text">Agents</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Top directions */}
-      <div className="recent-table" style={{ marginBottom: '32px' }}>
-        <div className="recent-header">
-          <h3 className="recent-title">
-            <FontAwesomeIcon icon={faBuilding} style={{ color: '#10b981' }} />
-            Top directions
-          </h3>
-          <Link to="/directions" className="view-all">Voir tout <FontAwesomeIcon icon={faChevronRight} style={{ fontSize: '10px' }} /></Link>
-        </div>
-        <div style={{ padding: '0 24px 24px 24px' }}>
-          {stats.directionsData.map((dir, i) => (
-            <div key={i} style={{ marginBottom: '16px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px' }}>
-                <span style={{ color: '#334155' }}>{dir.name}</span>
-                <span style={{ fontWeight: 600, color: '#1e293b' }}>{dir.count}</span>
-              </div>
-              <div style={{ background: '#eef2f6', borderRadius: '8px', overflow: 'hidden' }}>
-                <div style={{ width: `${(dir.count / (stats.directionsData[0]?.count || 1)) * 100}%`, height: '6px', background: '#10b981', borderRadius: '8px' }}></div>
-              </div>
+      {/* Actions rapides - accès direct */}
+      <div className="quick-actions">
+        {quickActions.map((action, i) => (
+          <Link to={action.link} key={i} className="quick-card">
+            <div className="quick-icon">
+              <FontAwesomeIcon icon={action.icon} />
             </div>
-          ))}
-        </div>
+            <h4>{action.title}</h4>
+            <p>{action.desc}</p>
+          </Link>
+        ))}
       </div>
 
-      {/* Derniers personnels */}
+      {/* Derniers personnels ajoutés */}
       <div className="recent-table">
         <div className="recent-header">
           <h3 className="recent-title">
             <FontAwesomeIcon icon={faUsers} style={{ color: '#10b981' }} />
             Derniers personnels ajoutés
           </h3>
-          <Link to="/personnels" className="view-all">Voir tout <FontAwesomeIcon icon={faChevronRight} style={{ fontSize: '10px' }} /></Link>
+          <Link to="/recrutement" className="view-all">
+            Voir tout <FontAwesomeIcon icon={faChevronRight} style={{ fontSize: '11px' }} />
+          </Link>
         </div>
         <table className="data-table">
           <thead>
@@ -220,7 +267,6 @@ const Dashboard: React.FC = () => {
               <th>Prénom</th>
               <th>Poste</th>
               <th>Date entrée</th>
-              <th>Statut</th>
             </tr>
           </thead>
           <tbody>
@@ -231,13 +277,15 @@ const Dashboard: React.FC = () => {
                 <td>{p.prenom}</td>
                 <td>{p.poste_titre || '-'}</td>
                 <td>{new Date(p.date_entree).toLocaleDateString('fr-FR')}</td>
-                <td>
-                  <span className={`badge ${p.id_etat === 1 || p.etat_nom === 'Actif' ? 'badge-active' : 'badge-inactive'}`}>
-                    {p.id_etat === 1 || p.etat_nom === 'Actif' ? 'Actif' : 'Inactif'}
-                  </span>
-                </td>
               </tr>
             ))}
+            {stats.recents.length === 0 && (
+              <tr>
+                <td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
+                  Aucun personnel enregistré
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

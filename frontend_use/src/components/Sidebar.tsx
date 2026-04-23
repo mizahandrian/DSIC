@@ -9,11 +9,15 @@ import {
   faDatabase,
   faLock
 } from '@fortawesome/free-solid-svg-icons';
+import logoInstat from '../assets/image/Logo-INSTAT.png';
 
 const Sidebar: React.FC = () => {
   return (
     <div className="sidebar">
       <div className="sidebar-header">
+        <div className="sidebar-logo">
+          <img src={logoInstat} alt="INSTAT" />
+        </div>
         <h2>INSTAT</h2>
         <p>Gestion RH</p>
       </div>

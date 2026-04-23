@@ -9,8 +9,10 @@ const AuthLayout: React.FC = () => {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <div className="logo-circle">
-            <img src={logoInstat} alt="INSTAT" className="auth-logo" />
+          <div className="logo-wrapper">
+            <div className="logo-circle">
+              <img src={logoInstat} alt="INSTAT" className="auth-logo" />
+            </div>
           </div>
           <h2>Bienvenue Chez</h2>
           <h1>INSTAT MADAGASCAR</h1>
