@@ -156,7 +156,7 @@ const Directions: React.FC = () => {
     }
   };
 
-  // Nouvelle fonction pour affecter un personnel depuis le formulaire
+  // Fonction pour affecter un personnel depuis le formulaire
   const handleAffecterPersonnelViaFormulaire = async () => {
     if (!newPersonnelId || !targetDirectionId) {
       alert('Veuillez sélectionner un personnel et une direction');
@@ -173,9 +173,10 @@ const Directions: React.FC = () => {
         id_direction: parseInt(targetDirectionId)
       });
 
-      // Rafraîchir les données
-      await fetchPersonnels();
-      await fetchAllPersonnels();
+      await Promise.all([
+        fetchPersonnels(),
+        fetchAllPersonnels()
+      ]);
 
       setShowAddPersonnelModal(false);
       setNewPersonnelId('');
@@ -198,8 +199,12 @@ const Directions: React.FC = () => {
         ...personnelToAffect,
         id_direction: parseInt(selectedDirectionId)
       });
-      fetchPersonnels();
-      fetchAllPersonnels();
+
+      await Promise.all([
+        fetchPersonnels(),
+        fetchAllPersonnels()
+      ]);
+
       setShowAffectationModal(false);
       setPersonnelToAffect(null);
       setSelectedDirectionId('');
@@ -296,9 +301,6 @@ const Directions: React.FC = () => {
 
   return (
     <div className="personnels-container">
-      {/* ============================================ */}
-      {/* 🌊 FORMES ONDULÉES MODERNES */}
-      {/* ============================================ */}
       <div className="wave-1"></div>
       <div className="wave-2"></div>
       <div className="wave-3"></div>

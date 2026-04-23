@@ -1,6 +1,6 @@
 // src/App.tsx
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import AuthLayout from './components/AuthLayout';
 import LayoutNormal from './components/LayoutNormal';
 import LayoutCompact from './components/LayoutCompact';
@@ -16,46 +16,27 @@ import Dashboard from './pages/Dashboard';
 import StatutAdmin from './pages/StatutAdmin';
 import SituationAdmin from './pages/SituationAdmin';
 import Etats from './pages/Etats';
-import CompleteSetup from './pages/CompleteSetup';
-import ForgotPassword from "./pages/ForgotPassword";
-import VerifyCode from "./pages/VerifyCode";
-import ResetPassword from "./pages/ResetPassword";
 import api from './Service/api';
 
-// Layout simple sans sidebar (pour l'initialisation)
-const SimpleLayout: React.FC = () => {
-  return <Outlet />;
-};
-
 const App: React.FC = () => {
-  const [isInitialized, setIsInitialized] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem('token');
   const isAuthenticated = !!token;
 
   useEffect(() => {
-    const checkUserInitialization = async () => {
+    const checkAuth = async () => {
       if (token) {
         try {
           api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-          const response = await api.get('/user/check-initialized');
-          const initialized = response.data.is_initialized === true;
-          setIsInitialized(initialized);
-          
-          const user = JSON.parse(localStorage.getItem('user') || '{}');
-          user.is_initialized = initialized;
-          localStorage.setItem('user', JSON.stringify(user));
-          
-          console.log('User initialized:', initialized);
+          await api.get('/me');
         } catch (error) {
-          console.error('Erreur vérification:', error);
-          const user = JSON.parse(localStorage.getItem('user') || '{}');
-          setIsInitialized(user.is_initialized === true);
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
         }
       }
       setLoading(false);
     };
-    checkUserInitialization();
+    checkAuth();
   }, [token]);
 
   if (loading) {
@@ -67,69 +48,35 @@ const App: React.FC = () => {
     );
   }
 
-  console.log('App render:', { isAuthenticated, isInitialized });
-
   return (
     <Router>
       <Routes>
         {/* Page de login */}
         <Route path="/login" element={<AuthLayout />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/verify-code" element={<VerifyCode />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
         
-        {/* ==================== UTILISATEUR NON INITIALISÉ ==================== */}
-        {/* Pendant l'initialisation : PAS de Sidebar, PAS de Header */}
-        {isAuthenticated && isInitialized === false && (
-          <Route element={<SimpleLayout />}>
-            <Route path="/personnels" element={<Personnels />} />
-            <Route path="/directions" element={<Directions />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/carrieres" element={<Carrieres />} />
-            <Route path="/postes" element={<Postes />} />
-            <Route path="/historique" element={<Historique />} />
-            <Route path="/base-rohi" element={<BaseRohi />} />
-            <Route path="/base-augure" element={<BaseAugure />} />
-            <Route path="/complete-setup" element={<CompleteSetup />} />
-          </Route>
-        )}
+        {/* Routes protégées - Dashboard avec LayoutCompact */}
+        <Route element={isAuthenticated ? <LayoutCompact /> : <Navigate to="/login" />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Route>
         
-        {/* ==================== UTILISATEUR INITIALISÉ ==================== */}
-        {/* Après initialisation : AVEC Sidebar et Header */}
-        {isAuthenticated && isInitialized === true && (
-          <>
-            {/* Dashboard avec LayoutCompact */}
-            <Route element={<LayoutCompact />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-            </Route>
-            
-            {/* Autres pages avec LayoutNormal */}
-            <Route element={<LayoutNormal />}>
-              <Route path="/personnels" element={<Personnels />} />
-              <Route path="/directions" element={<Directions />} />
-              <Route path="/services" element={<Services />} />
-              <Route path="/carrieres" element={<Carrieres />} />
-              <Route path="/postes" element={<Postes />} />
-              <Route path="/historique" element={<Historique />} />
-              <Route path="/base-rohi" element={<BaseRohi />} />
-              <Route path="/base-augure" element={<BaseAugure />} />
-              <Route path="/statut-admin" element={<StatutAdmin />} />
-              <Route path="/situation-admin" element={<SituationAdmin />} />
-              <Route path="/etats" element={<Etats />} />
-            </Route>
-          </>
-        )}
+        {/* Routes protégées - Pages CRUD avec LayoutNormal */}
+        <Route element={isAuthenticated ? <LayoutNormal /> : <Navigate to="/login" />}>
+          <Route path="/personnels" element={<Personnels />} />
+          <Route path="/directions" element={<Directions />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/carrieres" element={<Carrieres />} />
+          <Route path="/postes" element={<Postes />} />
+          <Route path="/historique" element={<Historique />} />
+          <Route path="/base-rohi" element={<BaseRohi />} />
+          <Route path="/base-augure" element={<BaseAugure />} />
+          <Route path="/statut-admin" element={<StatutAdmin />} />
+          <Route path="/situation-admin" element={<SituationAdmin />} />
+          <Route path="/etats" element={<Etats />} />
+        </Route>
         
-        {/* Redirection par défaut */}
-        <Route 
-          path="/" 
-          element={
-            !isAuthenticated ? <Navigate to="/login" /> :
-            isInitialized === true ? <Navigate to="/dashboard" /> : <Navigate to="/personnels" />
-          } 
-        />
-        
-        <Route path="*" element={<Navigate to="/" />} />
+        {/* Redirection */}
+        <Route path="/" element={<Navigate to="/dashboard" />} />
+        <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
     </Router>
   );

@@ -1,12 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Login from '../pages/Login';
-import Register from '../pages/Register';
 import logoInstat from '../assets/image/Logo2.png';
 import '../style/auth.css';
 
 const AuthLayout: React.FC = () => {
-  const [isLogin, setIsLogin] = useState<boolean>(true);
-
   return (
     <div className="auth-container">
       {/* ============================================ */}
@@ -34,25 +31,8 @@ const AuthLayout: React.FC = () => {
           <p className="header-subtitle">Institut National de la Statistique</p>
         </div>
         
-        <div className="auth-tabs">
-          <button 
-            className={`tab-btn ${isLogin ? 'active' : ''}`}
-            onClick={() => setIsLogin(true)}
-            type="button"
-          >
-            SE CONNECTER
-          </button>
-          <button 
-            className={`tab-btn ${!isLogin ? 'active' : ''}`}
-            onClick={() => setIsLogin(false)}
-            type="button"
-          >
-            S'INSCRIRE
-          </button>
-        </div>
-        
         <div className="auth-content">
-          {isLogin ? <Login /> : <Register />}
+          <Login />
         </div>
         
         <div className="auth-footer">
