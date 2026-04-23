@@ -7,11 +7,22 @@ import {
   faUserShield, 
   faUsers, 
   faDatabase,
-  faLock
+  faLock,
+  faUserPlus,
+  faList
 } from '@fortawesome/free-solid-svg-icons';
 import logoInstat from '../assets/image/Logo-INSTAT.png';
 
 const Sidebar: React.FC = () => {
+  const menuItems = [
+    { path: '/dashboard', name: 'Tableau de bord', icon: faTachometerAlt },
+    { path: '/super-admin', name: 'Super Admin', icon: faUserShield },
+    { path: '/recrutement', name: 'Nouveau recrutement', icon: faUserPlus },
+    { path: '/gestion-personnels', name: 'Liste des personnels', icon: faList },
+    { path: '/bases', name: 'Bases', icon: faDatabase },
+    { path: '/forgot-password', name: 'Mot de passe oublié', icon: faLock },
+  ];
+
   return (
     <div className="sidebar">
       <div className="sidebar-header">
@@ -23,30 +34,16 @@ const Sidebar: React.FC = () => {
       </div>
       
       <nav className="sidebar-nav">
-        <NavLink to="/dashboard" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <FontAwesomeIcon icon={faTachometerAlt} className="nav-icon" />
-          <span className="nav-text">Tableau de bord</span>
-        </NavLink>
-
-        <NavLink to="/super-admin" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <FontAwesomeIcon icon={faUserShield} className="nav-icon" />
-          <span className="nav-text">Super Admin</span>
-        </NavLink>
-
-        <NavLink to="/recrutement" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <FontAwesomeIcon icon={faUsers} className="nav-icon" />
-          <span className="nav-text">Recrutement</span>
-        </NavLink>
-
-        <NavLink to="/bases" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <FontAwesomeIcon icon={faDatabase} className="nav-icon" />
-          <span className="nav-text">Bases</span>
-        </NavLink>
-
-        <NavLink to="/forgot-password" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <FontAwesomeIcon icon={faLock} className="nav-icon" />
-          <span className="nav-text">Mot de passe oublié</span>
-        </NavLink>
+        {menuItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+          >
+            <FontAwesomeIcon icon={item.icon} className="nav-icon" />
+            <span className="nav-text">{item.name}</span>
+          </NavLink>
+        ))}
       </nav>
     </div>
   );

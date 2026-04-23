@@ -14,7 +14,6 @@ const AuthLayout: React.FC = () => {
               <img src={logoInstat} alt="INSTAT" className="auth-logo" />
             </div>
           </div>
-          <h2>Bienvenue Chez</h2>
           <h1>INSTAT MADAGASCAR</h1>
           <p className="header-subtitle">Institut National de la Statistique</p>
         </div>

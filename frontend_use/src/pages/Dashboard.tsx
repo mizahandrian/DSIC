@@ -59,18 +59,19 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  // Cartes statistiques - AFFICHAGE UNIQUEMENT (sans lien)
   const statCards = [
-    { title: 'Personnels', value: stats.totalPersonnels, icon: faUsers, link: '/recrutement' },
-    { title: 'Directions', value: stats.totalDirections, icon: faBuilding, link: '/recrutement' },
-    { title: 'Services', value: stats.totalServices, icon: faBriefcase, link: '/recrutement' },
-    { title: 'Postes', value: stats.totalPostes, icon: faUserTie, link: '/recrutement' },
+    { title: 'Personnels', value: stats.totalPersonnels, icon: faUsers },
+    { title: 'Directions', value: stats.totalDirections, icon: faBuilding },
+    { title: 'Services', value: stats.totalServices, icon: faBriefcase },
+    { title: 'Postes', value: stats.totalPostes, icon: faUserTie },
   ];
 
   const quickActions = [
     { title: 'Nouveau personnel', icon: faUserPlus, desc: 'Ajouter un employé', link: '/recrutement' },
-    { title: 'Modifier personnel', icon: faUserEdit, desc: 'Mettre à jour', link: '/recrutement' },
+    { title: 'Modifier personnel', icon: faUserEdit, desc: 'Mettre à jour', link: '/gestion-personnels' },
     { title: 'Gérer statuts', icon: faUserCheck, desc: 'Actif/Inactif', link: '/statut-admin' },
-    { title: 'Voir rapports', icon: faFileAlt, desc: 'Export données', link: '/recrutement' },
+    { title: 'Voir rapports', icon: faFileAlt, desc: 'Export données', link: '/gestion-personnels' },
   ];
 
   const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
@@ -104,13 +105,13 @@ const Dashboard: React.FC = () => {
     <div>
       {/* Message de bienvenue */}
       <div className="dashboard-welcome">
-        <p>Bienvenue sur votre espace de gestion </p>
+        <p>Bienvenue sur votre espace de gestion RH</p>
       </div>
 
-      {/* Cartes statistiques - sans ligne de tendance */}
+      {/* Cartes statistiques - AFFICHAGE SEULEMENT (pas de lien) */}
       <div className="stats-grid">
         {statCards.map((card, i) => (
-          <Link to={card.link} key={i} className="stat-card">
+          <div className="stat-card" key={i}>
             <div className="stat-info">
               <h3>{card.title}</h3>
               <p className="stat-number">{card.value}</p>
@@ -118,7 +119,7 @@ const Dashboard: React.FC = () => {
             <div className="stat-icon">
               <FontAwesomeIcon icon={card.icon} />
             </div>
-          </Link>
+          </div>
         ))}
       </div>
 
@@ -255,7 +256,7 @@ const Dashboard: React.FC = () => {
             <FontAwesomeIcon icon={faUsers} style={{ color: '#10b981' }} />
             Derniers personnels ajoutés
           </h3>
-          <Link to="/recrutement" className="view-all">
+          <Link to="/gestion-personnels" className="view-all">
             Voir tout <FontAwesomeIcon icon={faChevronRight} style={{ fontSize: '11px' }} />
           </Link>
         </div>
