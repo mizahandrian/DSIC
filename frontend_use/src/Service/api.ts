@@ -1,28 +1,8 @@
 // src/Service/api.ts
-import axios, { type AxiosInstance, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
+import axios, { type AxiosInstance, type AxiosResponse } from 'axios';
+import type { LoginCredentials, AuthResponse, User } from '../types';
 
 const API_URL: string = 'http://127.0.0.1:8000/api';
-
-interface LoginData {
-  email: string;
-  password: string;
-}
-
-interface RegisterData {
-  name: string;
-  email: string;
-  password: string;
-}
-
-interface AuthResponse {
-  token: string;
-  user: {
-    id: number;
-    name: string;
-    email: string;
-    is_initialized: boolean;
-  };
-}
 
 const api: AxiosInstance = axios.create({
   baseURL: API_URL,
@@ -30,23 +10,38 @@ const api: AxiosInstance = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
+  timeout: 10000,
 });
 
-api.interceptors.request.use((config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
-  const token: string | null = localStorage.getItem('token');
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const authAPI = {
-  login: (data: LoginData): Promise<AxiosResponse<AuthResponse>> => api.post('/login', data),
-  register: (data: RegisterData): Promise<AxiosResponse<AuthResponse>> => api.post('/register', data),
-  logout: (): Promise<AxiosResponse<void>> => api.post('/logout'),
-  getUser: (): Promise<AxiosResponse<AuthResponse['user']>> => api.get('/me'),
-  completeSetup: (): Promise<AxiosResponse<{ message: string }>> => api.post('/user/complete-setup'),
-  checkInitialized: (): Promise<AxiosResponse<{ is_initialized: boolean }>> => api.get('/user/check-initialized'),
+  login: (credentials: LoginCredentials): Promise<AxiosResponse<AuthResponse>> => 
+    api.post('/login', credentials),
+  
+  logout: (): Promise<AxiosResponse<{ message: string }>> => 
+    api.post('/logout'),
+  
+  getUser: (): Promise<AxiosResponse<User>> => 
+    api.get('/me'),
 };
 
 export const setAuthToken = (token: string | null): void => {

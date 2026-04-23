@@ -1,58 +1,29 @@
 // src/pages/Login.tsx
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { authAPI, setAuthToken } from '../Service/api';
 
-//link mdp oblie
-
-interface LoginFormData {
-  email: string;
-  password: string;
-}
-
 const Login: React.FC = () => {
-  const [formData, setFormData] = useState<LoginFormData>({
-    email: '',
-    password: ''
-  });
-  const [error, setError] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      const response = await authAPI.login(formData);
+      const response = await authAPI.login({ email, password });
       const { token, user } = response.data;
       
       setAuthToken(token);
       localStorage.setItem('user', JSON.stringify(user));
       
-      console.log('Login response:', response.data);
-      console.log('is_initialized:', user.is_initialized);
-      
-      // Redirection en fonction du statut d'initialisation
-      if (user.is_initialized === true) {
-        window.location.href = '/dashboard';
-      } else {
-        window.location.href = '/personnels';
-      }
+      window.location.href = '/dashboard';
     } catch (err: any) {
-      console.error('Login error:', err);
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else {
-        setError('Email ou mot de passe incorrect');
-      }
+      setError(err.response?.data?.message || 'Email ou mot de passe incorrect');
     } finally {
       setLoading(false);
     }
@@ -66,9 +37,8 @@ const Login: React.FC = () => {
         <label>Email</label>
         <input
           type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           placeholder="exemple@instat.mg"
           required
           disabled={loading}
@@ -76,12 +46,11 @@ const Login: React.FC = () => {
       </div>
 
       <div className="form-group">
-        <label>Password</label>
+        <label>Mot de passe</label>
         <input
           type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           placeholder="••••••••"
           required
           disabled={loading}
@@ -89,9 +58,9 @@ const Login: React.FC = () => {
       </div>
 
       <div className="form-options">
-        <a href="/forgot-password" className="forgot-link">
+        <Link to="/forgot-password" className="forgot-link">
           Mot de passe oublié ?
-        </a>
+        </Link>
       </div>
 
       <button type="submit" disabled={loading} className="submit-btn">

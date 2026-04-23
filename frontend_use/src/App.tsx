@@ -1,22 +1,18 @@
 // src/App.tsx
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AuthLayout from './components/AuthLayout';
-import LayoutNormal from './components/LayoutNormal';
-import LayoutCompact from './components/LayoutCompact';
-import Personnels from './pages/Personnels';
-import Directions from './pages/Directions';
-import Services from './pages/Services';
-import Carrieres from './pages/Carrieres';
-import Postes from './pages/Postes';
-import Historique from './pages/Historique';
-import BaseRohi from './pages/BaseRohi';
-import BaseAugure from './pages/BaseAugure';
+import MainLayout from './components/MainLayout';
 import Dashboard from './pages/Dashboard';
-import StatutAdmin from './pages/StatutAdmin';
-import SituationAdmin from './pages/SituationAdmin';
-import Etats from './pages/Etats';
+import ForgotPassword from './pages/ForgotPassword';
+import VerifyCode from './pages/VerifyCode';
+import ResetPassword from './pages/ResetPassword';
 import api from './Service/api';
+
+// Pages temporaires (à remplacer plus tard)
+const SuperAdmin = () => <div style={{ padding: '24px' }}><h1>Super Admin</h1><p>Gestion des utilisateurs (à venir)</p></div>;
+const Recrutement = () => <div style={{ padding: '24px' }}><h1>Recrutement</h1><p>Gestion des personnels, directions, services, postes, carrières (à venir)</p></div>;
+const Bases = () => <div style={{ padding: '24px' }}><h1>Bases</h1><p>Base ROHI et Base AUGURE (à venir)</p></div>;
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -40,45 +36,28 @@ const App: React.FC = () => {
   }, [token]);
 
   if (loading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <div style={{ width: '50px', height: '50px', border: '3px solid #e9ecef', borderTopColor: '#2c3e50', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></div>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
-    );
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Chargement...</div>;
   }
 
   return (
-    <Router>
+    <BrowserRouter>
       <Routes>
-        {/* Page de login */}
         <Route path="/login" element={<AuthLayout />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/verify-code" element={<VerifyCode />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         
-        {/* Routes protégées - Dashboard avec LayoutCompact */}
-        <Route element={isAuthenticated ? <LayoutCompact /> : <Navigate to="/login" />}>
+        <Route element={isAuthenticated ? <MainLayout /> : <Navigate to="/login" />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/super-admin" element={<SuperAdmin />} />
+          <Route path="/recrutement" element={<Recrutement />} />
+          <Route path="/bases" element={<Bases />} />
+          <Route path="/" element={<Navigate to="/dashboard" />} />
         </Route>
         
-        {/* Routes protégées - Pages CRUD avec LayoutNormal */}
-        <Route element={isAuthenticated ? <LayoutNormal /> : <Navigate to="/login" />}>
-          <Route path="/personnels" element={<Personnels />} />
-          <Route path="/directions" element={<Directions />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/carrieres" element={<Carrieres />} />
-          <Route path="/postes" element={<Postes />} />
-          <Route path="/historique" element={<Historique />} />
-          <Route path="/base-rohi" element={<BaseRohi />} />
-          <Route path="/base-augure" element={<BaseAugure />} />
-          <Route path="/statut-admin" element={<StatutAdmin />} />
-          <Route path="/situation-admin" element={<SituationAdmin />} />
-          <Route path="/etats" element={<Etats />} />
-        </Route>
-        
-        {/* Redirection */}
-        <Route path="/" element={<Navigate to="/dashboard" />} />
-        <Route path="*" element={<Navigate to="/dashboard" />} />
+        <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
-    </Router>
+    </BrowserRouter>
   );
 };
 
