@@ -4,10 +4,11 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faUsers, faSearch, faEdit, faTrashAlt, faEye, faPlus,
-  faArrowUp, faArrowDown, faFilter, faDownload, faPrint,
-  faUserCheck, faUserTimes, faBuilding, faBriefcase, faUserTie,
-  faCalendarAlt, faPhone, faIdCard, faVenusMars, faChevronLeft,
-  faChevronRight, faEllipsisH, faSyncAlt
+  faArrowUp, faArrowDown, faDownload, faSyncAlt,
+  faUserCheck, faUserTimes, faVenusMars, faChevronLeft,
+  faChevronRight, faIdCard, faPhone, faCalendarAlt,
+  faBuilding, faBriefcase, faUserTie, faSave, faTimes,
+  faPen
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 
@@ -21,10 +22,35 @@ interface Personnel {
   date_naissance: string;
   date_entree: string;
   motif_entree: string;
+  id_direction: number;
+  id_service: number;
+  id_poste: number;
+  id_etat: number;
   direction_nom?: string;
   service_nom?: string;
   poste_titre?: string;
   etat_nom?: string;
+}
+
+interface Direction {
+  id_direction: number;
+  nom_direction: string;
+}
+
+interface Service {
+  id_service: number;
+  nom_service: string;
+  id_direction: number;
+}
+
+interface Poste {
+  id_poste: number;
+  titre_poste: string;
+}
+
+interface Etat {
+  id_etat: number;
+  nom_etat: string;
 }
 
 const GestionPersonnels: React.FC = () => {
@@ -39,9 +65,18 @@ const GestionPersonnels: React.FC = () => {
   const [selectedPersonnel, setSelectedPersonnel] = useState<Personnel | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editFormData, setEditFormData] = useState<Partial<Personnel>>({});
+  
+  // Données pour les selects
+  const [directions, setDirections] = useState<Direction[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
+  const [postes, setPostes] = useState<Poste[]>([]);
+  const [etats, setEtats] = useState<Etat[]>([]);
 
   useEffect(() => {
     fetchPersonnels();
+    fetchSelectData();
   }, []);
 
   useEffect(() => {
@@ -60,10 +95,33 @@ const GestionPersonnels: React.FC = () => {
     }
   };
 
+  const fetchSelectData = async () => {
+    try {
+      const [directionsRes, postesRes, etatsRes] = await Promise.all([
+        api.get('/directions'),
+        api.get('/postes'),
+        api.get('/etats')
+      ]);
+      setDirections(directionsRes.data);
+      setPostes(postesRes.data);
+      setEtats(etatsRes.data);
+    } catch (error) {
+      console.error('Erreur:', error);
+    }
+  };
+
+  const fetchServicesByDirection = async (directionId: number) => {
+    try {
+      const response = await api.get(`/services/direction/${directionId}`);
+      setServices(response.data);
+    } catch (error) {
+      console.error('Erreur:', error);
+    }
+  };
+
   const filterAndSortPersonnels = () => {
     let filtered = [...personnels];
     
-    // Filtrer par recherche
     if (searchTerm) {
       filtered = filtered.filter(p => 
         p.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -73,7 +131,6 @@ const GestionPersonnels: React.FC = () => {
       );
     }
     
-    // Trier
     filtered.sort((a, b) => {
       const aVal = a[sortField] || '';
       const bVal = b[sortField] || '';
@@ -110,6 +167,47 @@ const GestionPersonnels: React.FC = () => {
     }
   };
 
+  const handleView = (personnel: Personnel) => {
+    setSelectedPersonnel(personnel);
+    setEditFormData(personnel);
+    setIsEditing(false);
+    if (personnel.id_direction) {
+      fetchServicesByDirection(personnel.id_direction);
+    }
+    setShowViewModal(true);
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditFormData(selectedPersonnel!);
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({ ...prev, [name]: value }));
+    
+    if (name === 'id_direction') {
+      fetchServicesByDirection(parseInt(value));
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    if (!selectedPersonnel) return;
+    try {
+      await api.put(`/personnels/${selectedPersonnel.id_personnel}`, editFormData);
+      fetchPersonnels();
+      setIsEditing(false);
+      alert('Personnel modifié avec succès');
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert('Erreur lors de la modification');
+    }
+  };
+
   const getSortIcon = (field: keyof Personnel) => {
     if (sortField !== field) return <FontAwesomeIcon icon={faArrowDown} className="sort-icon inactive" />;
     return sortDirection === 'asc' 
@@ -117,7 +215,6 @@ const GestionPersonnels: React.FC = () => {
       : <FontAwesomeIcon icon={faArrowDown} className="sort-icon active" />;
   };
 
-  // Pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredPersonnels.slice(indexOfFirstItem, indexOfLastItem);
@@ -180,7 +277,7 @@ const GestionPersonnels: React.FC = () => {
         ))}
       </div>
 
-      {/* Barre de recherche et filtres */}
+      {/* Barre de recherche */}
       <div className="gestion-filters">
         <div className="search-bar">
           <FontAwesomeIcon icon={faSearch} className="search-icon" />
@@ -196,7 +293,7 @@ const GestionPersonnels: React.FC = () => {
         </button>
       </div>
 
-      {/* Tableau des personnels */}
+      {/* Tableau */}
       <div className="gestion-table-container">
         {loading ? (
           <div className="loading-spinner">
@@ -247,23 +344,14 @@ const GestionPersonnels: React.FC = () => {
                           {personnel.etat_nom || 'Actif'}
                         </span>
                       </td>
-                      <td className="actions">
-                        <button 
-                          className="action-btn view" 
-                          onClick={() => { setSelectedPersonnel(personnel); setShowViewModal(true); }}
-                          title="Voir"
-                        >
+                      <td className="actions-cell">
+                        <button className="action-btn view" onClick={() => handleView(personnel)}>
                           <FontAwesomeIcon icon={faEye} />
+                          <span>Voir</span>
                         </button>
-                        <Link to={`/recrutement?edit=${personnel.id_personnel}`} className="action-btn edit" title="Modifier">
-                          <FontAwesomeIcon icon={faEdit} />
-                        </Link>
-                        <button 
-                          className="action-btn delete" 
-                          onClick={() => { setSelectedPersonnel(personnel); setShowDeleteModal(true); }}
-                          title="Supprimer"
-                        >
+                        <button className="action-btn delete" onClick={() => { setSelectedPersonnel(personnel); setShowDeleteModal(true); }}>
                           <FontAwesomeIcon icon={faTrashAlt} />
+                          <span>Supprimer</span>
                         </button>
                       </td>
                     </tr>
@@ -323,72 +411,175 @@ const GestionPersonnels: React.FC = () => {
         </div>
       )}
 
-      {/* Modal de visualisation */}
+      {/* Modal de visualisation et édition */}
       {showViewModal && selectedPersonnel && (
-        <div className="modal-overlay" onClick={() => setShowViewModal(false)}>
+        <div className="modal-overlay" onClick={() => { setShowViewModal(false); setIsEditing(false); }}>
           <div className="modal-container view-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3><FontAwesomeIcon icon={faUserTie} /> Détails du personnel</h3>
-              <button className="modal-close" onClick={() => setShowViewModal(false)}>✕</button>
+              <h3>
+                <FontAwesomeIcon icon={isEditing ? faPen : faUserTie} /> 
+                {isEditing ? 'Modifier le personnel' : 'Détails du personnel'}
+              </h3>
+              <button className="modal-close" onClick={() => { setShowViewModal(false); setIsEditing(false); }}>✕</button>
             </div>
+            
             <div className="modal-body view-body">
-              <div className="view-avatar">
-                <div className="avatar-circle">
-                  {selectedPersonnel.nom.charAt(0)}{selectedPersonnel.prenom.charAt(0)}
+              {/* Mode visualisation */}
+              {!isEditing && (
+                <>
+                  <div className="view-avatar">
+                    <div className="avatar-circle">
+                      {selectedPersonnel.nom.charAt(0)}{selectedPersonnel.prenom.charAt(0)}
+                    </div>
+                    <h4>{selectedPersonnel.nom} {selectedPersonnel.prenom}</h4>
+                    <span className={`badge ${selectedPersonnel.etat_nom === 'Actif' ? 'active' : 'inactive'}`}>
+                      {selectedPersonnel.etat_nom || 'Actif'}
+                    </span>
+                  </div>
+                  <div className="view-details">
+                    <div className="detail-group">
+                      <label><FontAwesomeIcon icon={faIdCard} /> Matricule</label>
+                      <span>#{selectedPersonnel.id_personnel}</span>
+                    </div>
+                    <div className="detail-group">
+                      <label><FontAwesomeIcon icon={faIdCard} /> CIN</label>
+                      <span>{selectedPersonnel.numero_cin}</span>
+                    </div>
+                    <div className="detail-group">
+                      <label><FontAwesomeIcon icon={faPhone} /> Téléphone</label>
+                      <span>{selectedPersonnel.tel || '-'}</span>
+                    </div>
+                    <div className="detail-group">
+                      <label><FontAwesomeIcon icon={faVenusMars} /> Genre</label>
+                      <span>{selectedPersonnel.genre === 'M' ? 'Masculin' : 'Féminin'}</span>
+                    </div>
+                    <div className="detail-group">
+                      <label><FontAwesomeIcon icon={faCalendarAlt} /> Date naissance</label>
+                      <span>{new Date(selectedPersonnel.date_naissance).toLocaleDateString('fr-FR')}</span>
+                    </div>
+                    <div className="detail-group">
+                      <label><FontAwesomeIcon icon={faCalendarAlt} /> Date entrée</label>
+                      <span>{new Date(selectedPersonnel.date_entree).toLocaleDateString('fr-FR')}</span>
+                    </div>
+                    <div className="detail-group">
+                      <label><FontAwesomeIcon icon={faBuilding} /> Direction</label>
+                      <span>{selectedPersonnel.direction_nom || '-'}</span>
+                    </div>
+                    <div className="detail-group">
+                      <label><FontAwesomeIcon icon={faBriefcase} /> Service</label>
+                      <span>{selectedPersonnel.service_nom || '-'}</span>
+                    </div>
+                    <div className="detail-group">
+                      <label><FontAwesomeIcon icon={faUserTie} /> Poste</label>
+                      <span>{selectedPersonnel.poste_titre || '-'}</span>
+                    </div>
+                    <div className="detail-group">
+                      <label>Motif entrée</label>
+                      <span>{selectedPersonnel.motif_entree || '-'}</span>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Mode édition */}
+              {isEditing && (
+                <div className="edit-form">
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Nom *</label>
+                      <input type="text" name="nom" value={editFormData.nom || ''} onChange={handleEditChange} />
+                    </div>
+                    <div className="form-group">
+                      <label>Prénom *</label>
+                      <input type="text" name="prenom" value={editFormData.prenom || ''} onChange={handleEditChange} />
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>CIN *</label>
+                      <input type="text" name="numero_cin" value={editFormData.numero_cin || ''} onChange={handleEditChange} />
+                    </div>
+                    <div className="form-group">
+                      <label>Téléphone</label>
+                      <input type="tel" name="tel" value={editFormData.tel || ''} onChange={handleEditChange} />
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Genre *</label>
+                      <select name="genre" value={editFormData.genre || 'M'} onChange={handleEditChange}>
+                        <option value="M">Masculin</option>
+                        <option value="F">Féminin</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Date naissance *</label>
+                      <input type="date" name="date_naissance" value={editFormData.date_naissance || ''} onChange={handleEditChange} />
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Date entrée *</label>
+                      <input type="date" name="date_entree" value={editFormData.date_entree || ''} onChange={handleEditChange} />
+                    </div>
+                    <div className="form-group">
+                      <label>Motif entrée</label>
+                      <input type="text" name="motif_entree" value={editFormData.motif_entree || ''} onChange={handleEditChange} />
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Direction *</label>
+                      <select name="id_direction" value={editFormData.id_direction || ''} onChange={handleEditChange}>
+                        <option value="">Sélectionner</option>
+                        {directions.map(d => <option key={d.id_direction} value={d.id_direction}>{d.nom_direction}</option>)}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Service *</label>
+                      <select name="id_service" value={editFormData.id_service || ''} onChange={handleEditChange}>
+                        <option value="">Sélectionner</option>
+                        {services.map(s => <option key={s.id_service} value={s.id_service}>{s.nom_service}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Poste *</label>
+                      <select name="id_poste" value={editFormData.id_poste || ''} onChange={handleEditChange}>
+                        <option value="">Sélectionner</option>
+                        {postes.map(p => <option key={p.id_poste} value={p.id_poste}>{p.titre_poste}</option>)}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>État *</label>
+                      <select name="id_etat" value={editFormData.id_etat || ''} onChange={handleEditChange}>
+                        {etats.map(e => <option key={e.id_etat} value={e.id_etat}>{e.nom_etat}</option>)}
+                      </select>
+                    </div>
+                  </div>
                 </div>
-                <h4>{selectedPersonnel.nom} {selectedPersonnel.prenom}</h4>
-                <span className={`badge ${selectedPersonnel.etat_nom === 'Actif' ? 'active' : 'inactive'}`}>
-                  {selectedPersonnel.etat_nom || 'Actif'}
-                </span>
-              </div>
-              <div className="view-details">
-                <div className="detail-group">
-                  <label><FontAwesomeIcon icon={faIdCard} /> Matricule</label>
-                  <span>#{selectedPersonnel.id_personnel}</span>
-                </div>
-                <div className="detail-group">
-                  <label><FontAwesomeIcon icon={faIdCard} /> CIN</label>
-                  <span>{selectedPersonnel.numero_cin}</span>
-                </div>
-                <div className="detail-group">
-                  <label><FontAwesomeIcon icon={faPhone} /> Téléphone</label>
-                  <span>{selectedPersonnel.tel || '-'}</span>
-                </div>
-                <div className="detail-group">
-                  <label><FontAwesomeIcon icon={faVenusMars} /> Genre</label>
-                  <span>{selectedPersonnel.genre === 'M' ? 'Masculin' : 'Féminin'}</span>
-                </div>
-                <div className="detail-group">
-                  <label><FontAwesomeIcon icon={faCalendarAlt} /> Date naissance</label>
-                  <span>{new Date(selectedPersonnel.date_naissance).toLocaleDateString('fr-FR')}</span>
-                </div>
-                <div className="detail-group">
-                  <label><FontAwesomeIcon icon={faCalendarAlt} /> Date entrée</label>
-                  <span>{new Date(selectedPersonnel.date_entree).toLocaleDateString('fr-FR')}</span>
-                </div>
-                <div className="detail-group">
-                  <label><FontAwesomeIcon icon={faBuilding} /> Direction</label>
-                  <span>{selectedPersonnel.direction_nom || '-'}</span>
-                </div>
-                <div className="detail-group">
-                  <label><FontAwesomeIcon icon={faBriefcase} /> Service</label>
-                  <span>{selectedPersonnel.service_nom || '-'}</span>
-                </div>
-                <div className="detail-group">
-                  <label><FontAwesomeIcon icon={faUserTie} /> Poste</label>
-                  <span>{selectedPersonnel.poste_titre || '-'}</span>
-                </div>
-                <div className="detail-group">
-                  <label>Motif entrée</label>
-                  <span>{selectedPersonnel.motif_entree || '-'}</span>
-                </div>
-              </div>
+              )}
             </div>
+
             <div className="modal-footer">
-              <Link to={`/recrutement?edit=${selectedPersonnel.id_personnel}`} className="btn-edit">
-                <FontAwesomeIcon icon={faEdit} /> Modifier
-              </Link>
-              <button className="btn-close" onClick={() => setShowViewModal(false)}>Fermer</button>
+              {!isEditing ? (
+                <>
+                  <button className="btn-edit" onClick={handleEdit}>
+                    <FontAwesomeIcon icon={faPen} /> Modifier
+                  </button>
+                  <button className="btn-close" onClick={() => { setShowViewModal(false); setIsEditing(false); }}>Fermer</button>
+                </>
+              ) : (
+                <>
+                  <button className="btn-cancel" onClick={handleCancelEdit}>
+                    <FontAwesomeIcon icon={faTimes} /> Annuler
+                  </button>
+                  <button className="btn-save" onClick={handleSaveEdit}>
+                    <FontAwesomeIcon icon={faSave} /> Enregistrer
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

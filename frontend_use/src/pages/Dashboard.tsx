@@ -105,7 +105,7 @@ const Dashboard: React.FC = () => {
     <div>
       {/* Message de bienvenue */}
       <div className="dashboard-welcome">
-        <p>Bienvenue sur votre espace de gestion RH</p>
+        <h1>Bienvenue sur votre Tableau de bord</h1>
       </div>
 
       {/* Cartes statistiques - AFFICHAGE SEULEMENT (pas de lien) */}

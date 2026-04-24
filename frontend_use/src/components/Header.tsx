@@ -1,10 +1,14 @@
-// src/components/Header.tsx
+// src/components/Header.tsx - Ajouter un bouton hamburger
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSignOutAlt, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faSignOutAlt, faUser, faBars } from '@fortawesome/free-solid-svg-icons';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  onMenuClick?: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -21,7 +25,12 @@ const Header: React.FC = () => {
   };
 
   return (
-    <div className="header">
+    <div className="dashboard-header">
+      {/* Bouton hamburger pour mobile */}
+      <button className="menu-toggle" onClick={onMenuClick}>
+        <FontAwesomeIcon icon={faBars} />
+      </button>
+
       <div className="header-user" onClick={() => setDropdownOpen(!dropdownOpen)}>
         <div className="user-avatar">{getUserInitial()}</div>
         <span className="user-name">{user.name || 'RH'}</span>
