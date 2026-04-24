@@ -7,7 +7,6 @@ import {
   faUserShield, 
   faUsers, 
   faDatabase,
-  faLock,
   faUserPlus,
   faList
 } from '@fortawesome/free-solid-svg-icons';
@@ -20,7 +19,6 @@ const Sidebar: React.FC = () => {
     { path: '/recrutement', name: 'Nouveau recrutement', icon: faUserPlus },
     { path: '/gestion-personnels', name: 'Liste des personnels', icon: faList },
     { path: '/bases', name: 'Bases', icon: faDatabase },
-    { path: '/forgot-password', name: 'Mot de passe oublié', icon: faLock },
   ];
 
   return (
@@ -29,8 +27,8 @@ const Sidebar: React.FC = () => {
         <div className="sidebar-logo">
           <img src={logoInstat} alt="INSTAT" />
         </div>
-        <h2>INSTAT</h2>
-        <p>Gestion RH</p>
+        <h2>INSTAT Madagascar</h2>
+        <p>Gestion Personnel</p>
       </div>
       
       <nav className="sidebar-nav">
