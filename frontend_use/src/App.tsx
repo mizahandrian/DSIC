@@ -13,13 +13,16 @@ import api from './Service/api';
 import './style/recrutement.css';
 import './style/gestion.css';
 
+import SuperAdmin from "./pages/SuperAdmin";
+
+<Route path="/super-admin" element={<SuperAdmin />} />
 // Pages temporaires (à remplacer plus tard)
-const SuperAdmin = () => (
+/*const SuperAdmin = () => (
   <div style={{ padding: '24px' }}>
     <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#1e293b', marginBottom: '8px' }}>Super Admin</h1>
     <p style={{ color: '#64748b' }}>Gestion des utilisateurs (à venir)</p>
   </div>
-);
+);*/
 
 const Bases = () => (
   <div style={{ padding: '24px' }}>
