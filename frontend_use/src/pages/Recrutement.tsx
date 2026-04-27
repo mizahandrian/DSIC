@@ -6,7 +6,8 @@ import {
   faUser, faIdCard, faPhone, faVenusMars, faCalendarAlt,
   faBuilding, faBriefcase, faUserTie, faChartLine,
   faCheckCircle, faHistory, faArrowLeft, faArrowRight,
-  faSave, faUserCheck, faExchangeAlt, faInfoCircle
+  faSave, faUserCheck, faExchangeAlt, faInfoCircle,
+  faTag, faLayerGroup, faGraduationCap
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 
@@ -25,13 +26,6 @@ interface Service {
 interface Poste {
   id_poste: number;
   titre_poste: string;
-}
-
-interface Carriere {
-  id_carriere: number;
-  categorie: string;
-  corps: string;
-  grade: string;
 }
 
 interface Statut {
@@ -54,8 +48,6 @@ const Recrutement: React.FC = () => {
   const [directions, setDirections] = useState<Direction[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
-  const [postes, setPostes] = useState<Poste[]>([]);
-  const [carrieres, setCarrieres] = useState<Carriere[]>([]);
   const [statuts, setStatuts] = useState<Statut[]>([]);
   const [etats, setEtats] = useState<Etat[]>([]);
 
@@ -73,10 +65,16 @@ const Recrutement: React.FC = () => {
     motif_entree: '',
     id_direction: '',
     id_service: '',
-    id_poste: '',
-    id_carriere: '',
+    poste: '', // Champ texte libre pour le poste
     
-    // Étape 3 - Statut
+    // Étape 3 - Carrière
+    categorie: '',
+    indice: '',
+    corps: '',
+    grade: '',
+    date_effet_carriere: '',
+    
+    // Étape 4 - Statut
     id_statut: '',
     id_etat: '1',
     situation: 'activite',
@@ -84,7 +82,7 @@ const Recrutement: React.FC = () => {
     destination: '',
     commentaire_situation: '',
     
-    // Étape 4 - Historique
+    // Étape 5 - Historique
     ancien_poste: '',
     ancien_direction: '',
     commentaire_historique: '',
@@ -99,7 +97,6 @@ const Recrutement: React.FC = () => {
     if (formData.id_direction) {
       const filtered = services.filter(s => s.id_direction === parseInt(formData.id_direction));
       setFilteredServices(filtered);
-      // Réinitialiser le service sélectionné
       setFormData(prev => ({ ...prev, id_service: '' }));
     } else {
       setFilteredServices([]);
@@ -108,18 +105,14 @@ const Recrutement: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      const [dirRes, servicesRes, postesRes, carrieresRes, statutsRes, etatsRes] = await Promise.all([
+      const [dirRes, servicesRes, statutsRes, etatsRes] = await Promise.all([
         api.get('/directions'),
         api.get('/services'),
-        api.get('/postes'),
-        api.get('/carrieres'),
         api.get('/statuts'),
         api.get('/etats')
       ]);
       setDirections(dirRes.data);
       setServices(servicesRes.data);
-      setPostes(postesRes.data);
-      setCarrieres(carrieresRes.data);
       setStatuts(statutsRes.data);
       setEtats(etatsRes.data);
     } catch (error) {
@@ -135,6 +128,40 @@ const Recrutement: React.FC = () => {
   const handleSubmit = async () => {
     setLoading(true);
     try {
+      // Création du poste si nouveau (champ texte libre)
+      let posteId = null;
+      if (formData.poste && formData.poste.trim() !== '') {
+        // Vérifier si le poste existe déjà
+        const postesRes = await api.get('/postes');
+        const existingPoste = postesRes.data.find((p: any) => p.titre_poste.toLowerCase() === formData.poste.toLowerCase());
+        if (existingPoste) {
+          posteId = existingPoste.id_poste;
+        } else {
+          // Créer un nouveau poste
+          const newPosteRes = await api.post('/postes', {
+            titre_poste: formData.poste,
+            indice: formData.indice || null,
+            id_service: parseInt(formData.id_service),
+            id_carriere: null
+          });
+          posteId = newPosteRes.data.id_poste;
+        }
+      }
+
+      // Création de la carrière
+      let carriereId = null;
+      if (formData.categorie && formData.corps && formData.grade) {
+        const carriereRes = await api.post('/carrieres', {
+          categorie: formData.categorie,
+          indice: formData.indice,
+          corps: formData.corps,
+          grade: formData.grade,
+          date_effet: formData.date_effet_carriere
+        });
+        carriereId = carriereRes.data.id_carriere;
+      }
+
+      // Création du personnel
       const personnelData = {
         nom: formData.nom,
         prenom: formData.prenom,
@@ -146,8 +173,8 @@ const Recrutement: React.FC = () => {
         motif_entree: formData.motif_entree,
         id_direction: parseInt(formData.id_direction),
         id_service: parseInt(formData.id_service),
-        id_poste: parseInt(formData.id_poste),
-        id_carriere: parseInt(formData.id_carriere),
+        id_poste: posteId,
+        id_carriere: carriereId,
         id_etat: parseInt(formData.id_etat),
         statuts: formData.id_statut ? [parseInt(formData.id_statut)] : [],
         situation_admin: formData.situation,
@@ -159,6 +186,7 @@ const Recrutement: React.FC = () => {
       const response = await api.post('/personnels', personnelData);
       const personnelId = response.data.id_personnel;
       
+      // Création de l'historique
       if (formData.ancien_poste || formData.ancien_direction) {
         await api.post('/historiques', {
           id_personnel: personnelId,
@@ -184,20 +212,22 @@ const Recrutement: React.FC = () => {
     setCurrentStep(1);
     setFormData({
       nom: '', prenom: '', genre: 'M', numero_cin: '', tel: '', date_naissance: '',
-      date_entree: '', motif_entree: '', id_direction: '', id_service: '', id_poste: '', id_carriere: '',
+      date_entree: '', motif_entree: '', id_direction: '', id_service: '', poste: '',
+      categorie: '', indice: '', corps: '', grade: '', date_effet_carriere: '',
       id_statut: '', id_etat: '1', situation: 'activite', date_situation: '', destination: '', commentaire_situation: '',
       ancien_poste: '', ancien_direction: '', commentaire_historique: '',
     });
   };
 
-  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 4));
+  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 5));
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
   const steps = [
     { number: 1, title: 'Identité', icon: faUser },
     { number: 2, title: 'Professionnel', icon: faBriefcase },
-    { number: 3, title: 'Statut', icon: faUserCheck },
-    { number: 4, title: 'Historique', icon: faHistory },
+    { number: 3, title: 'Carrière', icon: faChartLine },
+    { number: 4, title: 'Statut', icon: faUserCheck },
+    { number: 5, title: 'Historique', icon: faHistory },
   ];
 
   const renderStep = () => {
@@ -254,7 +284,6 @@ const Recrutement: React.FC = () => {
                 <input type="text" name="motif_entree" value={formData.motif_entree} onChange={handleChange} placeholder="Recrutement, Mutation..." />
               </div>
             </div>
-
             <div className="form-row">
               <div className="form-group">
                 <label><FontAwesomeIcon icon={faBuilding} /> Direction *</label>
@@ -263,39 +292,64 @@ const Recrutement: React.FC = () => {
                   {directions.map(d => <option key={d.id_direction} value={d.id_direction}>{d.nom_direction}</option>)}
                 </select>
               </div>
-
               <div className="form-group">
                 <label><FontAwesomeIcon icon={faBriefcase} /> Service *</label>
                 <select name="id_service" value={formData.id_service} onChange={handleChange} required disabled={!formData.id_direction}>
                   <option value="">{formData.id_direction ? "Sélectionner un service" : "Choisissez d'abord une direction"}</option>
                   {filteredServices.map(s => <option key={s.id_service} value={s.id_service}>{s.nom_service}</option>)}
                 </select>
-                {filteredServices.length === 0 && formData.id_direction && (
-                  <small className="hint-text">⚠️ Aucun service dans cette direction. Veuillez en créer dans la page "Services".</small>
-                )}
               </div>
             </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label><FontAwesomeIcon icon={faUserTie} /> Poste *</label>
-                <select name="id_poste" value={formData.id_poste} onChange={handleChange} required>
-                  <option value="">Sélectionner</option>
-                  {postes.map(p => <option key={p.id_poste} value={p.id_poste}>{p.titre_poste}</option>)}
-                </select>
-              </div>
-              <div className="form-group">
-                <label><FontAwesomeIcon icon={faChartLine} /> Carrière *</label>
-                <select name="id_carriere" value={formData.id_carriere} onChange={handleChange} required>
-                  <option value="">Sélectionner</option>
-                  {carrieres.map(c => <option key={c.id_carriere} value={c.id_carriere}>{c.categorie} - {c.corps}</option>)}
-                </select>
-              </div>
+            <div className="form-group">
+              <label><FontAwesomeIcon icon={faUserTie} /> Poste *</label>
+              <input type="text" name="poste" value={formData.poste} onChange={handleChange} placeholder="Ex: Administrateur Réseau, Développeur Full Stack..." required />
             </div>
           </div>
         );
       
       case 3:
+        return (
+          <div className="step-content">
+            <div className="info-box">
+              <FontAwesomeIcon icon={faInfoCircle} />
+              <span>Informations sur la carrière du personnel</span>
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label><FontAwesomeIcon icon={faLayerGroup} /> Catégorie *</label>
+                <select name="categorie" value={formData.categorie} onChange={handleChange} required>
+                  <option value="">Sélectionner</option>
+                  <option value="A1">A1 - Cadres Supérieurs</option>
+                  <option value="A2">A2 - Cadres Moyens</option>
+                  <option value="B1">B1 - Techniciens</option>
+                  <option value="C1">C1 - Agents</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label><FontAwesomeIcon icon={faTag} /> Indice *</label>
+                <input type="text" name="indice" value={formData.indice} onChange={handleChange} placeholder="Ex: 450, 430, 380..." required />
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label><FontAwesomeIcon icon={faGraduationCap} /> Corps *</label>
+                <input type="text" name="corps" value={formData.corps} onChange={handleChange} placeholder="Ex: Ingénieur des Travaux Statistiques..." required />
+              </div>
+              <div className="form-group">
+                <label><FontAwesomeIcon icon={faGraduationCap} /> Grade *</label>
+                <input type="text" name="grade" value={formData.grade} onChange={handleChange} placeholder="Ex: Ingénieur Principal, Technicien..." required />
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label><FontAwesomeIcon icon={faCalendarAlt} /> Date d'effet *</label>
+                <input type="date" name="date_effet_carriere" value={formData.date_effet_carriere} onChange={handleChange} required />
+              </div>
+            </div>
+          </div>
+        );
+      
+      case 4:
         return (
           <div className="step-content">
             <div className="form-row">
@@ -340,12 +394,12 @@ const Recrutement: React.FC = () => {
           </div>
         );
       
-      case 4:
+      case 5:
         return (
           <div className="step-content">
             <div className="info-box">
               <FontAwesomeIcon icon={faInfoCircle} />
-              <span>Ces informations concernent l'historique du personnel avant son arrivée</span>
+              <span>Historique avant l'arrivée du personnel</span>
             </div>
             <div className="form-row">
               <div className="form-group">
@@ -366,7 +420,8 @@ const Recrutement: React.FC = () => {
               <p><strong>{formData.nom} {formData.prenom}</strong> - {formData.numero_cin}</p>
               <p>Direction: {directions.find(d => d.id_direction.toString() === formData.id_direction)?.nom_direction || '-'}</p>
               <p>Service: {services.find(s => s.id_service.toString() === formData.id_service)?.nom_service || '-'}</p>
-              <p>Poste: {postes.find(p => p.id_poste.toString() === formData.id_poste)?.titre_poste || '-'}</p>
+              <p>Poste: {formData.poste || '-'}</p>
+              <p>Carrière: {formData.categorie} - {formData.corps} ({formData.grade})</p>
             </div>
           </div>
         );
@@ -401,7 +456,7 @@ const Recrutement: React.FC = () => {
               <FontAwesomeIcon icon={faArrowLeft} /> Précédent
             </button>
           )}
-          {currentStep < 4 ? (
+          {currentStep < 5 ? (
             <button type="button" className="btn-next" onClick={nextStep}>
               Suivant <FontAwesomeIcon icon={faArrowRight} />
             </button>

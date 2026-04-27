@@ -5,7 +5,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faTachometerAlt, 
   faUserShield, 
-  faUsers, 
   faDatabase,
   faUserPlus,
   faList,
@@ -22,7 +21,8 @@ const Sidebar: React.FC = () => {
     { path: '/gestion-personnels', name: 'Liste des personnels', icon: faList },
     { path: '/gestion-directions', name: 'Directions', icon: faBuilding },
     { path: '/gestion-services', name: 'Services', icon: faBriefcase },
-    { path: '/bases', name: 'Bases', icon: faDatabase },
+    { path: '/base-rohi', name: 'Base ROHI', icon: faDatabase },
+    { path: '/base-augure', name: 'Base AUGURE', icon: faDatabase },
 
   ];
 
