@@ -206,3 +206,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // ==================== ROUTES USERS ====================
 Route::get('/users', [UserController::class, 'index']);
+
+//route personnel vaovao
+Route::get('/directions', [DirectionController::class, 'index']);
+Route::get('/postes', [PosteController::class, 'index']);
+Route::get('/carrieres', [CarriereController::class, 'index']);
+Route::get('/statuts', [StatutController::class, 'index']);
+Route::get('/etats', [EtatController::class, 'index']);
+
+Route::get('/services/direction/{id}', [ServiceController::class, 'getByDirection']);
+
+Route::post('/personnels', [PersonnelController::class, 'store']);
+Route::post('/historiques', [HistoriqueController::class, 'store']);
