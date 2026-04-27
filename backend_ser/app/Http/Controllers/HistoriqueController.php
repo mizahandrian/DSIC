@@ -30,25 +30,17 @@ class HistoriqueController extends Controller
 
     // CREATE
     public function store(Request $request)
-    {
-        $request->validate([
-            'id_personnel' => 'required',
-            'ancien_poste' => 'required',
-            'ancien_direction' => 'required',
-        ]);
+{
+    $historique = Historique::create([
+        'id_personnel' => $request->id_personnel,
+        'ancien_poste' => $request->ancien_poste,
+        'ancien_direction' => $request->ancien_direction,
+        'motif_changement' => $request->motif_changement,
+        'date_changement' => $request->date_changement,
+    ]);
 
-        // ⚠️ règle métier : 1 seul historique par personnel
-        $exists = Historique::where('id_personnel', $request->id_personnel)->first();
-
-        if ($exists) {
-            return response()->json([
-                'message' => 'Ce personnel a déjà un historique'
-            ], 422);
-        }
-
-        return Historique::create($request->all());
-    }
-
+    return response()->json($historique);
+}
     // SHOW
     public function show($id)
     {
