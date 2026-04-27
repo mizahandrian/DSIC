@@ -12,10 +12,11 @@ import ResetPassword from './pages/ResetPassword';
 import api from './Service/api';
 import './style/recrutement.css';
 import './style/gestion.css';
+import GestionDirections from './pages/GestionDirections';
+import GestionServices from './pages/GestionServices';
 
-import SuperAdmin from "./pages/SuperAdmin";
 
-<Route path="/super-admin" element={<SuperAdmin />} />
+
 // Pages temporaires (à remplacer plus tard)
 /*const SuperAdmin = () => (
   <div style={{ padding: '24px' }}>
@@ -75,9 +76,10 @@ const App: React.FC = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/recrutement" element={<Recrutement />} />
           <Route path="/gestion-personnels" element={<GestionPersonnels />} />
-          <Route path="/super-admin" element={<SuperAdmin />} />
           <Route path="/bases" element={<Bases />} />
           <Route path="/" element={<Navigate to="/dashboard" />} />
+          <Route path="/gestion-directions" element={<GestionDirections />} />
+          <Route path="/gestion-services" element={<GestionServices />} />
         </Route>
         
         {/* Redirection par défaut */}

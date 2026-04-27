@@ -9,16 +9,17 @@ import {
   faSave, faUserCheck, faExchangeAlt, faInfoCircle
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
-import '../style/recrutement.css';
 
 interface Direction {
   id_direction: number;
   nom_direction: string;
+  type: string;
 }
 
 interface Service {
   id_service: number;
   nom_service: string;
+  id_direction: number;
 }
 
 interface Poste {
@@ -48,8 +49,11 @@ const Recrutement: React.FC = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  
+  // Données principales
   const [directions, setDirections] = useState<Direction[]>([]);
   const [services, setServices] = useState<Service[]>([]);
+  const [filteredServices, setFilteredServices] = useState<Service[]>([]);
   const [postes, setPostes] = useState<Poste[]>([]);
   const [carrieres, setCarrieres] = useState<Carriere[]>([]);
   const [statuts, setStatuts] = useState<Statut[]>([]);
@@ -90,35 +94,34 @@ const Recrutement: React.FC = () => {
     fetchData();
   }, []);
 
+  // Filtrer les services quand la direction change
   useEffect(() => {
     if (formData.id_direction) {
-      fetchServicesByDirection(parseInt(formData.id_direction));
+      const filtered = services.filter(s => s.id_direction === parseInt(formData.id_direction));
+      setFilteredServices(filtered);
+      // Réinitialiser le service sélectionné
+      setFormData(prev => ({ ...prev, id_service: '' }));
+    } else {
+      setFilteredServices([]);
     }
-  }, [formData.id_direction]);
+  }, [formData.id_direction, services]);
 
   const fetchData = async () => {
     try {
-      const [dirRes, postesRes, carrieresRes, statutsRes, etatsRes] = await Promise.all([
+      const [dirRes, servicesRes, postesRes, carrieresRes, statutsRes, etatsRes] = await Promise.all([
         api.get('/directions'),
+        api.get('/services'),
         api.get('/postes'),
         api.get('/carrieres'),
         api.get('/statuts'),
         api.get('/etats')
       ]);
       setDirections(dirRes.data);
+      setServices(servicesRes.data);
       setPostes(postesRes.data);
       setCarrieres(carrieresRes.data);
       setStatuts(statutsRes.data);
       setEtats(etatsRes.data);
-    } catch (error) {
-      console.error('Erreur:', error);
-    }
-  };
-
-  const fetchServicesByDirection = async (directionId: number) => {
-    try {
-      const response = await api.get(`/services/direction/${directionId}`);
-      setServices(response.data);
     } catch (error) {
       console.error('Erreur:', error);
     }
@@ -132,7 +135,6 @@ const Recrutement: React.FC = () => {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      // Création du personnel
       const personnelData = {
         nom: formData.nom,
         prenom: formData.prenom,
@@ -157,7 +159,6 @@ const Recrutement: React.FC = () => {
       const response = await api.post('/personnels', personnelData);
       const personnelId = response.data.id_personnel;
       
-      // Création de l'historique
       if (formData.ancien_poste || formData.ancien_direction) {
         await api.post('/historiques', {
           id_personnel: personnelId,
@@ -169,7 +170,7 @@ const Recrutement: React.FC = () => {
       }
       
       alert('Personnel ajouté avec succès !');
-      navigate('/recrutement');
+      navigate('/gestion-personnels');
       resetForm();
     } catch (error) {
       console.error('Erreur:', error);
@@ -253,22 +254,28 @@ const Recrutement: React.FC = () => {
                 <input type="text" name="motif_entree" value={formData.motif_entree} onChange={handleChange} placeholder="Recrutement, Mutation..." />
               </div>
             </div>
+
             <div className="form-row">
               <div className="form-group">
                 <label><FontAwesomeIcon icon={faBuilding} /> Direction *</label>
                 <select name="id_direction" value={formData.id_direction} onChange={handleChange} required>
-                  <option value="">Sélectionner</option>
+                  <option value="">Sélectionner une direction</option>
                   {directions.map(d => <option key={d.id_direction} value={d.id_direction}>{d.nom_direction}</option>)}
                 </select>
               </div>
+
               <div className="form-group">
                 <label><FontAwesomeIcon icon={faBriefcase} /> Service *</label>
                 <select name="id_service" value={formData.id_service} onChange={handleChange} required disabled={!formData.id_direction}>
-                  <option value="">Sélectionner</option>
-                  {services.map(s => <option key={s.id_service} value={s.id_service}>{s.nom_service}</option>)}
+                  <option value="">{formData.id_direction ? "Sélectionner un service" : "Choisissez d'abord une direction"}</option>
+                  {filteredServices.map(s => <option key={s.id_service} value={s.id_service}>{s.nom_service}</option>)}
                 </select>
+                {filteredServices.length === 0 && formData.id_direction && (
+                  <small className="hint-text">⚠️ Aucun service dans cette direction. Veuillez en créer dans la page "Services".</small>
+                )}
               </div>
             </div>
+
             <div className="form-row">
               <div className="form-group">
                 <label><FontAwesomeIcon icon={faUserTie} /> Poste *</label>
@@ -310,7 +317,6 @@ const Recrutement: React.FC = () => {
               <div className="form-group">
                 <label><FontAwesomeIcon icon={faExchangeAlt} /> Situation</label>
                 <select name="situation" value={formData.situation} onChange={handleChange}>
-                  <option value="activite">Activité</option>
                   <option value="mise_disposition">Mise à disposition</option>
                   <option value="detachement">Détachement</option>
                   <option value="disponibilite">Disponibilité</option>
@@ -359,6 +365,7 @@ const Recrutement: React.FC = () => {
               <h4>Récapitulatif</h4>
               <p><strong>{formData.nom} {formData.prenom}</strong> - {formData.numero_cin}</p>
               <p>Direction: {directions.find(d => d.id_direction.toString() === formData.id_direction)?.nom_direction || '-'}</p>
+              <p>Service: {services.find(s => s.id_service.toString() === formData.id_service)?.nom_service || '-'}</p>
               <p>Poste: {postes.find(p => p.id_poste.toString() === formData.id_poste)?.titre_poste || '-'}</p>
             </div>
           </div>
@@ -375,20 +382,16 @@ const Recrutement: React.FC = () => {
         <p>Ajoutez un personnel en remplissant les informations ci-dessous</p>
       </div>
 
-      {/* Indicateur d'étape */}
       <div className="steps-indicator">
         {steps.map((step) => (
           <div key={step.number} className={`step-item ${currentStep >= step.number ? 'active' : ''}`}>
-            <div className="step-circle">
-              <FontAwesomeIcon icon={step.icon} />
-            </div>
+            <div className="step-circle"><FontAwesomeIcon icon={step.icon} /></div>
             <span className="step-title">{step.title}</span>
             {step.number < steps.length && <div className="step-line"></div>}
           </div>
         ))}
       </div>
 
-      {/* Formulaire */}
       <div className="recrutement-form">
         {renderStep()}
         

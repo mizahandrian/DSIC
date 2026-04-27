@@ -278,3 +278,105 @@
       justify-content: center;
     }
   }
+
+  /* Ajouter à la fin du fichier recrutement.css */
+
+/* Styles pour les selects avec bouton d'ajout */
+.select-with-button {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.select-with-button select {
+  flex: 1;
+}
+
+.btn-add-quick {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-add-quick:hover {
+  background: #0d9488;
+  transform: translateY(-1px);
+}
+
+.hint-text {
+  display: block;
+  font-size: 11px;
+  color: #f59e0b;
+  margin-top: 5px;
+}
+
+/* Modal petit */
+.modal-small {
+  background: white;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 450px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: fadeInUp 0.3s ease;
+}
+
+.modal-small .modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #eef2f6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-small .modal-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-small .modal-body {
+  padding: 24px;
+}
+
+.modal-small .modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #eef2f6;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.modal-small .btn-cancel {
+  background: white;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  padding: 8px 20px;
+  border-radius: 40px;
+  cursor: pointer;
+}
+
+.modal-small .btn-confirm {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 40px;
+  cursor: pointer;
+}
+
+.modal-small .btn-confirm:hover {
+  background: #0d9488;
+}

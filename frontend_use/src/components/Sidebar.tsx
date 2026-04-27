@@ -8,7 +8,9 @@ import {
   faUsers, 
   faDatabase,
   faUserPlus,
-  faList
+  faList,
+  faBriefcase,
+  faBuilding
 } from '@fortawesome/free-solid-svg-icons';
 import logoInstat from '../assets/image/Logo-INSTAT.png';
 
@@ -16,9 +18,12 @@ const Sidebar: React.FC = () => {
   const menuItems = [
     { path: '/dashboard', name: 'Tableau de bord', icon: faTachometerAlt },
     { path: '/super-admin', name: 'Super Admin', icon: faUserShield },
-    { path: '/recrutement', name: 'Nouveau recrutement', icon: faUserPlus },
+    { path: '/recrutement', name: 'Personnel', icon: faUserPlus },
     { path: '/gestion-personnels', name: 'Liste des personnels', icon: faList },
+    { path: '/gestion-directions', name: 'Directions', icon: faBuilding },
+    { path: '/gestion-services', name: 'Services', icon: faBriefcase },
     { path: '/bases', name: 'Bases', icon: faDatabase },
+
   ];
 
   return (
