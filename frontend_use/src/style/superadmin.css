@@ -1,0 +1,354 @@
+/* src/style/superadmin.css */
+.superadmin-container {
+    padding: 24px;
+    background: #f5f5f5;
+    min-height: calc(100vh - 64px);
+  }
+  
+  /* En-tête */
+  .superadmin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  
+  .superadmin-header h1 {
+    font-size: 24px;
+    font-weight: 500;
+    color: #222;
+    margin: 0 0 4px 0;
+  }
+  
+  .superadmin-header p {
+    font-size: 13px;
+    color: #888;
+    margin: 0;
+  }
+  
+  .btn-primary {
+    background: #222;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.2s;
+  }
+  
+  .btn-primary:hover {
+    background: #444;
+  }
+  
+  /* Filtres */
+  .filters-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  
+  .search-input {
+    flex: 1;
+    max-width: 320px;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 13px;
+    background: white;
+  }
+  
+  .search-input:focus {
+    outline: none;
+    border-color: #aaa;
+  }
+  
+  .filter-select {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 13px;
+    background: white;
+    cursor: pointer;
+  }
+  
+  /* Tableau */
+  .table-wrapper {
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    overflow-x: auto;
+  }
+  
+  .user-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  
+  .user-table th {
+    text-align: left;
+    padding: 14px 16px;
+    background: #fafafa;
+    color: #888;
+    font-weight: 500;
+    font-size: 12px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .user-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #555;
+  }
+  
+  .user-table tr:hover {
+    background: #fafafa;
+  }
+  
+  .user-name-cell {
+    font-weight: 500;
+    color: #222;
+  }
+  
+  /* Badges */
+  .role-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .role-dg {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+  
+  .role-rh {
+    background: #e3f2fd;
+    color: #1565c0;
+  }
+  
+  .role-chef_dsic {
+    background: #fff3e0;
+    color: #e65100;
+  }
+  
+  .status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .status-active {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+  
+  .status-inactive {
+    background: #ffebee;
+    color: #c62828;
+  }
+  
+  /* Boutons d'action */
+  .actions-cell {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  
+  .btn-edit, .btn-status, .btn-delete {
+    padding: 6px 14px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .btn-edit:hover {
+    background: #e3f2fd;
+    border-color: #90caf9;
+    color: #1565c0;
+  }
+  
+  .btn-status:hover {
+    background: #e8f5e9;
+    border-color: #a5d6a7;
+    color: #2e7d32;
+  }
+  
+  .btn-delete:hover {
+    background: #ffebee;
+    border-color: #ffcdd2;
+    color: #c62828;
+  }
+  
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 60px;
+    color: #aaa;
+  }
+  
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  .modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .modal-header h3 {
+    font-size: 18px;
+    font-weight: 500;
+    color: #222;
+    margin: 0;
+  }
+  
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #aaa;
+  }
+  
+  .modal-body {
+    padding: 24px;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 6px;
+  }
+  
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+  
+  .form-group input:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: #aaa;
+  }
+  
+  .form-group small {
+    display: block;
+    font-size: 11px;
+    color: #888;
+    margin-top: 4px;
+  }
+  
+  .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+  
+  .btn-cancel {
+    padding: 8px 20px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  
+  .btn-save {
+    padding: 8px 24px;
+    background: #222;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  
+  .btn-save:hover {
+    background: #444;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .superadmin-container {
+      padding: 16px;
+    }
+    
+    .superadmin-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .btn-primary {
+      width: 100%;
+      text-align: center;
+    }
+    
+    .filters-bar {
+      flex-direction: column;
+    }
+    
+    .search-input {
+      max-width: 100%;
+    }
+    
+    .filter-select {
+      width: 100%;
+    }
+    
+    .actions-cell {
+      flex-direction: column;
+    }
+    
+    .btn-edit, .btn-status, .btn-delete {
+      width: 100%;
+      text-align: center;
+    }
+  }

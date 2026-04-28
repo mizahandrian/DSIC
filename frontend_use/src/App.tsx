@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AuthLayout from './components/AuthLayout';
 import MainLayout from './components/MainLayout';
 import Dashboard from './pages/Dashboard';
+import SuperAdmin from './pages/SuperAdmin';
 import Recrutement from './pages/Recrutement';
 import GestionPersonnels from './pages/GestionPersonnels';
 import ForgotPassword from './pages/ForgotPassword';
@@ -75,6 +76,7 @@ const App: React.FC = () => {
         {/* Routes protégées avec layout principal */}
         <Route element={isAuthenticated ? <MainLayout /> : <Navigate to="/login" />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/super-admin" element={<SuperAdmin />} />
           <Route path="/recrutement" element={<Recrutement />} />
           <Route path="/gestion-personnels" element={<GestionPersonnels />} />
           <Route path="/bases" element={<Bases />} />

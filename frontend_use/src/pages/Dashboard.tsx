@@ -1,20 +1,48 @@
 // src/pages/Dashboard.tsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
+import { Bar, Line } from 'react-chartjs-2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
+import {
   faUsers, faBuilding, faBriefcase, faUserTie,
   faUserPlus, faUserEdit, faUserCheck,
-  faFileAlt, faChevronRight, faChartLine, faChartSimple
+  faFileAlt, faChevronRight, faChartLine, faChartBar
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
+
+// Enregistrement Chart.js
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 interface DashboardStats {
   totalPersonnels: number;
   totalDirections: number;
   totalServices: number;
   totalPostes: number;
-  evolutionData: number[];
+  personnelsActifs: number;
+  personnelsInactifs: number;
+  directionsData: { name: string; count: number }[];
   recents: any[];
 }
 
@@ -24,7 +52,9 @@ const Dashboard: React.FC = () => {
     totalDirections: 0,
     totalServices: 0,
     totalPostes: 0,
-    evolutionData: [12, 15, 18, 22, 25, 30, 35, 38, 42, 45, 48, 52],
+    personnelsActifs: 0,
+    personnelsInactifs: 0,
+    directionsData: [],
     recents: []
   });
   const [loading, setLoading] = useState(true);
@@ -43,13 +73,25 @@ const Dashboard: React.FC = () => {
       ]);
 
       const personnels = personnelsRes.data;
+      const directions = directionsRes.data;
+
+      const actifs = personnels.filter((p: any) => p.id_etat === 1 || p.etat_nom === 'Actif').length;
+      const inactifs = personnels.length - actifs;
+
+      // Données pour le graphique en barres (Top 6 directions)
+      const directionsStats = directions.slice(0, 6).map((d: any) => ({
+        name: d.nom_direction.length > 15 ? d.nom_direction.substring(0, 15) + '...' : d.nom_direction,
+        count: personnels.filter((p: any) => p.id_direction === d.id_direction).length
+      })).sort((a: any, b: any) => b.count - a.count);
 
       setStats({
         totalPersonnels: personnels.length,
-        totalDirections: directionsRes.data.length,
+        totalDirections: directions.length,
         totalServices: servicesRes.data.length,
         totalPostes: postesRes.data.length,
-        evolutionData: [12, 15, 18, 22, 25, 30, 35, 38, 42, 45, 48, personnels.length],
+        personnelsActifs: actifs,
+        personnelsInactifs: inactifs,
+        directionsData: directionsStats,
         recents: [...personnels].slice(0, 5)
       });
     } catch (error) {
@@ -59,7 +101,134 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Cartes statistiques - AFFICHAGE UNIQUEMENT (sans lien)
+  // Configuration du graphique en barres (bâtonnets)
+  const barChartData = {
+    labels: stats.directionsData.map(d => d.name),
+    datasets: [
+      {
+        label: 'Nombre de personnels',
+        data: stats.directionsData.map(d => d.count),
+        backgroundColor: '#10b981',
+        borderColor: '#0d9488',
+        borderWidth: 1,
+        borderRadius: 6,
+        barPercentage: 0.65,
+        categoryPercentage: 0.8,
+      },
+    ],
+  };
+
+  const barChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+        labels: {
+          font: { size: 11 },
+          color: '#64748b',
+          boxWidth: 10,
+          usePointStyle: true,
+          pointStyle: 'circle',
+        },
+      },
+      tooltip: {
+        backgroundColor: '#1e293b',
+        titleColor: '#ffffff',
+        bodyColor: '#94a3b8',
+        callbacks: {
+          label: (context: any) => `Personnels: ${context.raw}`,
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: { color: '#e2e8f0' },
+        ticks: { color: '#64748b', stepSize: 1 },
+        title: {
+          display: true,
+          text: 'Nombre de personnels',
+          color: '#64748b',
+          font: { size: 11 },
+        },
+      },
+      x: {
+        grid: { display: false },
+        ticks: { color: '#64748b', font: { size: 11 } },
+      },
+    },
+  };
+
+  // Données pour l'évolution (12 mois)
+  const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+  const evolutionData = months.map((_, i) => {
+    // Simulation de croissance basée sur le nombre total de personnels
+    return Math.max(1, Math.round(stats.totalPersonnels * (i + 1) / 12));
+  });
+
+  const lineChartData = {
+    labels: months,
+    datasets: [
+      {
+        label: 'Effectifs',
+        data: evolutionData,
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.05)',
+        borderWidth: 2,
+        pointBackgroundColor: '#10b981',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 1,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        tension: 0.3,
+        fill: true,
+      },
+    ],
+  };
+
+  const lineChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+        labels: {
+          font: { size: 11 },
+          color: '#64748b',
+          boxWidth: 10,
+          usePointStyle: true,
+          pointStyle: 'circle',
+        },
+      },
+      tooltip: {
+        backgroundColor: '#1e293b',
+        titleColor: '#ffffff',
+        bodyColor: '#94a3b8',
+        callbacks: {
+          label: (context: any) => `Effectifs: ${context.raw} personnels`,
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: { color: '#e2e8f0' },
+        ticks: { color: '#64748b', stepSize: 10 },
+        title: {
+          display: true,
+          text: 'Nombre de personnels',
+          color: '#64748b',
+          font: { size: 11 },
+        },
+      },
+      x: {
+        grid: { display: false },
+        ticks: { color: '#64748b', font: { size: 11 } },
+      },
+    },
+  };
+
   const statCards = [
     { title: 'Personnels', value: stats.totalPersonnels, icon: faUsers },
     { title: 'Directions', value: stats.totalDirections, icon: faBuilding },
@@ -74,28 +243,10 @@ const Dashboard: React.FC = () => {
     { title: 'Voir rapports', icon: faFileAlt, desc: 'Export données', link: '/gestion-personnels' },
   ];
 
-  const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
-  const maxEvolution = Math.max(...stats.evolutionData, 1);
-
-  // Calcul des points pour la courbe (coordonnées SVG)
-  const getCurvePoints = () => {
-    const width = 100;
-    const height = 60;
-    const step = width / (stats.evolutionData.length - 1);
-    
-    return stats.evolutionData.map((value, index) => {
-      const x = index * step;
-      const y = height - (value / maxEvolution) * height;
-      return `${x},${y}`;
-    }).join(' ');
-  };
-
-  const points = getCurvePoints();
-
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-        <div style={{ width: '40px', height: '40px', border: '2px solid #eef2f6', borderTopColor: '#10b981', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+        <div style={{ width: '32px', height: '32px', border: '2px solid #e2e8f0', borderTopColor: '#10b981', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
@@ -108,7 +259,7 @@ const Dashboard: React.FC = () => {
         <h1>Bienvenue sur votre Tableau de bord</h1>
       </div>
 
-      {/* Cartes statistiques - AFFICHAGE SEULEMENT (pas de lien) */}
+      {/* Cartes statistiques */}
       <div className="stats-grid">
         {statCards.map((card, i) => (
           <div className="stat-card" key={i}>
@@ -123,9 +274,29 @@ const Dashboard: React.FC = () => {
         ))}
       </div>
 
-      {/* Section des 2 courbes */}
+      {/* Graphiques */}
       <div className="charts-grid">
-        {/* Courbe 1 : Évolution des effectifs */}
+        {/* Graphique en barres - Top directions */}
+        <div className="chart-card">
+          <div className="chart-header">
+            <div className="chart-icon">
+              <FontAwesomeIcon icon={faChartBar} />
+            </div>
+            <div>
+              <h3 className="chart-title">Top directions</h3>
+              <p className="chart-subtitle">Nombre de personnels par direction</p>
+            </div>
+          </div>
+          <div className="chart-container">
+            {stats.directionsData.length > 0 ? (
+              <Bar data={barChartData} options={barChartOptions} />
+            ) : (
+              <div className="no-data">Aucune donnée disponible</div>
+            )}
+          </div>
+        </div>
+
+        {/* Graphique en ligne - Évolution */}
         <div className="chart-card">
           <div className="chart-header">
             <div className="chart-icon">
@@ -133,110 +304,44 @@ const Dashboard: React.FC = () => {
             </div>
             <div>
               <h3 className="chart-title">Évolution des effectifs</h3>
-              <p className="chart-subtitle">Comparaison 2024 vs 2025</p>
+              <p className="chart-subtitle">Tendance sur 12 mois</p>
             </div>
           </div>
-          <div className="curve-container">
-            <svg viewBox="0 0 100 60" preserveAspectRatio="none" className="curve-svg">
-              {/* Courbe 2024 */}
-              <polyline
-                points="0,50 9,48 18,45 27,40 36,35 45,30 54,25 63,22 72,18 81,15 90,12 100,10"
-                fill="none"
-                stroke="#94a3b8"
-                strokeWidth="1.5"
-                strokeDasharray="4"
-                className="curve-line"
-              />
-              {/* Courbe 2025 (données réelles) */}
-              <polyline
-                points={points}
-                fill="none"
-                stroke="#10b981"
-                strokeWidth="2"
-                className="curve-line curve-active"
-              />
-              {/* Points sur la courbe active */}
-              {stats.evolutionData.map((_, idx) => (
-                <circle
-                  key={idx}
-                  cx={idx * (100 / (stats.evolutionData.length - 1))}
-                  cy={60 - (stats.evolutionData[idx] / maxEvolution) * 60}
-                  r="1.2"
-                  fill="#10b981"
-                  className="curve-dot"
-                />
-              ))}
-            </svg>
-            <div className="curve-labels">
-              {months.map((month, idx) => (
-                <span key={idx} className="curve-label">{month}</span>
-              ))}
-            </div>
-            <div className="curve-legend">
-              <span className="legend-dot dashed"></span>
-              <span className="legend-text">2024 (prévision)</span>
-              <span className="legend-dot solid"></span>
-              <span className="legend-text">2025 (réel)</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Courbe 2 : Répartition par catégorie */}
-        <div className="chart-card">
-          <div className="chart-header">
-            <div className="chart-icon">
-              <FontAwesomeIcon icon={faChartSimple} />
-            </div>
-            <div>
-              <h3 className="chart-title">Répartition par catégorie</h3>
-              <p className="chart-subtitle">Cadres vs Techniciens vs Agents</p>
-            </div>
-          </div>
-          <div className="curve-container">
-            <svg viewBox="0 0 100 60" preserveAspectRatio="none" className="curve-svg">
-              {/* Cadres */}
-              <polyline
-                points="0,45 9,42 18,38 27,35 36,30 45,28 54,25 63,22 72,20 81,18 90,15 100,12"
-                fill="none"
-                stroke="#3b82f6"
-                strokeWidth="2"
-                className="curve-line"
-              />
-              {/* Techniciens */}
-              <polyline
-                points="0,52 9,50 18,48 27,45 36,42 45,40 54,38 63,35 72,32 81,30 90,28 100,25"
-                fill="none"
-                stroke="#f59e0b"
-                strokeWidth="2"
-                className="curve-line"
-              />
-              {/* Agents */}
-              <polyline
-                points="0,58 9,56 18,55 27,53 36,52 45,50 54,48 63,46 72,44 81,42 90,40 100,38"
-                fill="none"
-                stroke="#8b5cf6"
-                strokeWidth="2"
-                className="curve-line"
-              />
-            </svg>
-            <div className="curve-labels">
-              {months.map((month, idx) => (
-                <span key={idx} className="curve-label">{month}</span>
-              ))}
-            </div>
-            <div className="curve-legend">
-              <span className="legend-dot" style={{ background: '#3b82f6' }}></span>
-              <span className="legend-text">Cadres</span>
-              <span className="legend-dot" style={{ background: '#f59e0b' }}></span>
-              <span className="legend-text">Techniciens</span>
-              <span className="legend-dot" style={{ background: '#8b5cf6' }}></span>
-              <span className="legend-text">Agents</span>
-            </div>
+          <div className="chart-container">
+            <Line data={lineChartData} options={lineChartOptions} />
           </div>
         </div>
       </div>
 
-      {/* Actions rapides - accès direct */}
+      {/* État des personnels simplifié */}
+      <div className="stats-simple">
+        <div className="stat-card-mini">
+          <div className="stat-info">
+            <h3>Personnels actifs</h3>
+            <p className="stat-number">{stats.personnelsActifs}</p>
+            <div className="stat-progress">
+              <div className="progress-bar" style={{ width: `${(stats.personnelsActifs / (stats.totalPersonnels || 1)) * 100}%` }}></div>
+            </div>
+          </div>
+          <div className="stat-icon-mini">
+            <FontAwesomeIcon icon={faUserCheck} />
+          </div>
+        </div>
+        <div className="stat-card-mini">
+          <div className="stat-info">
+            <h3>Personnels inactifs</h3>
+            <p className="stat-number">{stats.personnelsInactifs}</p>
+            <div className="stat-progress">
+              <div className="progress-bar" style={{ width: `${(stats.personnelsInactifs / (stats.totalPersonnels || 1)) * 100}%`, background: '#e2e8f0' }}></div>
+            </div>
+          </div>
+          <div className="stat-icon-mini">
+            <FontAwesomeIcon icon={faUserCheck} style={{ color: '#94a3b8' }} />
+          </div>
+        </div>
+      </div>
+
+      {/* Actions rapides */}
       <div className="quick-actions">
         {quickActions.map((action, i) => (
           <Link to={action.link} key={i} className="quick-card">
