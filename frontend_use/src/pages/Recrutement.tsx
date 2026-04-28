@@ -48,6 +48,7 @@ const Recrutement: React.FC = () => {
   const [directions, setDirections] = useState<Direction[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
+  
   const [statuts, setStatuts] = useState<Statut[]>([]);
   const [etats, setEtats] = useState<Etat[]>([]);
 
@@ -91,23 +92,43 @@ const Recrutement: React.FC = () => {
   useEffect(() => {
     fetchData();
   }, []);
+//model vaovao
+const fetchServicesByDirection = async (directionId: number) => {
+  try {
+    const res = await api.get(`/services/direction/${directionId}`);
+    setFilteredServices(res.data);
 
+    setFormData(prev => ({
+      ...prev,
+      id_service: ''
+    }));
+
+  } catch (error) {
+    console.error(error);
+  }
+};
   // Filtrer les services quand la direction change
+  //  useEffect(() => {
+  //    if (formData.id_direction) {
+  //      const filtered = services.filter(s => s.id_direction === parseInt(formData.id_direction));
+  //      setFilteredServices(filtered);
+  //      setFormData(prev => ({ ...prev, id_service: '' }));
+  //    } else {
+  //      setFilteredServices([]);
+  //    }
+  //  }, [formData.id_direction, services]);
   useEffect(() => {
-    if (formData.id_direction) {
-      const filtered = services.filter(s => s.id_direction === parseInt(formData.id_direction));
-      setFilteredServices(filtered);
-      setFormData(prev => ({ ...prev, id_service: '' }));
-    } else {
-      setFilteredServices([]);
-    }
-  }, [formData.id_direction, services]);
+  if (formData.id_direction) {
+    api.get(`/services/direction/${formData.id_direction}`)
+      .then(res => setFilteredServices(res.data));
+  }
+}, [formData.id_direction]);
 
   const fetchData = async () => {
     try {
       const [dirRes, servicesRes, statutsRes, etatsRes] = await Promise.all([
         api.get('/directions'),
-        api.get('/services'),
+        api.get('/services/direction/1'),
         api.get('/statuts'),
         api.get('/etats')
       ]);
@@ -296,7 +317,11 @@ const Recrutement: React.FC = () => {
                 <label><FontAwesomeIcon icon={faBriefcase} /> Service *</label>
                 <select name="id_service" value={formData.id_service} onChange={handleChange} required disabled={!formData.id_direction}>
                   <option value="">{formData.id_direction ? "Sélectionner un service" : "Choisissez d'abord une direction"}</option>
-                  {filteredServices.map(s => <option key={s.id_service} value={s.id_service}>{s.nom_service}</option>)}
+                  {filteredServices.map(s => (
+  <option key={s.id_service} value={s.id_service}>
+    {s.nom_service}
+  </option>
+))}
                 </select>
               </div>
             </div>
