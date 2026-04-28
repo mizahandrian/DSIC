@@ -14,6 +14,13 @@ class PersonnelController extends Controller
 
    public function store(Request $request)
 {
+      // 🔥 VALIDATION (AJOUT ICI)
+    $request->validate([
+        'nom' => 'required',
+        'prenom' => 'required',
+        'id_direction' => 'required|exists:directions,id_direction',
+        'id_service' => 'required|exists:services,id_service',
+    ]);
     // 1. créer personnel (champs contrôlés)
     $personnel = Personnel::create([
         'nom' => $request->nom,

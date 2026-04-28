@@ -5,19 +5,21 @@ use Illuminate\Http\Request;
 
 class ServiceController extends Controller
 {
-    public function index()
-    {
-        return Service::with('direction')->get()->map(function ($service) {
+public function getByDirection($id)
+{
+    return Service::where('id_direction', $id)
+        ->with('direction')
+        ->orderBy('nom_service') // 👈 AJOUT ICI
+        ->get()
+        ->map(function ($service) {
             return [
                 'id_service' => $service->id_service,
                 'nom_service' => $service->nom_service,
                 'id_direction' => $service->id_direction,
                 'direction_nom' => $service->direction->nom_direction ?? null,
-                'description' => $service->description,
-                'nombre_personnels' => $service->nombre_personnels
             ];
         });
-    }
+}
 
     public function store(Request $request)
     {
@@ -36,4 +38,5 @@ class ServiceController extends Controller
         Service::destroy($id);
         return response()->json(['message' => 'Supprimé']);
     }
+    
 }
