@@ -11,11 +11,13 @@ class Direction extends Model
     protected $fillable = [
         'nom_direction',
         'type',
-        'description',
-        'nombre_services',
-        'nombre_personnels'
+        'description'
     ];
-     public function services()
+
+    public $timestamps = true;
+
+    // Relation avec services
+    public function services()
     {
         return $this->hasMany(Service::class, 'id_direction');
     }

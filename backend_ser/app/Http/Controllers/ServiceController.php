@@ -9,7 +9,7 @@ public function getByDirection($id)
 {
     return Service::where('id_direction', $id)
         ->with('direction')
-        ->orderBy('nom_service') // 👈 AJOUT ICI
+        ->orderBy('nom_service')
         ->get()
         ->map(function ($service) {
             return [
@@ -21,10 +21,15 @@ public function getByDirection($id)
         });
 }
 
-    public function store(Request $request)
-    {
-        return Service::create($request->all());
-    }
+   public function store(Request $request)
+{
+    $request->validate([
+        'nom_service' => 'required',
+        'id_direction' => 'required|exists:directions,id_direction'
+    ]);
+
+    return Service::create($request->all());
+}
 
     public function update(Request $request, $id)
     {

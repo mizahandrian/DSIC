@@ -2,32 +2,43 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Direction;
+use Illuminate\Http\Request;
 
 class DirectionController extends Controller
 {
-    // GET /directions
+    // 🔹 GET all directions
     public function index()
     {
-        return response()->json(Direction::all());
+        return Direction::withCount('services')
+            ->get()
+            ->map(function ($direction) {
+                return [
+                    'id_direction' => $direction->id_direction,
+                    'nom_direction' => $direction->nom_direction,
+                    'type' => $direction->type,
+                    'description' => $direction->description,
+                    'nombre_services' => $direction->services_count,
+                    'nombre_personnels' => 0 // tu peux améliorer après
+                ];
+            });
     }
 
-    // POST /directions
+    // 🔹 ADD direction
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'nom_direction' => 'required|string',
+        $request->validate([
+            'nom_direction' => 'required|string|max:255',
             'type' => 'required|in:centrale,regionale,provinciale',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string'
         ]);
 
-        $direction = Direction::create($validated);
+        $direction = Direction::create($request->all());
 
         return response()->json($direction, 201);
     }
 
-    // PUT /directions/{id}
+    // 🔹 UPDATE direction
     public function update(Request $request, $id)
     {
         $direction = Direction::findOrFail($id);
@@ -37,11 +48,10 @@ class DirectionController extends Controller
         return response()->json($direction);
     }
 
-    // DELETE /directions/{id}
+    // 🔹 DELETE direction
     public function destroy($id)
     {
-        $direction = Direction::findOrFail($id);
-        $direction->delete();
+        Direction::destroy($id);
 
         return response()->json(['message' => 'Supprimé']);
     }

@@ -121,9 +121,9 @@ Route::delete('/postes/{id}', [PosteController::class, 'destroy']);
 // ==================== ROUTES SERVICES ====================
 Route::get('/services', [ServiceController::class, 'index']);
 Route::post('/services', [ServiceController::class, 'store']);
+Route::get('/services/direction/{id}', [ServiceController::class, 'getByDirection']);
 Route::put('/services/{id}', [ServiceController::class, 'update']);
 Route::delete('/services/{id}', [ServiceController::class, 'destroy']);
-Route::get('/services/direction/{directionId}', [ServiceController::class, 'getByDirection']);
 
 // ==================== ROUTES DIRECTIONS ====================
 Route::get('/directions', [DirectionController::class, 'index']);

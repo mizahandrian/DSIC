@@ -12,13 +12,11 @@ return new class extends Migration
 public function up()
 {
     Schema::create('directions', function (Blueprint $table) {
-        $table->id('id_direction');
-        $table->string('nom_direction');
-        $table->enum('type', ['centrale', 'regionale', 'provinciale']);
-        $table->text('description')->nullable();
-        $table->integer('nombre_services')->default(0);
-        $table->integer('nombre_personnels')->default(0);
-        $table->timestamps();
+    $table->id('id_direction');
+    $table->string('nom_direction');
+    $table->enum('type', ['centrale', 'regionale', 'provinciale']);
+    $table->text('description')->nullable();
+    $table->timestamps();
     });
 }
 
