@@ -107,6 +107,8 @@ const GestionServices: React.FC = () => {
         await api.put(`/services/${editingService.id_service}`, serviceData);
       } else {
         await api.post('/services', serviceData);
+        //  IMPORTANT : refresh global
+          await fetchServices();
       }
       await fetchServices();
       closeModal();
