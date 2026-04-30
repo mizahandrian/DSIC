@@ -121,16 +121,23 @@ const GestionServices: React.FC = () => {
   };
 
   const handleDelete = async () => {
-    if (!deleteConfirm) return;
-    try {
-      await api.delete(`/services/${deleteConfirm.id_service}`);
-      await fetchServices();
-      setDeleteConfirm(null);
-    } catch (error) {
-      console.error('Erreur:', error);
-      alert('Erreur lors de la suppression');
-    }
-  };
+  if (!deleteConfirm) return;
+
+  try {
+    const res = await api.delete(`/services/${deleteConfirm.id_service}`);
+    console.log("SUPPRESSION OK:", res.data);
+
+    setServices(prev =>
+      prev.filter(s => s.id_service !== deleteConfirm.id_service)
+    );
+
+    setDeleteConfirm(null);
+
+  } catch (error: any) {
+    console.log("ERREUR SUPPRESSION:", error.response?.data || error.message);
+    alert(error.response?.data?.message || "Erreur lors de la suppression");
+  }
+};
 
   const openAddModal = () => {
     setEditingService(null);
