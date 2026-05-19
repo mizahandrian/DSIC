@@ -37,7 +37,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         
         {dropdownOpen && (
           <div className="user-dropdown">
-            <button className="dropdown-item">
+            <button className="dropdown-item" onClick={() => navigate('/profile')}>
               <FontAwesomeIcon icon={faUser} style={{ marginRight: '10px' }} />
               Mon profil
             </button>

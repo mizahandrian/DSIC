@@ -1,106 +1,149 @@
 // src/pages/SuperAdmin.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../Service/api';
 import '../style/superadmin.css';
+
 
 interface User {
   id: number;
   name: string;
+  prenom: string;
+  age: number;
+  sexe: 'homme' | 'femme';
   email: string;
-  role: 'dg' | 'rh' | 'chef_dsic';
+  role: 'superadmin' | 'user';
   phone: string;
   status: 'actif' | 'inactif';
 }
 
-// Données mockées
-const mockUsers: User[] = [
-  { id: 1, name: 'Rakoto Jean', email: 'jean.rakoto@instat.mg', role: 'dg', phone: '032 12 345 67', status: 'actif' },
-  { id: 2, name: 'Rabe Marie', email: 'marie.rabe@instat.mg', role: 'rh', phone: '033 23 456 78', status: 'actif' },
-  { id: 3, name: 'Andria Paul', email: 'paul.andria@instat.mg', role: 'chef_dsic', phone: '034 34 567 89', status: 'inactif' },
-];
-
 const SuperAdmin: React.FC = () => {
-  const [users, setUsers] = useState<User[]>(mockUsers);
-  const [showForm, setShowForm] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterRole, setFilterRole] = useState('all');
+  const [users, setUsers] = useState<User[]>([]);
 
-  const [formData, setFormData] = useState({
+  const loadUsers = async () => {
+    const res = await api.get('/users');
+    setUsers(res.data);
+  };
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+const [editingUser, setEditingUser] = useState<User | null>(null);
+const [searchTerm, setSearchTerm] = useState('');
+const [filterRole, setFilterRole] = useState('all');
+const storedUser = localStorage.getItem('user');
+const currentUser = storedUser ? (JSON.parse(storedUser) as { role: User['role'] }) : null;
+
+  const [formData, setFormData] = useState<{
+    name: string;
+    prenom: string;
+    age: string;
+    sexe: 'homme' | 'femme';
+    email: string;
+    role: User['role'];
+    phone: string;
+    password: string;
+  }>({
     name: '',
+    prenom: '',
+    age: '',
+    sexe: 'homme',
     email: '',
-    role: 'rh' as 'dg' | 'rh' | 'chef_dsic',
+    role: 'user',
     phone: '',
     password: '',
   });
-
-  const handleAddUser = () => {
-    setEditingUser(null);
-    setFormData({ name: '', email: '', role: 'rh', phone: '', password: '' });
-    setShowForm(true);
-  };
 
   const handleEditUser = (user: User) => {
     setEditingUser(user);
     setFormData({
       name: user.name,
+      prenom: user.prenom,
+      age: user.age.toString(),
+      sexe: user.sexe,
       email: user.email,
       role: user.role,
       phone: user.phone,
       password: '',
     });
-    setShowForm(true);
   };
 
-  const handleDeleteUser = (id: number) => {
-    if (window.confirm('Supprimer cet utilisateur ?')) {
-      setUsers(users.filter(u => u.id !== id));
-    }
+ const handleDeleteUser = async (id: number) => {
+  if (window.confirm('Supprimer cet utilisateur ?')) {
+    await api.delete(`/users/${id}`);
+    loadUsers();
+  }
+};
+
+const handleToggleStatus = async (id: number) => {
+  const user = users.find(u => u.id === id);
+  if (!user) return;
+
+  await api.put(`/users/${id}`, {
+    ...user,
+    status: user.status === 'actif' ? 'inactif' : 'actif',
+  });
+
+  loadUsers();
+};
+
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  const payload = {
+    name: formData.name,
+    prenom: formData.prenom,
+    age: Number(formData.age),
+    sexe: formData.sexe,
+    email: formData.email,
+    phone: formData.phone,
+    role: formData.role,
   };
 
-  const handleToggleStatus = (id: number) => {
-    setUsers(users.map(u => 
-      u.id === id ? { ...u, status: u.status === 'actif' ? 'inactif' : 'actif' } : u
-    ));
-  };
+  if (editingUser) {
+    await api.put(`/users/${editingUser.id}`, payload);
+  } else {
+    await api.post('/users', {
+      ...payload,
+      password: formData.password,
+    });
+  }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editingUser) {
-      setUsers(users.map(u => 
-        u.id === editingUser.id ? { 
-          ...u, 
-          name: formData.name, 
-          email: formData.email, 
-          role: formData.role, 
-          phone: formData.phone 
-        } : u
-      ));
-    } else {
-      const newUser: User = {
-        id: Date.now(),
-        name: formData.name,
-        email: formData.email,
-        role: formData.role,
-        phone: formData.phone,
-        status: 'actif',
-      };
-      setUsers([...users, newUser]);
-    }
-    setShowForm(false);
+  setEditingUser(null);
+  loadUsers();
+
+  setFormData({
+    name: '',
+    prenom: '',
+    age: '',
+    sexe: 'homme',
+    email: '',
+    role: 'user',
+    phone: '',
+    password: '',
+  });
+};
+
+
+  const handleCancel = () => {
     setEditingUser(null);
+    setFormData({ name: '', prenom: '', age: '', sexe: 'homme', email: '', role: 'user', phone: '', password: '' });
   };
 
-  const getRoleLabel = (role: string) => {
-    switch(role) {
-      case 'dg': return 'Directeur Général';
-      case 'rh': return 'RH';
-      case 'chef_dsic': return 'Chef DSIC';
-      default: return role;
+  const getRoleLabel = (role: User['role']) => {
+    switch (role) {
+      case 'superadmin':
+        return 'Super admin';
+      case 'user':
+        return 'Utilisateur';
+      default:
+        return role;
     }
   };
 
   const filteredUsers = users.filter(user => {
     const matchSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        user.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchRole = filterRole === 'all' || user.role === filterRole;
     return matchSearch && matchRole;
@@ -108,15 +151,121 @@ const SuperAdmin: React.FC = () => {
 
   return (
     <div className="superadmin-container">
-      {/* En-tête */}
-      <div className="superadmin-header">
-        <div>
-          <h1>Super Admin</h1>
-          <p>Gestion des utilisateurs du système</p>
-        </div>
-        <button className="btn-primary" onClick={handleAddUser}>
-          + Nouvel utilisateur
-        </button>
+      <h1>Super Admin</h1>
+      <p>Gestion des utilisateurs du système</p>
+
+      {/* Formulaire en carré */}
+      <div className="form-card">
+        <h3>{editingUser ? 'Modifier l\'utilisateur' : 'Ajouter un nouvel utilisateur'}</h3>
+        <form onSubmit={handleSubmit}>
+          {/* Ligne 1: Nom et Prénom côte à côte */}
+          <div className="form-row">
+            <div className="form-group">
+              <label>Nom *</label>
+              <input 
+                type="text" 
+                value={formData.name} 
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
+                required 
+                placeholder="Entrez le nom"
+              />
+            </div>
+            <div className="form-group">
+              <label>Prénom *</label>
+              <input 
+                type="text" 
+                value={formData.prenom} 
+                onChange={(e) => setFormData({ ...formData, prenom: e.target.value })} 
+                required 
+                placeholder="Entrez le prénom"
+              />
+            </div>
+          </div>
+
+          {/* Ligne 2: Âge et Sexe côte à côte */}
+          <div className="form-row">
+            <div className="form-group">
+              <label>Âge *</label>
+              <input 
+                type="number" 
+                value={formData.age} 
+                onChange={(e) => setFormData({ ...formData, age: e.target.value })} 
+                required 
+                placeholder="Entrez l'âge"
+                min="18"
+                max="100"
+              />
+            </div>
+            <div className="form-group">
+              <label>Sexe *</label>
+              <select value={formData.sexe} onChange={(e) => setFormData({ ...formData, sexe: e.target.value as any })}>
+                <option value="homme">Homme</option>
+                <option value="femme">Femme</option>
+              </select>
+            </div>
+          </div>
+          
+           {/* Ligne 5: Rôle et Téléphone côte à côte */}
+          <div className="form-row">
+             <div className="form-group">
+              <label>Téléphone</label>
+              <input 
+                type="tel" 
+                value={formData.phone} 
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })} 
+                placeholder="032 12 345 67"
+              />
+            </div>
+            <div className="form-group">
+              <label>Rôle *</label>
+              <select value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value as User['role'] })}>
+                <option value="superadmin">Super Admin</option>
+                <option value="user">Utilisateur</option>
+              </select>
+            </div>
+           
+          </div>
+
+          {/* Ligne 3: Email */}
+          <div className="form-group">
+            <label>Email *</label>
+            <input 
+              type="email" 
+              value={formData.email} 
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })} 
+              required 
+              placeholder="exemple@instat.mg"
+            />
+          </div>
+
+          {/* Ligne 4: Mot de passe provisoire */}
+          {!editingUser && (
+            <div className="form-group">
+              <label>Mot de passe provisoire *</label>
+              <input 
+                type="password" 
+                value={formData.password} 
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })} 
+                required 
+                placeholder="Mot de passe temporaire"
+              />
+              <small>L'utilisateur devra changer son mot de passe à la première connexion</small>
+            </div>
+          )}
+
+         
+          
+          <div className="form-actions">
+            {editingUser && (
+              <button type="button" className="btn-cancel" onClick={handleCancel}>
+                Annuler
+              </button>
+            )}
+            <button type="submit" className="btn-save">
+              {editingUser ? 'Modifier' : 'Ajouter'}
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* Filtres */}
@@ -124,109 +273,52 @@ const SuperAdmin: React.FC = () => {
         <input
           type="text"
           className="search-input"
-          placeholder="Rechercher un utilisateur..."
+          placeholder="Rechercher par nom, prénom ou email..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         <select className="filter-select" value={filterRole} onChange={(e) => setFilterRole(e.target.value)}>
           <option value="all">Tous les rôles</option>
-          <option value="dg">Directeur Général</option>
-          <option value="rh">RH</option>
-          <option value="chef_dsic">Chef DSIC</option>
+          <option value="superadmin">Super Admin</option>
+          <option value="user">Utilisateur</option>
         </select>
       </div>
 
-      {/* Tableau */}
-      <div className="table-wrapper">
-        <table className="user-table">
-          <thead>
-            <tr>
-              <th>Utilisateur</th>
-              <th>Email</th>
-              <th>Téléphone</th>
-              <th>Rôle</th>
-              <th>Statut</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredUsers.map((user) => (
-              <tr key={user.id}>
-                <td className="user-name-cell">{user.name}</td>
-                <td>{user.email}</td>
-                <td>{user.phone || '-'}</td>
-                <td>
-                  <span className={`role-badge role-${user.role}`}>
-                    {getRoleLabel(user.role)}
-                  </span>
-                </td>
-                <td>
-                  <span className={`status-badge ${user.status === 'actif' ? 'status-active' : 'status-inactive'}`}>
-                    {user.status === 'actif' ? 'Actif' : 'Inactif'}
-                  </span>
-                </td>
-                <td className="actions-cell">
-                  <button className="btn-edit" onClick={() => handleEditUser(user)}>Modifier</button>
-                  <button className="btn-status" onClick={() => handleToggleStatus(user.id)}>
-                    {user.status === 'actif' ? 'Désactiver' : 'Activer'}
-                  </button>
-                  <button className="btn-delete" onClick={() => handleDeleteUser(user.id)}>Supprimer</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {filteredUsers.length === 0 && (
+      {/* Liste des utilisateurs */}
+      <div className="users-list">
+        <h2>Liste des utilisateurs</h2>
+        {filteredUsers.length === 0 ? (
           <div className="empty-state">Aucun utilisateur trouvé</div>
-        )}
-      </div>
-
-      {/* Modal Formulaire */}
-      {showForm && (
-        <div className="modal-overlay" onClick={() => setShowForm(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>{editingUser ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur'}</h3>
-              <button className="modal-close" onClick={() => setShowForm(false)}>✕</button>
-            </div>
-            <form onSubmit={handleSubmit}>
-              <div className="modal-body">
-                <div className="form-group">
-                  <label>Nom complet *</label>
-                  <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+        ) : (
+          filteredUsers.map(user => (
+            <div key={user.id} className="user-row">
+              <div className="user-summary">
+                <div className="user-name">{user.name} {user.prenom}</div>
+                <div className="user-meta">
+                  <span>{getRoleLabel(user.role)}</span>
+                  <span>{user.email}</span>
+                  <span>{user.status === 'actif' ? 'Actif' : 'Inactif'}</span>
                 </div>
-                <div className="form-group">
-                  <label>Email *</label>
-                  <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
-                </div>
-                <div className="form-group">
-                  <label>Téléphone</label>
-                  <input type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
-                </div>
-                <div className="form-group">
-                  <label>Rôle *</label>
-                  <select value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}>
-                    <option value="dg">Directeur Général</option>
-                    <option value="rh">RH</option>
-                    <option value="chef_dsic">Chef DSIC</option>
-                  </select>
-                </div>
-                {!editingUser && (
-                  <div className="form-group">
-                    <label>Mot de passe *</label>
-                    <input type="password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} required />
-                    <small>Minimum 6 caractères</small>
-                  </div>
+              </div>
+              <div className="actions-cell">
+                {currentUser?.role === 'superadmin' ? (
+                  <>
+                    <button type="button" className="btn-edit" onClick={() => handleEditUser(user)}>Modifier</button>
+                    <button type="button" className="btn-delete" onClick={() => handleDeleteUser(user.id)}>Supprimer</button>
+                    <button type="button" className="btn-status" onClick={() => handleToggleStatus(user.id)}>
+                      {user.status === 'actif' ? 'Désactiver' : 'Activer'}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button type="button" className="btn-view">Voir</button>
+                  </>
                 )}
               </div>
-              <div className="modal-footer">
-                <button type="button" className="btn-cancel" onClick={() => setShowForm(false)}>Annuler</button>
-                <button type="submit" className="btn-save">{editingUser ? 'Modifier' : 'Ajouter'}</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 };

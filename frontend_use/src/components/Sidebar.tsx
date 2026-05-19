@@ -13,7 +13,12 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import logoInstat from '../assets/image/Logo-INSTAT.png';
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  className?: string;
+  onClose?: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ className, onClose }) => {
   const menuItems = [
     { path: '/dashboard', name: 'Tableau de bord', icon: faTachometerAlt },
     { path: '/super-admin', name: 'Super Admin', icon: faUserShield },
@@ -27,7 +32,7 @@ const Sidebar: React.FC = () => {
   ];
 
   return (
-    <div className="sidebar">
+    <div className={`sidebar ${className}`}>
       <div className="sidebar-header">
         <div className="sidebar-logo">
           <img src={logoInstat} alt="INSTAT" />
@@ -42,6 +47,7 @@ const Sidebar: React.FC = () => {
             key={item.path}
             to={item.path}
             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            onClick={onClose}
           >
             <FontAwesomeIcon icon={item.icon} className="nav-icon" />
             <span className="nav-text">{item.name}</span>

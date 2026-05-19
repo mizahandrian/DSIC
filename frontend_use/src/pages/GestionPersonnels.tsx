@@ -13,7 +13,7 @@ import {
 import api from '../Service/api';
 
 interface Personnel {
-  id_personnel: number;
+  id: number;
   nom: string;
   prenom: string;
   tel: string;
@@ -22,14 +22,14 @@ interface Personnel {
   date_naissance: string;
   date_entree: string;
   motif_entree: string;
-  id_direction: number;
-  id_service: number;
-  id_poste: number;
-  id_etat: number;
-  direction_nom?: string;
-  service_nom?: string;
-  poste_titre?: string;
-  etat_nom?: string;
+  id_direction: number | null;
+  id_service: number | null;
+  id_poste: number | null;
+  id_etat: number | null;
+  direction?: string | null;
+  service?: string | null;
+  poste?: string | null;   // ✅ déjà là, garder comme string
+  etat?: string | null;
 }
 
 interface Direction {
@@ -60,7 +60,7 @@ const GestionPersonnels: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  const [sortField, setSortField] = useState<keyof Personnel>('id_personnel');
+  const [sortField, setSortField] = useState<keyof Personnel>('id');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [selectedPersonnel, setSelectedPersonnel] = useState<Personnel | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -84,16 +84,24 @@ const GestionPersonnels: React.FC = () => {
   }, [personnels, searchTerm, sortField, sortDirection]);
 
   const fetchPersonnels = async () => {
-    setLoading(true);
-    try {
-      const response = await api.get('/personnels');
-      setPersonnels(response.data);
-    } catch (error) {
-      console.error('Erreur:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  try {
+    const response = await api.get('/personnels');
+    console.log("API RESPONSE:", response.data[0]); // ← ajoute ça
+    const mappedData = response.data.map((p: any) => ({
+      ...p,
+      direction: p.direction?.nom_direction ?? null,
+      service:   p.service?.nom_service ?? null,
+      etat:      p.etat ?? null,
+    }));
+    console.log("MAPPED:", mappedData[0]); // ← et ça
+    setPersonnels(mappedData);
+  } catch (error) {
+    console.error('Erreur:', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const fetchSelectData = async () => {
     try {
@@ -127,10 +135,10 @@ const GestionPersonnels: React.FC = () => {
         p.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.numero_cin.includes(searchTerm) ||
-        p.id_personnel.toString().includes(searchTerm)
+        p.id.toString().includes(searchTerm)
       );
     }
-    
+
     filtered.sort((a, b) => {
       const aVal = a[sortField] || '';
       const bVal = b[sortField] || '';
@@ -157,7 +165,7 @@ const GestionPersonnels: React.FC = () => {
   const handleDelete = async () => {
     if (!selectedPersonnel) return;
     try {
-      await api.delete(`/personnels/${selectedPersonnel.id_personnel}`);
+      await api.delete(`/personnels/${selectedPersonnel.id}`);
       fetchPersonnels();
       setShowDeleteModal(false);
       setSelectedPersonnel(null);
@@ -168,14 +176,17 @@ const GestionPersonnels: React.FC = () => {
   };
 
   const handleView = (personnel: Personnel) => {
-    setSelectedPersonnel(personnel);
-    setEditFormData(personnel);
-    setIsEditing(false);
-    if (personnel.id_direction) {
-      fetchServicesByDirection(personnel.id_direction);
-    }
-    setShowViewModal(true);
-  };
+  setSelectedPersonnel(personnel);
+  setEditFormData({
+    ...personnel,
+    poste: personnel.poste || '',  // ✅ string direct
+  });
+  setIsEditing(false);
+  if (personnel.id_direction) {
+    fetchServicesByDirection(personnel.id_direction);
+  }
+  setShowViewModal(true);
+};
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -198,7 +209,7 @@ const GestionPersonnels: React.FC = () => {
   const handleSaveEdit = async () => {
     if (!selectedPersonnel) return;
     try {
-      await api.put(`/personnels/${selectedPersonnel.id_personnel}`, editFormData);
+      await api.put(`/personnels/${selectedPersonnel.id}`, editFormData);
       fetchPersonnels();
       setIsEditing(false);
       alert('Personnel modifié avec succès');
@@ -223,9 +234,9 @@ const GestionPersonnels: React.FC = () => {
   const exportToCSV = () => {
     const headers = ['ID', 'Nom', 'Prénom', 'CIN', 'Téléphone', 'Genre', 'Direction', 'Service', 'Poste', 'Date entrée', 'Statut'];
     const csvData = filteredPersonnels.map(p => [
-      p.id_personnel, p.nom, p.prenom, p.numero_cin, p.tel, p.genre === 'M' ? 'Masculin' : 'Féminin',
-      p.direction_nom || '-', p.service_nom || '-', p.poste_titre || '-',
-      new Date(p.date_entree).toLocaleDateString('fr-FR'), p.etat_nom || 'Actif'
+      p.id, p.nom, p.prenom, p.numero_cin, p.tel, p.genre === 'M' ? 'Masculin' : 'Féminin',
+      p.direction || '-', p.service || '-', p.poste || '-',
+      new Date(p.date_entree).toLocaleDateString('fr-FR'), p.etat || 'Actif'
     ]);
     const csvContent = [headers, ...csvData].map(row => row.join(',')).join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -239,7 +250,7 @@ const GestionPersonnels: React.FC = () => {
 
   const statsCards = [
     { title: 'Total personnels', value: personnels.length, icon: faUsers, color: '#10b981', bg: '#e8f5e9' },
-    { title: 'Actifs', value: personnels.filter(p => p.etat_nom === 'Actif').length, icon: faUserCheck, color: '#10b981', bg: '#e8f5e9' },
+    { title: 'Actifs', value: personnels.filter(p => p.etat === 'Actif').length, icon: faUserCheck, color: '#10b981', bg: '#e8f5e9' },
     { title: 'Hommes', value: personnels.filter(p => p.genre === 'M').length, icon: faVenusMars, color: '#3b82f6', bg: '#eff6ff' },
     { title: 'Femmes', value: personnels.filter(p => p.genre === 'F').length, icon: faVenusMars, color: '#ec4899', bg: '#fce7f3' },
   ];
@@ -306,7 +317,7 @@ const GestionPersonnels: React.FC = () => {
               <table className="gestion-table">
                 <thead>
                   <tr>
-                    <th onClick={() => handleSort('id_personnel')}>Matricule {getSortIcon('id_personnel')}</th>
+                    <th onClick={() => handleSort('id')}>Matricule {getSortIcon('id')}</th>
                     <th onClick={() => handleSort('nom')}>Nom complet {getSortIcon('nom')}</th>
                     <th onClick={() => handleSort('numero_cin')}>CIN {getSortIcon('numero_cin')}</th>
                     <th>Téléphone</th>
@@ -321,8 +332,8 @@ const GestionPersonnels: React.FC = () => {
                 </thead>
                 <tbody>
                   {currentItems.map((personnel) => (
-                    <tr key={personnel.id_personnel} className="personnel-row">
-                      <td className="matricule">#{personnel.id_personnel}</td>
+                    <tr key={personnel.id} className="personnel-row">
+                      <td className="matricule">#{personnel.id}</td>
                       <td className="name">
                         <div className="name-info">
                           <strong>{personnel.nom}</strong> {personnel.prenom}
@@ -335,13 +346,13 @@ const GestionPersonnels: React.FC = () => {
                           {personnel.genre === 'M' ? 'Masculin' : 'Féminin'}
                         </span>
                       </td>
-                      <td>{personnel.direction_nom || '-'}</td>
-                      <td>{personnel.service_nom || '-'}</td>
-                      <td>{personnel.poste_titre || '-'}</td>
+                      <td>{personnel.direction || '-'}</td>
+                      <td>{personnel.service || '-'}</td>
+                      <td>{personnel.poste || '-'}</td>
                       <td>{new Date(personnel.date_entree).toLocaleDateString('fr-FR')}</td>
                       <td>
-                        <span className={`status-badge ${personnel.etat_nom === 'Actif' ? 'active' : 'inactive'}`}>
-                          {personnel.etat_nom || 'Actif'}
+                        <span className={`status-badge ${personnel.etat === 'Actif' ? 'active' : 'inactive'}`}>
+                          {personnel.etat || 'Actif'}
                         </span>
                       </td>
                       <td className="actions-cell">
@@ -399,7 +410,7 @@ const GestionPersonnels: React.FC = () => {
               <div className="delete-info">
                 <strong>{selectedPersonnel.nom} {selectedPersonnel.prenom}</strong>
                 <span>CIN: {selectedPersonnel.numero_cin}</span>
-                <span>Matricule: #{selectedPersonnel.id_personnel}</span>
+                <span>Matricule: #{selectedPersonnel.id}</span>
               </div>
               <p className="warning">Cette action est irréversible.</p>
             </div>
@@ -432,14 +443,14 @@ const GestionPersonnels: React.FC = () => {
                       {selectedPersonnel.nom.charAt(0)}{selectedPersonnel.prenom.charAt(0)}
                     </div>
                     <h4>{selectedPersonnel.nom} {selectedPersonnel.prenom}</h4>
-                    <span className={`badge ${selectedPersonnel.etat_nom === 'Actif' ? 'active' : 'inactive'}`}>
-                      {selectedPersonnel.etat_nom || 'Actif'}
+                    <span className={`badge ${selectedPersonnel.etat === 'Actif' ? 'active' : 'inactive'}`}>
+                      {selectedPersonnel.etat || 'Actif'}
                     </span>
                   </div>
                   <div className="view-details">
                     <div className="detail-group">
                       <label><FontAwesomeIcon icon={faIdCard} /> Matricule</label>
-                      <span>#{selectedPersonnel.id_personnel}</span>
+                      <span>#{selectedPersonnel.id}</span>
                     </div>
                     <div className="detail-group">
                       <label><FontAwesomeIcon icon={faIdCard} /> CIN</label>
@@ -463,15 +474,15 @@ const GestionPersonnels: React.FC = () => {
                     </div>
                     <div className="detail-group">
                       <label><FontAwesomeIcon icon={faBuilding} /> Direction</label>
-                      <span>{selectedPersonnel.direction_nom || '-'}</span>
+                      <span>{selectedPersonnel.direction || '-'}</span>
                     </div>
                     <div className="detail-group">
                       <label><FontAwesomeIcon icon={faBriefcase} /> Service</label>
-                      <span>{selectedPersonnel.service_nom || '-'}</span>
+                      <span>{selectedPersonnel.service || '-'}</span>
                     </div>
                     <div className="detail-group">
                       <label><FontAwesomeIcon icon={faUserTie} /> Poste</label>
-                      <span>{selectedPersonnel.poste_titre || '-'}</span>
+                      <span>{selectedPersonnel.poste || '-'}</span>
                     </div>
                     <div className="detail-group">
                       <label>Motif entrée</label>
@@ -546,11 +557,15 @@ const GestionPersonnels: React.FC = () => {
                   <div className="form-row">
                     <div className="form-group">
                       <label>Poste *</label>
-                      <select name="id_poste" value={editFormData.id_poste || ''} onChange={handleEditChange}>
-                        <option value="">Sélectionner</option>
-                        {postes.map(p => <option key={p.id_poste} value={p.id_poste}>{p.titre_poste}</option>)}
-                      </select>
+                      <input
+                        type="text"
+                        name="poste"
+                        value={editFormData.poste || ''}
+                        onChange={handleEditChange}
+                        placeholder="Ex: Développeur, Technicien..."
+                      />
                     </div>
+                    
                     <div className="form-group">
                       <label>État *</label>
                       <select name="id_etat" value={editFormData.id_etat || ''} onChange={handleEditChange}>

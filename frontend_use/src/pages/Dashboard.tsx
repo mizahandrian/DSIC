@@ -72,17 +72,26 @@ const Dashboard: React.FC = () => {
         api.get('/postes')
       ]);
 
-      const personnels = personnelsRes.data;
+      const personnels = personnelsRes.data.map((p: any) => ({
+        ...p,
+        direction: p.direction?.nom_direction,
+        service: p.service?.nom_service,
+        poste: p.poste?.titre_poste,
+        etat: p.etat?.nom_etat
+      }));
       const directions = directionsRes.data;
 
-      const actifs = personnels.filter((p: any) => p.id_etat === 1 || p.etat_nom === 'Actif').length;
+      const actifs = personnels.filter((p: any) => p.id_etat === 1).length;
       const inactifs = personnels.length - actifs;
 
       // Données pour le graphique en barres (Top 6 directions)
-      const directionsStats = directions.slice(0, 6).map((d: any) => ({
-        name: d.nom_direction.length > 15 ? d.nom_direction.substring(0, 15) + '...' : d.nom_direction,
-        count: personnels.filter((p: any) => p.id_direction === d.id_direction).length
-      })).sort((a: any, b: any) => b.count - a.count);
+      const directionsStats = directions
+        .map((d: any) => ({
+          name: d.nom_direction.length > 15 ? d.nom_direction.substring(0, 15) + '...' : d.nom_direction,
+          count: personnels.filter((p: any) => p.id_direction === d.id_direction).length
+        }))
+        .sort((a: any, b: any) => b.count - a.count)
+        .slice(0, 6);
 
       setStats({
         totalPersonnels: personnels.length,
@@ -377,11 +386,11 @@ const Dashboard: React.FC = () => {
           </thead>
           <tbody>
             {stats.recents.map((p: any) => (
-              <tr key={p.id_personnel}>
-                <td>{p.id_personnel}</td>
+              <tr key={p.id}>
+                <td>{p.id}</td>
                 <td><strong>{p.nom}</strong></td>
                 <td>{p.prenom}</td>
-                <td>{p.poste_titre || '-'}</td>
+                <td>{p.poste || '-'}</td>
                 <td>{new Date(p.date_entree).toLocaleDateString('fr-FR')}</td>
               </tr>
             ))}

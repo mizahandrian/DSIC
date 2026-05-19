@@ -3,6 +3,8 @@ export interface User {
   id: number;
   name: string;
   email: string;
+  role?: string;
+  is_initialized?: boolean;
 }
 
 export interface LoginCredentials {

@@ -23,20 +23,10 @@ interface Service {
   id_direction: number;
 }
 
-interface Poste {
-  id_poste: number;
-  titre_poste: string;
-}
-
 interface Statut {
-  id_statut: number;
+  id: number;
   nom_statut: string;
   type_statut: string;
-}
-
-interface Etat {
-  id_etat: number;
-  nom_etat: string;
 }
 
 const Recrutement: React.FC = () => {
@@ -48,11 +38,11 @@ const Recrutement: React.FC = () => {
   const [directions, setDirections] = useState<Direction[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
-  
   const [statuts, setStatuts] = useState<Statut[]>([]);
-  const [etats, setEtats] = useState<Etat[]>([]);
 
   const [formData, setFormData] = useState({
+
+    
     // Étape 1 - Identité
     nom: '',
     prenom: '',
@@ -77,7 +67,7 @@ const Recrutement: React.FC = () => {
     
     // Étape 4 - Statut
     id_statut: '',
-    id_etat: '1',
+    id_etat: 'actif',
     situation: 'activite',
     date_situation: '',
     destination: '',
@@ -92,50 +82,45 @@ const Recrutement: React.FC = () => {
   useEffect(() => {
     fetchData();
   }, []);
-//model vaovao
-const fetchServicesByDirection = async (directionId: number) => {
-  try {
-    const res = await api.get(`/services/direction/${directionId}`);
-    setFilteredServices(res.data);
 
-    setFormData(prev => ({
-      ...prev,
-      id_service: ''
-    }));
+  //model vaovao
+  const fetchServicesByDirection = async (directionId: number) => {
+    try {
+      const res = await api.get(`/services/direction/${directionId}`);
+      setFilteredServices(res.data);
 
-  } catch (error) {
-    console.error(error);
-  }
-};
-  // Filtrer les services quand la direction change
-  //  useEffect(() => {
-  //    if (formData.id_direction) {
-  //      const filtered = services.filter(s => s.id_direction === parseInt(formData.id_direction));
-  //      setFilteredServices(filtered);
-  //      setFormData(prev => ({ ...prev, id_service: '' }));
-  //    } else {
-  //      setFilteredServices([]);
-  //    }
-  //  }, [formData.id_direction, services]);
+      setFormData(prev => ({
+        ...prev,
+        id_service: ''
+      }));
+
+    } catch (error: any) {
+      console.log("STATUS:", error.response?.status);
+      console.log("DATA:", error.response?.data);
+      console.log("HEADERS:", error.response?.headers);
+
+      alert(error.response?.status + " - " + JSON.stringify(error.response?.data));
+    }
+  };
+
   useEffect(() => {
-  if (formData.id_direction) {
-    api.get(`/services/direction/${formData.id_direction}`)
-      .then(res => setFilteredServices(res.data));
-  }
-}, [formData.id_direction]);
+    if (formData.id_direction) {
+      fetchServicesByDirection(parseInt(formData.id_direction));
+    } else {
+      setFilteredServices([]);
+    }
+  }, [formData.id_direction]);
 
   const fetchData = async () => {
     try {
-      const [dirRes, servicesRes, statutsRes, etatsRes] = await Promise.all([
+      const [dirRes, servicesRes, statutsRes] = await Promise.all([
         api.get('/directions'),
         api.get('/services/direction/1'),
-        api.get('/statuts'),
-        api.get('/etats')
+        api.get('/statuts')
       ]);
       setDirections(dirRes.data);
       setServices(servicesRes.data);
       setStatuts(statutsRes.data);
-      setEtats(etatsRes.data);
     } catch (error) {
       console.error('Erreur:', error);
     }
@@ -146,88 +131,111 @@ const fetchServicesByDirection = async (directionId: number) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async () => {
-    setLoading(true);
-    try {
-      // Création du poste si nouveau (champ texte libre)
-      let posteId = null;
-      if (formData.poste && formData.poste.trim() !== '') {
-        // Vérifier si le poste existe déjà
-        const postesRes = await api.get('/postes');
-        const existingPoste = postesRes.data.find((p: any) => p.titre_poste.toLowerCase() === formData.poste.toLowerCase());
-        if (existingPoste) {
-          posteId = existingPoste.id_poste;
-        } else {
-          // Créer un nouveau poste
-          const newPosteRes = await api.post('/postes', {
-            titre_poste: formData.poste,
-            indice: formData.indice || null,
-            id_service: parseInt(formData.id_service),
-            id_carriere: null
-          });
-          posteId = newPosteRes.data.id_poste;
-        }
-      }
-
-      // Création de la carrière
-      let carriereId = null;
-      if (formData.categorie && formData.corps && formData.grade) {
-        const carriereRes = await api.post('/carrieres', {
-          categorie: formData.categorie,
-          indice: formData.indice,
-          corps: formData.corps,
-          grade: formData.grade,
-          date_effet: formData.date_effet_carriere
-        });
-        carriereId = carriereRes.data.id_carriere;
-      }
-
-      // Création du personnel
-      const personnelData = {
-        nom: formData.nom,
-        prenom: formData.prenom,
-        genre: formData.genre,
-        numero_cin: formData.numero_cin,
-        tel: formData.tel,
-        date_naissance: formData.date_naissance,
-        date_entree: formData.date_entree,
-        motif_entree: formData.motif_entree,
-        id_direction: parseInt(formData.id_direction),
-        id_service: parseInt(formData.id_service),
-        id_poste: posteId,
-        id_carriere: carriereId,
-        id_etat: parseInt(formData.id_etat),
-        statuts: formData.id_statut ? [parseInt(formData.id_statut)] : [],
-        situation_admin: formData.situation,
-        date_entrer_situation: formData.date_situation,
-        destination: formData.destination,
-        commentaire_situation: formData.commentaire_situation,
-      };
-      
-      const response = await api.post('/personnels', personnelData);
-      const personnelId = response.data.id_personnel;
-      
-      // Création de l'historique
-      if (formData.ancien_poste || formData.ancien_direction) {
-        await api.post('/historiques', {
-          id_personnel: personnelId,
-          ancien_poste: formData.ancien_poste,
-          ancien_direction: formData.ancien_direction,
-          motif_changement: formData.commentaire_historique,
-          date_changement: new Date().toISOString().split('T')[0]
-        });
-      }
-      
-      alert('Personnel ajouté avec succès !');
-      navigate('/gestion-personnels');
-      resetForm();
-    } catch (error) {
-      console.error('Erreur:', error);
-      alert('Erreur lors de l\'enregistrement');
-    } finally {
-      setLoading(false);
+  const validateStep = (step: number): string | null => {
+    switch (step) {
+      case 1:
+        if (!formData.nom.trim()) return 'Le nom est requis.';
+        if (!formData.prenom.trim()) return 'Le prénom est requis.';
+        if (!formData.numero_cin.trim()) return 'Le numéro de CIN est requis.';
+        if (!formData.date_naissance) return 'La date de naissance est requise.';
+        return null;
+      case 2:
+        if (!formData.date_entree) return 'La date d’entrée est requise.';
+        if (!formData.motif_entree.trim()) return 'Le motif d’entrée est requis.';
+        if (!formData.id_direction) return 'La direction est requise.';
+        if (!formData.id_service) return 'Le service est requis.';
+        if (!formData.poste.trim()) return 'Le poste est requis.';
+        return null;
+      case 3:
+        if (!formData.categorie) return 'La catégorie est requise.';
+        if (!formData.indice.trim()) return 'L’indice est requis.';
+        if (!formData.corps.trim()) return 'Le corps est requis.';
+        if (!formData.grade.trim()) return 'Le grade est requis.';
+        if (!formData.date_effet_carriere) return 'La date d’effet de carrière est requise.';
+        return null;
+      case 4:
+        if (!formData.id_etat) return 'L’état est requis.';
+        return null;
+      default:
+        return null;
     }
   };
+
+  const validateAllSteps = (): string | null => {
+    for (let step = 1; step <= 4; step += 1) {
+      const error = validateStep(step);
+      if (error) return error;
+    }
+    return null;
+  };
+
+ const handleSubmit = async () => {
+  const validationError = validateAllSteps();
+  if (validationError) {
+    alert(validationError);
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    // ✅ UN SEUL appel API — le controller Laravel gère tout
+    const personnelData = {
+      nom:            formData.nom.trim(),
+      prenom:         formData.prenom.trim(),
+      genre:          formData.genre,
+      numero_cin:     formData.numero_cin.trim(),
+      tel:            formData.tel?.trim() || null,
+      date_naissance: formData.date_naissance,
+
+      date_entree:    formData.date_entree,
+      motif_entree:   formData.motif_entree?.trim() || null,
+
+      id_direction:   formData.id_direction ? Number(formData.id_direction) : null,
+      id_service:     formData.id_service   ? Number(formData.id_service)   : null,
+      id_statut:      formData.id_statut    ? Number(formData.id_statut)    : null,
+      id_etat:        formData.id_etat === 'actif' ? 1 : 2,
+
+      poste:                   formData.poste?.trim()              || null,
+      categorie:               formData.categorie?.trim()          || null,
+      indice:                  formData.indice                     || null,
+      corps:                   formData.corps?.trim()              || null,
+      grade:                   formData.grade?.trim()              || null,
+      date_effet_carriere:     formData.date_effet_carriere        || null,
+
+      situation:               formData.situation                  || null,
+      date_situation:          formData.date_situation             || null,
+      destination:             formData.destination                || null,
+      commentaire_situation:   formData.commentaire_situation      || null,
+
+      ancien_poste:            formData.ancien_poste               || null,
+      ancien_direction:        formData.ancien_direction           || null,
+      commentaire_historique:  formData.commentaire_historique     || null,
+    };
+
+    console.log("PAYLOAD SEND:", personnelData);
+
+    const response = await api.post('/recrutement', personnelData);
+    console.log("RESPONSE:", response.data);
+
+    alert("Personnel ajouté avec succès !");
+    navigate('/gestion-personnels');
+    resetForm();
+
+  } catch (error: any) {
+    console.error("❌ ERREUR:", error.response?.data || error.message);
+
+    const errors = error?.response?.data?.errors;
+    if (errors) {
+      const first = Object.values(errors)[0];
+      alert(`Erreur: ${Array.isArray(first) ? first[0] : first}`);
+    } else {
+      alert(error?.response?.data?.message || "Erreur lors de l'enregistrement");
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   const resetForm = () => {
     setCurrentStep(1);
@@ -235,12 +243,20 @@ const fetchServicesByDirection = async (directionId: number) => {
       nom: '', prenom: '', genre: 'M', numero_cin: '', tel: '', date_naissance: '',
       date_entree: '', motif_entree: '', id_direction: '', id_service: '', poste: '',
       categorie: '', indice: '', corps: '', grade: '', date_effet_carriere: '',
-      id_statut: '', id_etat: '1', situation: 'activite', date_situation: '', destination: '', commentaire_situation: '',
+      id_statut: '', id_etat: 'actif', situation: 'activite', date_situation: '', destination: '', commentaire_situation: '',
       ancien_poste: '', ancien_direction: '', commentaire_historique: '',
     });
   };
 
-  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 5));
+  const nextStep = () => {
+    const error = validateStep(currentStep);
+    if (error) {
+      alert(error);
+      return;
+    }
+    setCurrentStep(prev => Math.min(prev + 1, 5));
+  };
+
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
   const steps = [
@@ -318,10 +334,10 @@ const fetchServicesByDirection = async (directionId: number) => {
                 <select name="id_service" value={formData.id_service} onChange={handleChange} required disabled={!formData.id_direction}>
                   <option value="">{formData.id_direction ? "Sélectionner un service" : "Choisissez d'abord une direction"}</option>
                   {filteredServices.map(s => (
-  <option key={s.id_service} value={s.id_service}>
-    {s.nom_service}
-  </option>
-))}
+                    <option key={s.id_service} value={s.id_service}>
+                      {s.nom_service}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -382,13 +398,14 @@ const fetchServicesByDirection = async (directionId: number) => {
                 <label><FontAwesomeIcon icon={faUserCheck} /> Statut administratif</label>
                 <select name="id_statut" value={formData.id_statut} onChange={handleChange}>
                   <option value="">Sélectionner</option>
-                  {statuts.map(s => <option key={s.id_statut} value={s.id_statut}>{s.nom_statut} ({s.type_statut})</option>)}
+                  {statuts.map(s => <option key={s.id} value={s.id}>{s.nom_statut} ({s.type_statut})</option>)}
                 </select>
               </div>
               <div className="form-group">
                 <label><FontAwesomeIcon icon={faCheckCircle} /> État *</label>
                 <select name="id_etat" value={formData.id_etat} onChange={handleChange} required>
-                  {etats.map(e => <option key={e.id_etat} value={e.id_etat}>{e.nom_etat}</option>)}
+                  <option value="actif">Actif</option>
+                  <option value="inactif">Inactif</option>
                 </select>
               </div>
             </div>

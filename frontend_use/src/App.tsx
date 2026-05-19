@@ -17,6 +17,7 @@ import GestionDirections from './pages/GestionDirections';
 import GestionServices from './pages/GestionServices';
 import BaseRohi from './pages/BaseRohi';
 import BaseAugure from './pages/BaseAugure';
+import Profile from './pages/Profile';
 
 
 // Pages temporaires (à remplacer plus tard)
@@ -85,6 +86,7 @@ const App: React.FC = () => {
           <Route path="/gestion-services" element={<GestionServices />} />
           <Route path="/base-rohi" element ={<BaseRohi/>}/>
           <Route path="/base-augure" element ={<BaseAugure/>}/>
+          <Route path="/profile" element={<Profile />} />
         </Route>
         
         {/* Redirection par défaut */}
