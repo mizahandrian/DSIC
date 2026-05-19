@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+/*
 use App\Models\Personnel;
 use Illuminate\Http\Request;
 
@@ -16,13 +16,22 @@ class PersonnelController extends Controller
 {
       // 🔥 VALIDATION (AJOUT ICI)
     $request->validate([
-        'nom' => 'required',
-        'prenom' => 'required',
-        'id_direction' => 'required|exists:directions,id_direction',
-        'id_service' => 'required|exists:services,id_service',
-    ]);
+    'nom' => 'required',
+    'prenom' => 'required',
+    'genre' => 'required',
+    'numero_cin' => 'required',
+    'date_naissance' => 'required',
+    'date_entree' => 'required',
+
+    'id_direction' => 'required|exists:directions,id_direction',
+    'id_service' => 'required|exists:services,id_service',
+
+    'id_etat' => 'nullable|integer',
+    'id_poste' => 'nullable|integer',
+    'id_carriere' => 'nullable|integer',
+]);
     // 1. créer personnel (champs contrôlés)
-    $personnel = Personnel::create([
+     $personnel = Personnel::create([
         'nom' => $request->nom,
         'prenom' => $request->prenom,
         'genre' => $request->genre,
@@ -31,11 +40,13 @@ class PersonnelController extends Controller
         'date_naissance' => $request->date_naissance,
         'date_entree' => $request->date_entree,
         'motif_entree' => $request->motif_entree,
+
         'id_direction' => $request->id_direction,
         'id_service' => $request->id_service,
-        'id_poste' => $request->id_poste,
-        'id_carriere' => $request->id_carriere,
+        'id_poste' => $request->id_poste ?? null,
+        'id_carriere' => $request->id_carriere ?? null,
         'id_etat' => $request->id_etat,
+
         'situation_admin' => $request->situation_admin,
         'date_entrer_situation' => $request->date_entrer_situation,
         'destination' => $request->destination,
@@ -57,6 +68,41 @@ class PersonnelController extends Controller
     {
         return Personnel::findOrFail($id);
     }
+
+    public function update(Request $request, $id)
+    {
+        $personnel = Personnel::findOrFail($id);
+        $personnel->update($request->all());
+        return response()->json($personnel);
+    }
+
+    public function destroy($id)
+    {
+        $personnel = Personnel::findOrFail($id);
+        $personnel->delete();
+        return response()->json(['message' => 'Supprimé']);
+    }
+}*/
+use App\Models\Personnel;
+use Illuminate\Http\Request;
+
+class PersonnelController extends Controller
+{
+    public function store(Request $request)
+    {
+        $personnel = Personnel::create($request->all());
+
+        return response()->json([
+            'message' => 'OK',
+            'data' => $personnel
+        ]);
+    }
+
+    public function index()
+{
+    // ✅ Retirer 'etat' qui n'a pas de relation définie
+    return Personnel::with(['direction', 'service'])->get();
+}
 
     public function update(Request $request, $id)
     {

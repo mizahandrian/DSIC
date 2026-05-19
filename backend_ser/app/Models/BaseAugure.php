@@ -6,17 +6,39 @@ use Illuminate\Database\Eloquent\Model;
 
 class BaseAugure extends Model
 {
-    protected $table = 'base_augure';
+    protected $table = 'base_augures';
+
     protected $primaryKey = 'id_augure';
 
     protected $fillable = [
-        'agentMatricule','agentNom','agentCin',
-        'corpsCode','gradeCode','indice',
-        'posteAgentNumero','titre','categorieCode',
+
+        'agentMatricule',
+        'agentNom',
+        'agentCin',
+        'agentDateNais',
+
+        'corpsCode',
+        'gradeCode',
+
+        'indice',
+        'categorieCode',
+
+        'posteAgentNumero',
+
+        'titre',
+
         'structureRattachement',
-        'regCode','regLibelle',
-        'sanctionCode','sanctionLibelle',
-        'agentDateNais','dateEffet',
-        'intervalAge','statutAgent'
+
+        'statutAgent',
+
+        'sanctionCode',
+        'sanctionLibelle',
+
+        'regCode',
+        'regLibelle',
+
+        'dateEffet',
+
+        'intervalAge',
     ];
 }

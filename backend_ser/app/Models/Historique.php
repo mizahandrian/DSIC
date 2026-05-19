@@ -1,4 +1,5 @@
 <?php
+// app/Models/Historique.php
 
 namespace App\Models;
 
@@ -7,14 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class Historique extends Model
 {
     protected $table = 'historiques';
-    protected $primaryKey = 'id_historique';
+    // primaryKey reste 'id' par défaut ✅
 
     protected $fillable = [
-        'id_personnel',
+        'id_personnel',      // ✅ nom réel en DB (pas personnel_id)
         'ancien_poste',
         'ancien_direction',
+        'motif_changement',
         'date_changement',
-        'motif_changement'
     ];
 
     public function personnel()

@@ -8,24 +8,23 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('personnels_augure', function (Blueprint $table) {
-            $table->id();
+    $table->id();
 
-            $table->unsignedBigInteger('id_personnel');
-            $table->unsignedBigInteger('id_augure');
+    $table->unsignedBigInteger('id_personnel');
+    $table->unsignedBigInteger('id_augure');
 
-            $table->timestamp('date_liaison')->useCurrent();
+    $table->timestamp('date_liaison')->useCurrent();
 
-            // 🔗 relations (important)
-            $table->foreign('id_personnel')
-                ->references('id_personnel')
-                ->on('personnels')
-                ->onDelete('cascade');
+    $table->foreign('id_personnel')
+        ->references('id')
+        ->on('personnels')
+        ->onDelete('cascade');
 
-            $table->foreign('id_augure')
-                ->references('id_augure')
-                ->on('base_augure')
-                ->onDelete('cascade');
-        });
+    $table->foreign('id_augure')
+        ->references('id')
+        ->on('base_augures')
+        ->onDelete('cascade');
+});
     }
 
     public function down(): void

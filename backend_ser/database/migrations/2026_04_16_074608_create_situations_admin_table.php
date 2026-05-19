@@ -32,7 +32,7 @@ return new class extends Migration
 
         // relation avec personnels
         $table->foreign('id_personnel')
-              ->references('id_personnel')
+              ->references('id')
               ->on('personnels')
               ->onDelete('cascade');
     });

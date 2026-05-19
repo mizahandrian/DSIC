@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-      Schema::create('personnel_statut', function (Blueprint $table) {
-    $table->id();
-    $table->foreignId('id_personnel')->constrained('personnels')->onDelete('cascade');
-    $table->foreignId('id_statut')->constrained( 'statuts')->onDelete('cascade');
-});
+        Schema::table('directions', function (Blueprint $table) {
+            $table->text('description')->nullable()->after('type');
+        });
     }
 
     /**
@@ -23,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('personnel_statut');
+        Schema::table('directions', function (Blueprint $table) {
+            $table->dropColumn('description');
+        });
     }
 };

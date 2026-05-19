@@ -10,7 +10,7 @@ class DirectionController extends Controller
     // 🔹 GET all directions
     public function index()
     {
-        return Direction::withCount('services')
+        return Direction::withCount(['services', 'personnels'])
             ->get()
             ->map(function ($direction) {
                 return [
@@ -19,7 +19,7 @@ class DirectionController extends Controller
                     'type' => $direction->type,
                     'description' => $direction->description,
                     'nombre_services' => $direction->services_count,
-                    'nombre_personnels' => 0 // tu peux améliorer après
+                    'nombre_personnels' => $direction->personnels_count
                 ];
             });
     }
@@ -39,7 +39,7 @@ class DirectionController extends Controller
     }
 
     // 🔹 UPDATE direction
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
         $direction = Direction::findOrFail($id);
 
@@ -49,7 +49,7 @@ class DirectionController extends Controller
     }
 
     // 🔹 DELETE direction
-    public function destroy($id)
+    public function destroy(int $id)
     {
         Direction::destroy($id);
 

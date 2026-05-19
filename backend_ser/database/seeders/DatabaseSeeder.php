@@ -17,9 +17,33 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Create superadmin user
+        User::firstOrCreate(
+            ['email' => 'admin@instat.mg'],
+            [
+                'name' => 'Super Admin',
+                'password' => \Illuminate\Support\Facades\Hash::make('Admin123!'),
+                'role' => 'superadmin',
+                'is_initialized' => true,
+            ]
+        );
+
+        // Create test user if not exists
+        User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'role' => 'user',
+            ]
+        );
+
+        // Appeler les seeders dans le bon ordre
+        $this->call([
+            DirectionSeeder::class,
+            EtatSeeder::class,
+            DirectionServiceSeeder::class,
+            ServiceSeeder::class,
         ]);
     }
 }

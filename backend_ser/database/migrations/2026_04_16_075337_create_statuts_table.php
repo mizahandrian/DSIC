@@ -12,10 +12,10 @@ return new class extends Migration
     public function up()
 {
     Schema::create('statuts', function (Blueprint $table) {
-        $table->id('id_statut');
+        $table->id( );
         $table->string('nom_statut');
         $table->enum('type_statut', ['fonctionnaire', 'prive']);
-        $table->text('description')->nullable();
+       // $table->text('description')->nullable();
         $table->timestamps();
     });
 }

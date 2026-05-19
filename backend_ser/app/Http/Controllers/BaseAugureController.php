@@ -7,26 +7,73 @@ use Illuminate\Http\Request;
 
 class BaseAugureController extends Controller
 {
+
+    // LISTE
     public function index()
     {
-        return BaseAugure::all();
+        return response()->json(
+            BaseAugure::orderBy('id_augure', 'desc')->get()
+        );
     }
 
+    // AJOUT
     public function store(Request $request)
     {
-        return BaseAugure::create($request->all());
+        $validated = $request->validate([
+
+            'agentMatricule' => 'required|unique:base_augures',
+            'agentNom' => 'required',
+
+            'structureRattachement' => 'required',
+        ]);
+
+        $data = BaseAugure::create($request->all());
+
+        return response()->json([
+            'message' => 'Ajout réussi',
+            'data' => $data
+        ], 201);
     }
 
-    public function update(Request $request, $id)
+    // AFFICHER 1
+    public function show(string $id)
     {
-        $augure = BaseAugure::findOrFail($id);
-        $augure->update($request->all());
-        return $augure;
+        $data = BaseAugure::findOrFail($id);
+
+        return response()->json($data);
     }
 
-    public function destroy($id)
+    // MODIFIER
+    public function update(Request $request, string $id)
     {
-        BaseAugure::destroy($id);
-        return ['message' => 'supprimé'];
+        $data = BaseAugure::findOrFail($id);
+
+        $request->validate([
+
+            'agentMatricule' => 'required|unique:base_augures,agentMatricule,' . $id . ',id_augure',
+
+            'agentNom' => 'required',
+
+            'structureRattachement' => 'required',
+        ]);
+
+        $data->update($request->all());
+
+        return response()->json([
+            'message' => 'Modification réussie',
+            'data' => $data
+        ]);
+    }
+
+    // SUPPRIMER
+    public function destroy(string $id)
+    {
+        $data = BaseAugure::findOrFail($id);
+
+        $data->delete();
+
+        return response()->json([
+            'message' => 'Suppression réussie'
+        ]);
     }
 }

@@ -22,4 +22,9 @@ class Service extends Model
     {
         return $this->belongsTo(Direction::class, 'id_direction', 'id_direction');
     }
+
+    public function personnels()
+    {
+        return $this->hasMany(Personnel::class, 'id_service', 'id_service');
+    }
 }

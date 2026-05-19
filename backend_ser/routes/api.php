@@ -16,6 +16,7 @@ use App\Http\Controllers\StatutController;
 use App\Http\Controllers\SituationAdminController;
 use App\Http\Controllers\EtatController;
 use App\Http\Controllers\LiaisonController;
+use App\Http\Controllers\RecrutementController;
 use Illuminate\Support\Facades\Password;
 
 
@@ -151,28 +152,32 @@ Route::put('/historiques/{id}', [HistoriqueController::class, 'update']);
 Route::delete('/historiques/{id}', [HistoriqueController::class, 'destroy']);
 
 // ==================== ROUTES BASE ROHI ====================
-Route::get('/base-rohi', [BaseRohiController::class, 'index']);
-Route::post('/base-rohi', [BaseRohiController::class, 'store']);
-Route::put('/base-rohi/{id}', [BaseRohiController::class, 'update']);
-Route::delete('/base-rohi/{id}', [BaseRohiController::class, 'destroy']);
+// Route::get('/base-rohi', [BaseRohiController::class, 'index']);
+// Route::post('/base-rohi', [BaseRohiController::class, 'store']);
+// Route::put('/base-rohi/{id}', [BaseRohiController::class, 'update']);
+// Route::delete('/base-rohi/{id}', [BaseRohiController::class, 'destroy']);
 
-Route::get('/personnels', [PersonnelController::class, 'index']);
+// Route::get('/personnels', [PersonnelController::class, 'index']);
 
-Route::get('/personnels-rohi', [LiaisonController::class, 'index']);
-Route::post('/personnels-rohi', [LiaisonController::class, 'store']);
-Route::delete('/personnels-rohi/{personnelId}/{rohiId}', [LiaisonController::class, 'destroy']);
+// Route::get('/personnels-rohi', [LiaisonController::class, 'index']);
+// Route::post('/personnels-rohi', [LiaisonController::class, 'store']);
+// Route::delete('/personnels-rohi/{personnelId}/{rohiId}', [LiaisonController::class, 'destroy']);
+//nouveaux
+Route::apiResource('base-rohi', BaseRohiController::class);
 
 // ==================== ROUTES BASE AUGURE ====================
-Route::get('/base-augure', [BaseAugureController::class, 'index']);
-Route::post('/base-augure', [BaseAugureController::class, 'store']);
-Route::put('/base-augure/{id}', [BaseAugureController::class, 'update']);
-Route::delete('/base-augure/{id}', [BaseAugureController::class, 'destroy']);
+// Route::get('/base-augure', [BaseAugureController::class, 'index']);
+// Route::post('/base-augure', [BaseAugureController::class, 'store']);
+// Route::put('/base-augure/{id}', [BaseAugureController::class, 'update']);
+// Route::delete('/base-augure/{id}', [BaseAugureController::class, 'destroy']);
 
-Route::get('/personnels', [PersonnelController::class, 'index']);
+// Route::get('/personnels', [PersonnelController::class, 'index']);
 
-Route::get('/personnels-augure', [LiaisonController::class, 'index']);
-Route::post('/personnels-augure', [LiaisonController::class, 'store']);
-Route::delete('/personnels-augure/{personnelId}/{augureId}', [LiaisonController::class, 'destroy']);
+// Route::get('/personnels-augure', [LiaisonController::class, 'index']);
+// Route::post('/personnels-augure', [LiaisonController::class, 'store']);
+//Route::delete('/personnels-augure/{personnelId}/{augureId}', [LiaisonController::class, 'destroy']);
+//nouveaux
+Route::apiResource('base-augure', BaseAugureController::class);
 // ==================== ROUTES STATUTS ADMIN ====================
 Route::get('/statuts', [StatutController::class, 'index']);
 Route::post('/statuts', [StatutController::class, 'store']);
@@ -203,8 +208,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user/complete-setup', [AuthController::class, 'completeSetup']);
 });
 
+//recrutement 
+Route::apiResource('recrutement', RecrutementController::class);
+Route::apiResource('postes', PosteController::class);
+Route::apiResource('carrieres', CarriereController::class);
+Route::apiResource('statuts', StatutController::class);
+
 // ==================== ROUTES USERS ====================
-Route::get('/users', [UserController::class, 'index']);
+// Route::get('/users', [UserController::class, 'index']);
 
 //route personnel vaovao
 Route::get('/directions', [DirectionController::class, 'index']);
@@ -217,3 +228,30 @@ Route::get('/services/direction/{id}', [ServiceController::class, 'getByDirectio
 
 Route::post('/personnels', [PersonnelController::class, 'store']);
 Route::post('/historiques', [HistoriqueController::class, 'store']);
+
+// recrutement
+Route::post('/recrutement', [RecrutementController::class, 'store']);
+//Route::get('/personnels', [PersonnelController::class, 'index']);
+//role admin
+
+Route::middleware(['auth:sanctum'])->group(function () {
+
+    // USER + SUPERADMIN
+    Route::post('/formulaire', [\App\Http\Controllers\FormController::class, 'store']);
+
+    // USER + SUPERADMIN peuvent voir leur profil (optionnel)
+    Route::get('/me', function (Request $request) {
+        return $request->user();
+    });
+
+    // 🔐 SUPERADMIN ONLY (gestion users)
+    Route::middleware([\App\Http\Middleware\RoleMiddleware::class . ':superadmin'])->group(function () {
+
+        Route::get('/users', [UserController::class, 'index']);
+        Route::post('/users', [UserController::class, 'store']);
+        Route::put('/users/{id}', [UserController::class, 'update']);
+        Route::delete('/users/{id}', [UserController::class, 'destroy']);
+
+    });
+
+});

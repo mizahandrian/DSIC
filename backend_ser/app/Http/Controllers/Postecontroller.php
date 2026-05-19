@@ -33,16 +33,21 @@ class PosteController extends Controller
     }
 
     // CREATE
-    public function store(Request $request)
-    {
-        $request->validate([
-            'titre_poste' => 'required',
-            'id_service' => 'required',
-            'id_carriere' => 'required'
-        ]);
+public function store(Request $request)
+{
+    $request->validate([
+        'titre_poste' => 'required|string',
+        'id_service' => 'nullable|integer',
+        'id_carriere' => 'nullable|integer'
+    ]);
 
-        return Poste::create($request->all());
-    }
+    return Poste::create([
+        'titre_poste' => $request->titre_poste,
+        'indice' => $request->indice,
+        'id_service' => $request->id_service,
+        'id_carriere' => $request->id_carriere,
+    ]);
+}
 
     // SHOW
     public function show($id)

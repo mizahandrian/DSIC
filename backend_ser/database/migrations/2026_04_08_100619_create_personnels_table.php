@@ -6,38 +6,52 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
-{
-    Schema::create('personnels', function (Blueprint $table) {
-    $table->id('id_personnel');
-    $table->string('nom');
-    $table->string('prenom');
-    $table->enum('genre', ['M', 'F']);
-    $table->string('numero_cin')->unique();
-    $table->string('tel')->nullable();
-    $table->date('date_naissance');
+    {
+        Schema::create('personnels', function (Blueprint $table) {
+            $table->id();
 
-    $table->date('date_entree');
-    $table->string('motif_entree')->nullable();
+            $table->string('nom');
+            $table->string('prenom');
+            $table->string('genre')->nullable();
+            $table->string('numero_cin')->nullable();
+            $table->string('tel')->nullable();
+            $table->date('date_naissance')->nullable();
 
-    $table->foreignId('id_direction')->constrained('directions', 'id_direction');
-    $table->foreignId('id_service')->constrained('services', 'id_service');
-    $table->foreignId('id_poste')->constrained('postes', 'id_poste');
-    $table->foreignId('id_carriere')->constrained('carrieres', 'id_carriere');
-    $table->foreignId('id_etat')->constrained('etats', 'id_etat');
+            $table->date('date_entree')->nullable();
+            $table->string('motif_entree')->nullable();
 
-    $table->string('situation_admin')->nullable();
-    $table->date('date_entrer_situation')->nullable();
-    $table->string('destination')->nullable();
-    $table->text('commentaire_situation')->nullable();
+            $table->foreignId('id_direction')->nullable();
+            $table->foreignId('id_service')->nullable();
+            $table->foreignId('id_poste')->nullable();
+            $table->foreignId('id_carriere')->nullable();
+            $table->foreignId('id_etat')->nullable();
 
-    $table->timestamps();
-});
-}
+            $table->string('direction')->nullable();
+            $table->string('service')->nullable();
+            $table->string('poste')->nullable();
 
+            $table->string('categorie')->nullable();
+            $table->string('indice')->nullable();
+            $table->string('corps')->nullable();
+            $table->string('grade')->nullable();
+            $table->date('date_effet_carriere')->nullable();
+
+            $table->string('statut')->nullable();
+            $table->string('etat')->nullable();
+
+            $table->string('situation')->nullable();
+            $table->date('date_situation')->nullable();
+            $table->string('destination')->nullable();
+            $table->text('commentaire_situation')->nullable();
+
+            $table->string('ancien_poste')->nullable();
+            $table->string('ancien_direction')->nullable();
+            $table->text('commentaire_historique')->nullable();
+
+            $table->timestamps();
+        });
+    }
     /**
      * Reverse the migrations.
      */

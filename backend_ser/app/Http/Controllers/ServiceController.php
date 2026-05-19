@@ -11,6 +11,7 @@ class ServiceController extends Controller
     public function index()
     {
         return Service::with('direction')
+            ->withCount('personnels')
             ->orderBy('nom_service')
             ->get()
             ->map(function ($service) {
@@ -19,15 +20,17 @@ class ServiceController extends Controller
                     'nom_service' => $service->nom_service,
                     'id_direction' => $service->id_direction,
                     'direction_nom' => $service->direction->nom_direction ?? null,
+                    'nombre_personnels' => $service->personnels_count
                 ];
             });
     }
 
     // ✅ SERVICES PAR DIRECTION
-    public function getByDirection($id)
+    public function getByDirection(int $id)
     {
         return Service::where('id_direction', $id)
             ->with('direction')
+            ->withCount('personnels')
             ->orderBy('nom_service')
             ->get()
             ->map(function ($service) {
@@ -36,6 +39,7 @@ class ServiceController extends Controller
                     'nom_service' => $service->nom_service,
                     'id_direction' => $service->id_direction,
                     'direction_nom' => $service->direction->nom_direction ?? null,
+                    'nombre_personnels' => $service->personnels_count
                 ];
             });
     }
@@ -52,7 +56,7 @@ class ServiceController extends Controller
     }
 
     // UPDATE
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
         $service = Service::findOrFail($id);
         $service->update($request->all());
@@ -60,7 +64,7 @@ class ServiceController extends Controller
     }
 
     // DELETE
-    public function destroy($id)
+    public function destroy(int $id)
 {
     $service = Service::find($id);
 

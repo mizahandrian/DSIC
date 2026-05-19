@@ -21,4 +21,10 @@ class Direction extends Model
     {
         return $this->hasMany(Service::class, 'id_direction');
     }
+
+    // Relation avec personnels
+    public function personnels()
+    {
+        return $this->hasMany(Personnel::class, 'id_direction', 'id_direction');
+    }
 }

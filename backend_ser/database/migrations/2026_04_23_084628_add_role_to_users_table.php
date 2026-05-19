@@ -9,10 +9,15 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+public function up(): void
 {
     Schema::table('users', function (Blueprint $table) {
         $table->string('role')->default('user');
+        $table->string('status')->default('actif');
+        $table->string('prenom')->nullable();
+        $table->integer('age')->nullable();
+        $table->string('sexe')->nullable();
+        $table->string('phone')->nullable();
     });
 }
 

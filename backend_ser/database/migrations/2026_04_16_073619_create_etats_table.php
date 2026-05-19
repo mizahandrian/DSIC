@@ -13,7 +13,7 @@ return new class extends Migration
 {
     Schema::create('etats', function (Blueprint $table) {
         $table->id('id_etat');
-        $table->enum('nom_etat', ['Actif', 'Inactif']);
+        $table->enum('nom_etat', ['Actif', 'Inactif', 'En congé', 'Retraité']);
         $table->string('cause_inactivite')->nullable();
         $table->text('commentaire')->nullable();
         $table->timestamps();
