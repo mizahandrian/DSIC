@@ -169,6 +169,13 @@ const Recrutement: React.FC = () => {
     return null;
   };
 
+  const formatDate = (date: string): string | null => {
+  if (!date || date.trim() === '') return null;
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return null;
+  return d.toISOString().split('T')[0]; // → "2026-05-19"
+};
+
  const handleSubmit = async () => {
   const validationError = validateAllSteps();
   if (validationError) {

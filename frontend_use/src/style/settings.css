@@ -1,0 +1,48 @@
+/* src/style/settings.css */
+.settings-container {
+  padding: 24px;
+}
+
+.settings-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.settings-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.settings-item h3 {
+  margin: 0;
+}
+
+.settings-item p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.settings-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: white;
+}
+
+.settings-button-active {
+  background-color: #10b981;
+}
+
+.settings-button-inactive {
+  background-color: #ef4444;
+}
+
+.settings-button-dark {
+  background-color: #1e293b;
+}

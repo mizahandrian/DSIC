@@ -9,7 +9,8 @@ import {
   faUserPlus,
   faList,
   faBriefcase,
-  faBuilding
+  faBuilding,
+  faCog
 } from '@fortawesome/free-solid-svg-icons';
 import logoInstat from '../assets/image/Logo-INSTAT.png';
 
@@ -28,7 +29,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onClose }) => {
     { path: '/gestion-services', name: 'Services', icon: faBriefcase },
     { path: '/base-rohi', name: 'Base ROHI', icon: faDatabase },
     { path: '/base-augure', name: 'Base AUGURE', icon: faDatabase },
-
+    { path: '/settings', name: 'Paramètres', icon: faCog },
   ];
 
   return (
