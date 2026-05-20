@@ -10,30 +10,34 @@ class BaseAugureController extends Controller
 
     // LISTE
     public function index()
-    {
-        return response()->json(
-            BaseAugure::orderBy('id_augure', 'desc')->get()
-        );
-    }
+{
+    return response()->json(
+        BaseAugure::orderBy('id', 'desc')->get()
+    );
+}
 
     // AJOUT
     public function store(Request $request)
-    {
-        $validated = $request->validate([
+{
+    $validated = $request->validate([
+        'agentMatricule' => 'required|unique:base_augures',
+        'agentNom'       => 'required',
+        'structureRattachement' => 'required',
+    ]);
 
-            'agentMatricule' => 'required|unique:base_augures',
-            'agentNom' => 'required',
+    // Convertir les chaînes vides en null pour les dates
+    $data = $request->merge([
+        'agentDateNais' => $request->agentDateNais ?: null,
+        'dateEffet'     => $request->dateEffet ?: null,
+    ])->all();
 
-            'structureRattachement' => 'required',
-        ]);
+    $created = BaseAugure::create($data);
 
-        $data = BaseAugure::create($request->all());
-
-        return response()->json([
-            'message' => 'Ajout réussi',
-            'data' => $data
-        ], 201);
-    }
+    return response()->json([
+        'message' => 'Ajout réussi',
+        'data'    => $created
+    ], 201);
+}
 
     // AFFICHER 1
     public function show(string $id)
@@ -45,25 +49,27 @@ class BaseAugureController extends Controller
 
     // MODIFIER
     public function update(Request $request, string $id)
-    {
-        $data = BaseAugure::findOrFail($id);
+{
+    $data = BaseAugure::findOrFail($id);
 
-        $request->validate([
+    $request->validate([
+        'agentMatricule'        => 'required|unique:base_augures,agentMatricule,' . $id . ',id_augure',
+        'agentNom'              => 'required',
+        'structureRattachement' => 'required',
+    ]);
 
-            'agentMatricule' => 'required|unique:base_augures,agentMatricule,' . $id . ',id_augure',
+    $payload = $request->merge([
+        'agentDateNais' => $request->agentDateNais ?: null,
+        'dateEffet'     => $request->dateEffet ?: null,
+    ])->all();
 
-            'agentNom' => 'required',
+    $data->update($payload);
 
-            'structureRattachement' => 'required',
-        ]);
-
-        $data->update($request->all());
-
-        return response()->json([
-            'message' => 'Modification réussie',
-            'data' => $data
-        ]);
-    }
+    return response()->json([
+        'message' => 'Modification réussie',
+        'data'    => $data
+    ]);
+}
 
     // SUPPRIMER
     public function destroy(string $id)
