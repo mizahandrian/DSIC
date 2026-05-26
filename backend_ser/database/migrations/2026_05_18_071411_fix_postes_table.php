@@ -10,7 +10,7 @@ return new class extends Migration {
         Schema::dropIfExists('postes');
 
         Schema::create('postes', function (Blueprint $table) {
-            $table->id('id_poste');
+            $table->bigIncrements('id_poste');
             $table->string('titre_poste');
             $table->string('indice')->nullable();
 
@@ -28,7 +28,7 @@ return new class extends Migration {
                   ->onDelete('set null');
 
             $table->foreign('id_carriere')
-                  ->references('id_carriere') // ✅ corrigé : id_carriere pas id
+                  ->references('id_carriere')
                   ->on('carrieres')
                   ->onDelete('set null');
         });

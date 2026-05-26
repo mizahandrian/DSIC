@@ -8,7 +8,7 @@ class BaseAugure extends Model
 {
     protected $table = 'base_augures';
 
-    protected $primaryKey = 'id';
+    protected $primaryKey = 'id_augure';
 
     // ⚠️ Mettez false si votre table n'a pas created_at / updated_at
     public $timestamps = true;

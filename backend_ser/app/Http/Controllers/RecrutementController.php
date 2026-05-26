@@ -7,6 +7,7 @@ use App\Models\Carriere;
 use App\Models\Historique;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class RecrutementController extends Controller
 {
@@ -20,81 +21,89 @@ class RecrutementController extends Controller
             'date_entree'    => 'required|date',
         ]);
 
+        // ✅ Helper pour nettoyer toutes les dates → format Y-m-d
+        $parseDate = function(?string $date): ?string {
+            if (!$date || trim($date) === '') return null;
+            try {
+                return Carbon::parse($date)->format('Y-m-d');
+            } catch (\Exception $e) {
+                return null;
+            }
+        };
+
         try {
             DB::beginTransaction();
 
             // ✅ 1. Créer le PERSONNEL
             $personnel = Personnel::create([
-                'nom'            => $request->nom,
-                'prenom'         => $request->prenom,
-                'genre'          => $request->genre ?? null,
-                'numero_cin'     => $request->numero_cin,
-                'tel'            => $request->tel ?? null,
-                'date_naissance' => $request->date_naissance,
+                'nom'                    => $request->nom,
+                'prenom'                 => $request->prenom,
+                'genre'                  => $request->genre ?? null,
+                'numero_cin'             => $request->numero_cin,
+                'tel'                    => $request->tel ?? null,
+                'date_naissance'         => $parseDate($request->date_naissance),      // ✅
+                'date_entree'            => $parseDate($request->date_entree),          // ✅
+                'motif_entree'           => $request->motif_entree ?? null,
 
-                'date_entree'  => $request->date_entree,
-                'motif_entree' => $request->motif_entree ?? null,
+                'id_direction'           => $request->id_direction ?: null,
+                'id_service'             => $request->id_service ?: null,
+                'id_poste'               => null,
+                'id_carriere'            => null,
+                'id_etat'                => $request->id_etat ?: null,
+                'id_statut'              => $request->id_statut ?: null,
 
-                'id_direction' => $request->id_direction ?: null,
-                'id_service'   => $request->id_service ?: null,
-                'id_poste'     => null, // sera mis à jour après
-                'id_carriere'  => null, // sera mis à jour après
-                'id_etat'      => $request->id_etat ?: null,
-                'id_statut'    => $request->id_statut ?: null,
+                'poste'                  => $request->poste ?? null,
+                'service'                => $request->service ?? null,
+                'direction'              => $request->direction ?? null,
 
-                'poste'    => $request->poste ?? null,
-                'service'  => $request->service ?? null,
-                'direction'=> $request->direction ?? null,
+                'categorie'              => $request->categorie ?? null,
+                'indice'                 => $request->indice ?? null,
+                'corps'                  => $request->corps ?? null,
+                'grade'                  => $request->grade ?? null,
+                'date_effet_carriere'    => $parseDate($request->date_effet_carriere),  // ✅
 
-                'categorie'           => $request->categorie ?? null,
-                'indice'              => $request->indice ?? null,
-                'corps'               => $request->corps ?? null,
-                'grade'               => $request->grade ?? null,
-                'date_effet_carriere' => $request->date_effet_carriere ?? null,
+                'statut'                 => $request->statut ?? null,
+                'etat'                   => $request->etat ?? 'actif',
 
-                'statut' => $request->statut ?? null,
-                'etat'   => $request->etat ?? 'actif',
-
-                'situation'             => $request->situation ?? null,
-                'date_situation'        => $request->date_situation ?? null,
-                'destination'           => $request->destination ?? null,
-                'commentaire_situation' => $request->commentaire_situation ?? null,
+                'situation'              => $request->situation ?? null,
+                'date_situation'         => $parseDate($request->date_situation),       // ✅
+                'destination'            => $request->destination ?? null,
+                'commentaire_situation'  => $request->commentaire_situation ?? null,
 
                 'ancien_poste'           => $request->ancien_poste ?? null,
                 'ancien_direction'       => $request->ancien_direction ?? null,
                 'commentaire_historique' => $request->commentaire_historique ?? null,
             ]);
 
-            // ✅ 2. Créer la CARRIÈRE avec l'ID du personnel
+            // ✅ 2. Créer la CARRIÈRE
             if ($request->filled('categorie') && $request->filled('corps') && $request->filled('grade')) {
                 $carriere = Carriere::create([
                     'personnel_id' => $personnel->id,
                     'categorie'    => $request->categorie,
-                    'indice'       => $request->indice ?? null,
+                    'indice'       => $request->indice ?? '-',
                     'corps'        => $request->corps,
                     'grade'        => $request->grade,
-                    'date_effet'   => $request->date_effet_carriere,
+                    'date_effet'   => $parseDate($request->date_effet_carriere) ?? now()->format('Y-m-d'), // ✅
                 ]);
 
-                // Lier la carrière au personnel
                 $personnel->update(['id_carriere' => $carriere->id_carriere]);
             }
 
             // ✅ 3. Créer l'HISTORIQUE
             if ($request->filled('ancien_poste') || $request->filled('ancien_direction')) {
                 Historique::create([
-                    'id_personnel'     => $personnel->id,
+                    'personnel_id'     => $personnel->id,
                     'ancien_poste'     => $request->ancien_poste ?? null,
                     'ancien_direction' => $request->ancien_direction ?? null,
                     'motif_changement' => $request->commentaire_historique ?? null,
-                    'date_changement'  => now()->toDateString(),
+                    'date_changement'  => now()->format('Y-m-d'),
                 ]);
             }
 
             DB::commit();
 
             return response()->json([
-                'message' => 'Personnel créé avec succès',
+                'message' => 'Personnel recruté avec succès',
                 'data'    => $personnel->fresh(),
             ], 201);
 
