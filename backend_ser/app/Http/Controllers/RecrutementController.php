@@ -53,7 +53,7 @@ class RecrutementController extends Controller
                 'date_effet_carriere' => $request->date_effet_carriere ?? null,
 
                 'statut' => $request->statut ?? null,
-                'etat'   => $request->etat ?? 'actif',
+                'etat' => $request->id_etat == 1 ? 'Actif' : 'Inactif',
 
                 'situation'             => $request->situation ?? null,
                 'date_situation'        => $request->date_situation ?? null,
