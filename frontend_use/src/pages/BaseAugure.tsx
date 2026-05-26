@@ -10,7 +10,7 @@ import api from '../Service/api';
 import '../style/base-augure.css';
 
 interface BaseAugure {
-  id_augure: number;
+  id: number;
   agentMatricule: string;
   corpsCode: string;
   indice: string;
@@ -106,7 +106,7 @@ const BaseAugure: React.FC = () => {
     setLoading(true);
     try {
       if (editingItem) {
-        await api.put(`/base-augure/${editingItem.id_augure}`, formData);
+        await api.put(`/base-augure/${editingItem.id}`, formData);
       } else {
         await api.post('/base-augure', formData);
       }
@@ -123,7 +123,7 @@ const BaseAugure: React.FC = () => {
   const handleDelete = async () => {
     if (!deleteConfirm) return;
     try {
-      await api.delete(`/base-augure/${deleteConfirm.id_augure}`);
+      await api.delete(`/base-augure/${deleteConfirm.id}`);
       await fetchItems();
       setDeleteConfirm(null);
     } catch (error) {
@@ -231,7 +231,7 @@ const BaseAugure: React.FC = () => {
               </thead>
               <tbody>
                 {paginatedItems.map((item) => (
-                  <tr key={item.id_augure}>
+                  <tr key={item.id}>
                     <td className="matricule-cell">{item.agentMatricule}</td>
                     <td><strong>{item.agentNom}</strong></td>
                     <td>{item.agentCin || '-'}</td>
@@ -402,7 +402,7 @@ const BaseAugure: React.FC = () => {
             </div>
             <div className="modal-body">
               <p>Supprimer l'entrée :</p>
-              <p className="confirm-name"><strong>{deleteConfirm.agentMatricule} - {deleteConfirm.agentNom}</strong></p>
+              <p><strong>{deleteConfirm.agentMatricule}...</strong></p>
               <p className="warning">Cette action est irréversible.</p>
             </div>
             <div className="modal-footer">

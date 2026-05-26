@@ -420,6 +420,7 @@ const Recrutement: React.FC = () => {
               <div className="form-group">
                 <label><FontAwesomeIcon icon={faExchangeAlt} /> Situation</label>
                 <select name="situation" value={formData.situation} onChange={handleChange}>
+                  <option value="activite">En activité</option>
                   <option value="mise_disposition">Mise à disposition</option>
                   <option value="detachement">Détachement</option>
                   <option value="disponibilite">Disponibilité</option>

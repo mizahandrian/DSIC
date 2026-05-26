@@ -65,24 +65,24 @@ const Dashboard: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      const [personnelsRes, directionsRes, servicesRes, postesRes] = await Promise.all([
+      const [personnelsRes, directionsRes, servicesRes] = await Promise.all([
         api.get('/personnels'),
         api.get('/directions'),
-        api.get('/services'),
-        api.get('/postes')
+        api.get('/services')
+
       ]);
 
       const personnels = personnelsRes.data.map((p: any) => ({
         ...p,
         direction: p.direction?.nom_direction,
         service: p.service?.nom_service,
-        poste: p.poste?.titre_poste,
-        etat: p.etat?.nom_etat
+        poste: p.poste,
+        etat: p.etat
       }));
       const directions = directionsRes.data;
 
-      const actifs = personnels.filter((p: any) => p.id_etat === 1).length;
-      const inactifs = personnels.length - actifs;
+      const actifs   = personnels.filter((p: any) => p.etat === 'Actif').length;
+      const inactifs = personnels.filter((p: any) => p.etat === 'Inactif').length;
 
       // Données pour le graphique en barres (Top 6 directions)
       const directionsStats = directions
@@ -97,7 +97,7 @@ const Dashboard: React.FC = () => {
         totalPersonnels: personnels.length,
         totalDirections: directions.length,
         totalServices: servicesRes.data.length,
-        totalPostes: postesRes.data.length,
+        totalPostes: new Set(personnels.map((p: any) => p.poste).filter(Boolean)).size,
         personnelsActifs: actifs,
         personnelsInactifs: inactifs,
         directionsData: directionsStats,

@@ -568,8 +568,9 @@ const GestionPersonnels: React.FC = () => {
                     
                     <div className="form-group">
                       <label>État *</label>
-                      <select name="id_etat" value={editFormData.id_etat || ''} onChange={handleEditChange}>
-                        {etats.map(e => <option key={e.id_etat} value={e.id_etat}>{e.nom_etat}</option>)}
+                      <select name="etat" value={editFormData.etat || 'Actif'} onChange={handleEditChange}>
+                        <option value="Actif">Actif</option>
+                        <option value="Inactif">Inactif</option>
                       </select>
                     </div>
                   </div>
