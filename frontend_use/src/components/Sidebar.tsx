@@ -23,7 +23,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onClose }) => {
   const menuItems = [
     { path: '/dashboard', name: 'Tableau de bord', icon: faTachometerAlt },
     { path: '/super-admin', name: 'Super Admin', icon: faUserShield },
-    { path: '/recrutement', name: 'Personnel', icon: faUserPlus },
+    { path: '/recrutement', name: 'Ajout Personnel', icon: faUserPlus },
     { path: '/gestion-personnels', name: 'Liste des personnels', icon: faList },
     { path: '/gestion-directions', name: 'Directions', icon: faBuilding },
     { path: '/gestion-services', name: 'Services', icon: faBriefcase },
