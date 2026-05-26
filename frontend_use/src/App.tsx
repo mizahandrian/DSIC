@@ -90,6 +90,7 @@ const App: React.FC = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
           
+          
         </Route>
         
         {/* Redirection par défaut */}
