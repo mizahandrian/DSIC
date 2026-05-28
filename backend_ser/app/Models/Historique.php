@@ -1,5 +1,4 @@
 <?php
-// app/Models/Historique.php
 
 namespace App\Models;
 
@@ -11,7 +10,7 @@ class Historique extends Model
     // primaryKey reste 'id' par défaut ✅
 
     protected $fillable = [
-        'id_personnel',      // ✅ nom réel en DB (pas personnel_id)
+        'personnel_id',
         'ancien_poste',
         'ancien_direction',
         'motif_changement',
@@ -20,6 +19,6 @@ class Historique extends Model
 
     public function personnel()
     {
-        return $this->belongsTo(Personnel::class, 'id_personnel');
+        return $this->belongsTo(Personnel::class, 'personnel_id'); // ✅ corrigé
     }
 }

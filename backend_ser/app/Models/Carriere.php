@@ -1,5 +1,4 @@
 <?php
-// app/Models/Carriere.php
 
 namespace App\Models;
 
@@ -8,10 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class Carriere extends Model
 {
     protected $table = 'carrieres';
-    protected $primaryKey = 'id_carriere'; // ✅ clé primaire réelle
+    protected $primaryKey = 'id_carriere'; // ✅
 
     protected $fillable = [
-        'personnel_id',  // ✅ colonne qu'on vient d'ajouter
+        'personnel_id',
         'categorie',
         'indice',
         'corps',
@@ -21,6 +20,6 @@ class Carriere extends Model
 
     public function personnel()
     {
-        return $this->belongsTo(Personnel::class, 'personnel_id');
+        return $this->belongsTo(Personnel::class, 'personnel_id'); // ✅
     }
 }
