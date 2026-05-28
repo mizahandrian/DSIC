@@ -1,5 +1,5 @@
 // src/components/Sidebar.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
@@ -10,16 +10,21 @@ import {
   faList,
   faBriefcase,
   faBuilding,
-  faCog
+  faCog,
+  faChevronLeft,
+  faChevronRight,
+  faUserCircle
 } from '@fortawesome/free-solid-svg-icons';
 import logoInstat from '../assets/image/Logo-INSTAT.png';
 
 interface SidebarProps {
-  className?: string;
-  onClose?: () => void;
+  isCollapsed?: boolean;
+  onToggle?: () => void;
+  isMobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ className, onClose }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, onToggle, isMobileOpen = false, onMobileClose }) => {
   const menuItems = [
     { path: '/dashboard', name: 'Tableau de bord', icon: faTachometerAlt },
     { path: '/super-admin', name: 'Super Admin', icon: faUserShield },
@@ -29,33 +34,44 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onClose }) => {
     { path: '/gestion-services', name: 'Services', icon: faBriefcase },
     { path: '/base-rohi', name: 'Base ROHI', icon: faDatabase },
     { path: '/base-augure', name: 'Base AUGURE', icon: faDatabase },
+    { path: '/profile', name: 'Mon profil', icon: faUserCircle },
     { path: '/settings', name: 'Paramètres', icon: faCog },
   ];
 
   return (
-    <div className={`sidebar ${className}`}>
-      <div className="sidebar-header">
-        <div className="sidebar-logo">
-          <img src={logoInstat} alt="INSTAT" />
+    <>
+      <div className={`sidebar ${isCollapsed ? 'collapsed' : ''} ${isMobileOpen ? 'open' : ''}`}>
+        <div className="sidebar-header">
+          <div className={`sidebar-logo ${isCollapsed ? 'collapsed' : ''}`}>
+            <img src={logoInstat} alt="INSTAT" />
+          </div>
+          {!isCollapsed && (
+            <>
+              <h2>INSTAT Madagascar</h2>
+              <p>Gestion RH</p>
+            </>
+          )}
+          <button className="sidebar-toggle" onClick={onToggle}>
+            <FontAwesomeIcon icon={isCollapsed ? faChevronRight : faChevronLeft} />
+          </button>
         </div>
-        <h2>INSTAT Madagascar</h2>
-        <p>Gestion Personnel</p>
+        
+        <nav className="sidebar-nav">
+          {menuItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+              onClick={onMobileClose}
+            >
+              <FontAwesomeIcon icon={item.icon} className="nav-icon" />
+              <span className="nav-text">{item.name}</span>
+            </NavLink>
+          ))}
+        </nav>
       </div>
-      
-      <nav className="sidebar-nav">
-        {menuItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-            onClick={onClose}
-          >
-            <FontAwesomeIcon icon={item.icon} className="nav-icon" />
-            <span className="nav-text">{item.name}</span>
-          </NavLink>
-        ))}
-      </nav>
-    </div>
+      {isMobileOpen && <div className="sidebar-overlay" onClick={onMobileClose}></div>}
+    </>
   );
 };
 

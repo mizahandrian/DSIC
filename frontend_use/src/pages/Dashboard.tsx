@@ -18,11 +18,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUsers, faBuilding, faBriefcase, faUserTie,
   faUserPlus, faUserEdit, faUserCheck,
-  faFileAlt, faChevronRight, faChartLine, faChartBar
+  faFileAlt, faChevronRight, faChartLine, faChartBar,
+  faSpinner
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 
-// Enregistrement Chart.js
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -69,7 +69,6 @@ const Dashboard: React.FC = () => {
         api.get('/personnels'),
         api.get('/directions'),
         api.get('/services')
-
       ]);
 
       const personnels = personnelsRes.data.map((p: any) => ({
@@ -81,10 +80,9 @@ const Dashboard: React.FC = () => {
       }));
       const directions = directionsRes.data;
 
-      const actifs   = personnels.filter((p: any) => p.etat === 'Actif').length;
+      const actifs = personnels.filter((p: any) => p.etat === 'Actif').length;
       const inactifs = personnels.filter((p: any) => p.etat === 'Inactif').length;
 
-      // Données pour le graphique en barres (Top 6 directions)
       const directionsStats = directions
         .map((d: any) => ({
           name: d.nom_direction.length > 15 ? d.nom_direction.substring(0, 15) + '...' : d.nom_direction,
@@ -110,17 +108,17 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Configuration du graphique en barres (bâtonnets)
+  // Graphique en barres - violet
   const barChartData = {
     labels: stats.directionsData.map(d => d.name),
     datasets: [
       {
-        label: 'Nombre de personnels',
+        label: 'Personnels',
         data: stats.directionsData.map(d => d.count),
-        backgroundColor: '#10b981',
-        borderColor: '#0d9488',
+        backgroundColor: '#4f46e5',
+        borderColor: '#4338ca',
         borderWidth: 1,
-        borderRadius: 6,
+        borderRadius: 8,
         barPercentage: 0.65,
         categoryPercentage: 0.8,
       },
@@ -169,10 +167,9 @@ const Dashboard: React.FC = () => {
     },
   };
 
-  // Données pour l'évolution (12 mois)
+  // Graphique en ligne - violet
   const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
   const evolutionData = months.map((_, i) => {
-    // Simulation de croissance basée sur le nombre total de personnels
     return Math.max(1, Math.round(stats.totalPersonnels * (i + 1) / 12));
   });
 
@@ -182,14 +179,14 @@ const Dashboard: React.FC = () => {
       {
         label: 'Effectifs',
         data: evolutionData,
-        borderColor: '#10b981',
-        backgroundColor: 'rgba(16, 185, 129, 0.05)',
+        borderColor: '#4f46e5',
+        backgroundColor: 'rgba(79, 70, 229, 0.05)',
         borderWidth: 2,
-        pointBackgroundColor: '#10b981',
+        pointBackgroundColor: '#4f46e5',
         pointBorderColor: '#ffffff',
-        pointBorderWidth: 1,
-        pointRadius: 3,
-        pointHoverRadius: 5,
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
         tension: 0.3,
         fill: true,
       },
@@ -239,113 +236,69 @@ const Dashboard: React.FC = () => {
   };
 
   const statCards = [
-    { title: 'Personnels', value: stats.totalPersonnels, icon: faUsers },
-    { title: 'Directions', value: stats.totalDirections, icon: faBuilding },
-    { title: 'Services', value: stats.totalServices, icon: faBriefcase },
-    { title: 'Postes', value: stats.totalPostes, icon: faUserTie },
+    { title: 'Personnels', value: stats.totalPersonnels, icon: faUsers, color: '#4f46e5', bg: '#e0e7ff' },
+    { title: 'Directions', value: stats.totalDirections, icon: faBuilding, color: '#4f46e5', bg: '#e0e7ff' },
+    { title: 'Services', value: stats.totalServices, icon: faBriefcase, color: '#4f46e5', bg: '#e0e7ff' },
+    { title: 'Postes', value: stats.totalPostes, icon: faUserTie, color: '#4f46e5', bg: '#e0e7ff' },
   ];
 
   const quickActions = [
-    { title: 'Nouveau personnel', icon: faUserPlus, desc: 'Ajouter un employé', link: '/recrutement' },
-    { title: 'Modifier personnel', icon: faUserEdit, desc: 'Mettre à jour', link: '/gestion-personnels' },
-    { title: 'Gérer statuts', icon: faUserCheck, desc: 'Actif/Inactif', link: '/statut-admin' },
-    { title: 'Voir rapports', icon: faFileAlt, desc: 'Export données', link: '/gestion-personnels' },
+    { title: 'Ajouter un personnel', icon: faUserPlus, desc: 'Nouveau recrutement', link: '/recrutement' },
+    { title: 'Modifier un personnel', icon: faUserEdit, desc: 'Mettre à jour', link: '/gestion-personnels' },
+    { title: 'Gérer les statuts', icon: faUserCheck, desc: 'Actif/Inactif', link: '/gestion-personnels' },
+    { title: 'Exporter les données', icon: faFileAlt, desc: 'Rapports CSV', link: '/gestion-personnels' },
   ];
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-        <div style={{ width: '32px', height: '32px', border: '2px solid #e2e8f0', borderTopColor: '#10b981', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <div className="dashboard-loading">
+        <FontAwesomeIcon icon={faSpinner} spin />
+        <p>Chargement du tableau de bord...</p>
       </div>
     );
   }
 
   return (
-    <div>
-      {/* Message de bienvenue */}
-      <div className="dashboard-welcome">
-        <h1>Bienvenue sur votre Tableau de bord</h1>
+    <div className="dashboard-content">
+      {/* En-tête de bienvenue */}
+      <div className="welcome-section">
+        <h1>Tableau de bord</h1>
+        <p>Bienvenue sur votre espace de gestion RH</p>
       </div>
 
       {/* Cartes statistiques */}
       <div className="stats-grid">
         {statCards.map((card, i) => (
           <div className="stat-card" key={i}>
-            <div className="stat-info">
-              <h3>{card.title}</h3>
-              <p className="stat-number">{card.value}</p>
-            </div>
-            <div className="stat-icon">
+            <div className="stat-icon-wrapper" style={{ background: card.bg, color: card.color }}>
               <FontAwesomeIcon icon={card.icon} />
+            </div>
+            <div className="stat-info">
+              <span className="stat-value">{card.value}</span>
+              <span className="stat-label">{card.title}</span>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Graphiques */}
-      <div className="charts-grid">
-        {/* Graphique en barres - Top directions */}
-        <div className="chart-card">
-          <div className="chart-header">
-            <div className="chart-icon">
-              <FontAwesomeIcon icon={faChartBar} />
-            </div>
-            <div>
-              <h3 className="chart-title">Top directions</h3>
-              <p className="chart-subtitle">Nombre de personnels par direction</p>
-            </div>
+      {/* État des personnels */}
+      <div className="status-cards">
+        <div className="status-card active">
+          <div className="status-info">
+            <span className="status-value">{stats.personnelsActifs}</span>
+            <span className="status-label">Personnels actifs</span>
           </div>
-          <div className="chart-container">
-            {stats.directionsData.length > 0 ? (
-              <Bar data={barChartData} options={barChartOptions} />
-            ) : (
-              <div className="no-data">Aucune donnée disponible</div>
-            )}
+          <div className="status-progress">
+            <div className="progress-fill" style={{ width: `${(stats.personnelsActifs / (stats.totalPersonnels || 1)) * 100}%` }}></div>
           </div>
         </div>
-
-        {/* Graphique en ligne - Évolution */}
-        <div className="chart-card">
-          <div className="chart-header">
-            <div className="chart-icon">
-              <FontAwesomeIcon icon={faChartLine} />
-            </div>
-            <div>
-              <h3 className="chart-title">Évolution des effectifs</h3>
-              <p className="chart-subtitle">Tendance sur 12 mois</p>
-            </div>
+        <div className="status-card inactive">
+          <div className="status-info">
+            <span className="status-value">{stats.personnelsInactifs}</span>
+            <span className="status-label">Personnels inactifs</span>
           </div>
-          <div className="chart-container">
-            <Line data={lineChartData} options={lineChartOptions} />
-          </div>
-        </div>
-      </div>
-
-      {/* État des personnels simplifié */}
-      <div className="stats-simple">
-        <div className="stat-card-mini">
-          <div className="stat-info">
-            <h3>Personnels actifs</h3>
-            <p className="stat-number">{stats.personnelsActifs}</p>
-            <div className="stat-progress">
-              <div className="progress-bar" style={{ width: `${(stats.personnelsActifs / (stats.totalPersonnels || 1)) * 100}%` }}></div>
-            </div>
-          </div>
-          <div className="stat-icon-mini">
-            <FontAwesomeIcon icon={faUserCheck} />
-          </div>
-        </div>
-        <div className="stat-card-mini">
-          <div className="stat-info">
-            <h3>Personnels inactifs</h3>
-            <p className="stat-number">{stats.personnelsInactifs}</p>
-            <div className="stat-progress">
-              <div className="progress-bar" style={{ width: `${(stats.personnelsInactifs / (stats.totalPersonnels || 1)) * 100}%`, background: '#e2e8f0' }}></div>
-            </div>
-          </div>
-          <div className="stat-icon-mini">
-            <FontAwesomeIcon icon={faUserCheck} style={{ color: '#94a3b8' }} />
+          <div className="status-progress">
+            <div className="progress-fill" style={{ width: `${(stats.personnelsInactifs / (stats.totalPersonnels || 1)) * 100}%`, background: '#cbd5e1' }}></div>
           </div>
         </div>
       </div>
@@ -363,46 +316,82 @@ const Dashboard: React.FC = () => {
         ))}
       </div>
 
-      {/* Derniers personnels ajoutés */}
-      <div className="recent-table">
+      {/* Graphiques */}
+      <div className="charts-section">
+        <div className="chart-card">
+          <div className="chart-header">
+            <div className="chart-icon">
+              <FontAwesomeIcon icon={faChartBar} />
+            </div>
+            <div>
+              <h3>Répartition par direction</h3>
+              <p>Nombre de personnels par direction</p>
+            </div>
+          </div>
+          <div className="chart-container">
+            {stats.directionsData.length > 0 ? (
+              <Bar data={barChartData} options={barChartOptions} />
+            ) : (
+              <div className="no-data">Aucune donnée disponible</div>
+            )}
+          </div>
+        </div>
+
+        <div className="chart-card">
+          <div className="chart-header">
+            <div className="chart-icon">
+              <FontAwesomeIcon icon={faChartLine} />
+            </div>
+            <div>
+              <h3>Évolution des effectifs</h3>
+              <p>Tendance sur 12 mois</p>
+            </div>
+          </div>
+          <div className="chart-container">
+            <Line data={lineChartData} options={lineChartOptions} />
+          </div>
+        </div>
+      </div>
+
+      {/* Derniers personnels */}
+      <div className="recent-section">
         <div className="recent-header">
-          <h3 className="recent-title">
-            <FontAwesomeIcon icon={faUsers} style={{ color: '#10b981' }} />
-            Derniers personnels ajoutés
-          </h3>
-          <Link to="/gestion-personnels" className="view-all">
-            Voir tout <FontAwesomeIcon icon={faChevronRight} style={{ fontSize: '11px' }} />
+          <h3>Derniers personnels ajoutés</h3>
+          <Link to="/gestion-personnels" className="view-link">
+            Voir tout <FontAwesomeIcon icon={faChevronRight} />
           </Link>
         </div>
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Matricule</th>
-              <th>Nom</th>
-              <th>Prénom</th>
-              <th>Poste</th>
-              <th>Date entrée</th>
-            </tr>
-          </thead>
-          <tbody>
-            {stats.recents.map((p: any) => (
-              <tr key={p.id}>
-                <td>{p.id}</td>
-                <td><strong>{p.nom}</strong></td>
-                <td>{p.prenom}</td>
-                <td>{p.poste || '-'}</td>
-                <td>{new Date(p.date_entree).toLocaleDateString('fr-FR')}</td>
-              </tr>
-            ))}
-            {stats.recents.length === 0 && (
+        <div className="table-wrapper">
+          <table className="recent-table">
+            <thead>
               <tr>
-                <td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
-                  Aucun personnel enregistré
-                </td>
+                <th>Matricule</th>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Poste</th>
+                <th>Date d'entrée</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {stats.recents.map((p: any) => (
+                <tr key={p.id}>
+                  <td className="matricule">#{p.id}</td>
+                  <td className="name">{p.nom}</td>
+                  <td>{p.prenom}</td>
+                  <td>{p.poste || '-'}</td>
+                  <td>{new Date(p.date_entree).toLocaleDateString('fr-FR')}</td>
+                </tr>
+              ))}
+              {stats.recents.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="empty-row">
+                    Aucun personnel enregistré
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
