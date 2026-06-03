@@ -44,6 +44,7 @@ const Recrutement: React.FC = () => {
 
   const [formData, setFormData] = useState({
     // Étape 1 - Identité
+    matricule: '',
     nom: '',
     prenom: '',
     genre: 'M',
@@ -187,6 +188,7 @@ const Recrutement: React.FC = () => {
 
     try {
       const personnelData = {
+        matricule: formData.matricule.trim() || null,
         nom: formData.nom.trim(),
         prenom: formData.prenom.trim(),
         genre: formData.genre,
@@ -238,7 +240,7 @@ const Recrutement: React.FC = () => {
   const resetForm = () => {
     setCurrentStep(1);
     setFormData({
-      nom: '', prenom: '', genre: 'M', numero_cin: '', tel: '', date_naissance: '',
+      matricule: '', nom: '', prenom: '', genre: 'M', numero_cin: '', tel: '', date_naissance: '',
       date_entree: '', motif_entree: '', id_direction: '', id_service: '', poste: '',
       categorie: '', indice: '', corps: '', grade: '', date_effet_carriere: '',
       id_statut: '', id_etat: 'actif', situation: 'activite', date_situation: '', destination: '', commentaire_situation: '',
@@ -271,6 +273,10 @@ const Recrutement: React.FC = () => {
         return (
           <div className="step-content">
             <div className="form-grid">
+              <div className="form-group">
+                <label><FontAwesomeIcon icon={faUser} /> Matricule *</label>
+                <input type="text" name="matricule" value={formData.matricule} onChange={handleChange} placeholder="Matricule" required />
+              </div>
               <div className="form-group">
                 <label><FontAwesomeIcon icon={faUser} /> Nom complet *</label>
                 <input type="text" name="nom" value={formData.nom} onChange={handleChange} placeholder="Nom" required />
@@ -391,8 +397,9 @@ const Recrutement: React.FC = () => {
               <div className="form-group">
                 <label><FontAwesomeIcon icon={faUserCheck} /> Statut administratif</label>
                 <select name="id_statut" value={formData.id_statut} onChange={handleChange}>
-                  <option value="">Sélectionner</option>
-                  {statuts.map(s => <option key={s.id} value={s.id}>{s.nom_statut} ({s.type_statut})</option>)}
+                  <option value="actif">Fonctionnaire</option>
+                  <option value="inactif">Prive</option>
+                  {/* {statuts.map(s => <option key={s.id} value={s.id}>{s.nom_statut} ({s.type_statut})</option>)} */}
                 </select>
               </div>
               <div className="form-group">
