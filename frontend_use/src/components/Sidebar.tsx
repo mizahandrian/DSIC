@@ -34,7 +34,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, onToggle, isMobi
     { path: '/gestion-services', name: 'Services', icon: faBriefcase },
     { path: '/base-rohi', name: 'Base ROHI', icon: faDatabase },
     { path: '/base-augure', name: 'Base AUGURE', icon: faDatabase },
-    { path: '/profile', name: 'Mon profil', icon: faUserCircle },
     { path: '/settings', name: 'Paramètres', icon: faCog },
   ];
 
@@ -51,9 +50,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, onToggle, isMobi
               <p>Gestion RH</p>
             </>
           )}
-          <button className="sidebar-toggle" onClick={onToggle}>
+          {/* <button className="sidebar-toggle" onClick={onToggle}>
             <FontAwesomeIcon icon={isCollapsed ? faChevronRight : faChevronLeft} />
-          </button>
+          </button> */}
         </div>
         
         <nav className="sidebar-nav">
