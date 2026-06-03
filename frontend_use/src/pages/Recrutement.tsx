@@ -7,7 +7,8 @@ import {
   faBuilding, faBriefcase, faUserTie, faChartLine,
   faCheckCircle, faHistory, faArrowLeft, faArrowRight,
   faSave, faUserCheck, faExchangeAlt, faInfoCircle,
-  faTag, faLayerGroup, faGraduationCap
+  faTag, faLayerGroup, faGraduationCap, faCheck,
+  faUserPlus, faComment
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 
@@ -33,6 +34,7 @@ const Recrutement: React.FC = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   
   // Données principales
   const [directions, setDirections] = useState<Direction[]>([]);
@@ -41,8 +43,6 @@ const Recrutement: React.FC = () => {
   const [statuts, setStatuts] = useState<Statut[]>([]);
 
   const [formData, setFormData] = useState({
-
-    
     // Étape 1 - Identité
     nom: '',
     prenom: '',
@@ -56,7 +56,7 @@ const Recrutement: React.FC = () => {
     motif_entree: '',
     id_direction: '',
     id_service: '',
-    poste: '', // Champ texte libre pour le poste
+    poste: '',
     
     // Étape 3 - Carrière
     categorie: '',
@@ -83,23 +83,13 @@ const Recrutement: React.FC = () => {
     fetchData();
   }, []);
 
-  //model vaovao
   const fetchServicesByDirection = async (directionId: number) => {
     try {
       const res = await api.get(`/services/direction/${directionId}`);
       setFilteredServices(res.data);
-
-      setFormData(prev => ({
-        ...prev,
-        id_service: ''
-      }));
-
+      setFormData(prev => ({ ...prev, id_service: '' }));
     } catch (error: any) {
-      console.log("STATUS:", error.response?.status);
-      console.log("DATA:", error.response?.data);
-      console.log("HEADERS:", error.response?.headers);
-
-      alert(error.response?.status + " - " + JSON.stringify(error.response?.data));
+      console.error("Erreur chargement services:", error);
     }
   };
 
@@ -141,7 +131,6 @@ const Recrutement: React.FC = () => {
         return null;
       case 2:
         if (!formData.date_entree) return 'La date d’entrée est requise.';
-        if (!formData.motif_entree.trim()) return 'Le motif d’entrée est requis.';
         if (!formData.id_direction) return 'La direction est requise.';
         if (!formData.id_service) return 'Le service est requis.';
         if (!formData.poste.trim()) return 'Le poste est requis.';
@@ -154,7 +143,6 @@ const Recrutement: React.FC = () => {
         if (!formData.date_effet_carriere) return 'La date d’effet de carrière est requise.';
         return null;
       case 4:
-        if (!formData.id_etat) return 'L’état est requis.';
         return null;
       default:
         return null;
@@ -169,80 +157,83 @@ const Recrutement: React.FC = () => {
     return null;
   };
 
-  const formatDate = (date: string): string | null => {
-  if (!date || date.trim() === '') return null;
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return null;
-  return d.toISOString().split('T')[0]; // → "2026-05-19"
-};
-
- const handleSubmit = async () => {
-  const validationError = validateAllSteps();
-  if (validationError) {
-    alert(validationError);
-    return;
-  }
-
-  setLoading(true);
-
-  try {
-    // ✅ UN SEUL appel API — le controller Laravel gère tout
-    const personnelData = {
-      nom:            formData.nom.trim(),
-      prenom:         formData.prenom.trim(),
-      genre:          formData.genre,
-      numero_cin:     formData.numero_cin.trim(),
-      tel:            formData.tel?.trim() || null,
-      date_naissance: formData.date_naissance,
-
-      date_entree:    formData.date_entree,
-      motif_entree:   formData.motif_entree?.trim() || null,
-
-      id_direction:   formData.id_direction ? Number(formData.id_direction) : null,
-      id_service:     formData.id_service   ? Number(formData.id_service)   : null,
-      id_statut:      formData.id_statut    ? Number(formData.id_statut)    : null,
-      id_etat:        formData.id_etat === 'actif' ? 1 : 2,
-
-      poste:                   formData.poste?.trim()              || null,
-      categorie:               formData.categorie?.trim()          || null,
-      indice:                  formData.indice                     || null,
-      corps:                   formData.corps?.trim()              || null,
-      grade:                   formData.grade?.trim()              || null,
-      date_effet_carriere:     formData.date_effet_carriere        || null,
-
-      situation:               formData.situation                  || null,
-      date_situation:          formData.date_situation             || null,
-      destination:             formData.destination                || null,
-      commentaire_situation:   formData.commentaire_situation      || null,
-
-      ancien_poste:            formData.ancien_poste               || null,
-      ancien_direction:        formData.ancien_direction           || null,
-      commentaire_historique:  formData.commentaire_historique     || null,
-    };
-
-    console.log("PAYLOAD SEND:", personnelData);
-
-    const response = await api.post('/recrutement', personnelData);
-    console.log("RESPONSE:", response.data);
-
-    alert("Personnel ajouté avec succès !");
-    navigate('/gestion-personnels');
-    resetForm();
-
-  } catch (error: any) {
-    console.error("❌ ERREUR:", error.response?.data || error.message);
-
-    const errors = error?.response?.data?.errors;
-    if (errors) {
-      const first = Object.values(errors)[0];
-      alert(`Erreur: ${Array.isArray(first) ? first[0] : first}`);
-    } else {
-      alert(error?.response?.data?.message || "Erreur lors de l'enregistrement");
+  // Fonction pour naviguer vers une étape spécifique
+  const goToStep = (stepNumber: number) => {
+    // Vérifier si on peut aller à cette étape
+    let canGo = true;
+    for (let i = 1; i < stepNumber; i++) {
+      const error = validateStep(i);
+      if (error) {
+        canGo = false;
+        break;
+      }
     }
-  } finally {
-    setLoading(false);
-  }
-};
+    
+    if (canGo) {
+      setCurrentStep(stepNumber);
+    } else {
+      alert("Veuillez remplir correctement les étapes précédentes");
+    }
+  };
+
+  const handleSubmit = async () => {
+    const validationError = validateAllSteps();
+    if (validationError) {
+      alert(validationError);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const personnelData = {
+        nom: formData.nom.trim(),
+        prenom: formData.prenom.trim(),
+        genre: formData.genre,
+        numero_cin: formData.numero_cin.trim(),
+        tel: formData.tel?.trim() || null,
+        date_naissance: formData.date_naissance,
+        date_entree: formData.date_entree,
+        motif_entree: formData.motif_entree?.trim() || null,
+        id_direction: formData.id_direction ? Number(formData.id_direction) : null,
+        id_service: formData.id_service ? Number(formData.id_service) : null,
+        id_statut: formData.id_statut ? Number(formData.id_statut) : null,
+        id_etat: formData.id_etat === 'actif' ? 1 : 2,
+        poste: formData.poste?.trim() || null,
+        categorie: formData.categorie?.trim() || null,
+        indice: formData.indice || null,
+        corps: formData.corps?.trim() || null,
+        grade: formData.grade?.trim() || null,
+        date_effet_carriere: formData.date_effet_carriere || null,
+        situation: formData.situation || null,
+        date_situation: formData.date_situation || null,
+        destination: formData.destination || null,
+        commentaire_situation: formData.commentaire_situation || null,
+        ancien_poste: formData.ancien_poste || null,
+        ancien_direction: formData.ancien_direction || null,
+        commentaire_historique: formData.commentaire_historique || null,
+      };
+
+      await api.post('/recrutement', personnelData);
+      
+      setSuccessMessage("Personnel ajouté avec succès !");
+      setTimeout(() => {
+        navigate('/gestion-personnels');
+        resetForm();
+      }, 1500);
+    } catch (error: any) {
+      console.error("Erreur:", error.response?.data || error.message);
+      const errors = error?.response?.data?.errors;
+      if (errors) {
+        const first = Object.values(errors)[0];
+        alert(`Erreur: ${Array.isArray(first) ? first[0] : first}`);
+      } else {
+        alert(error?.response?.data?.message || "Erreur lors de l'enregistrement");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const resetForm = () => {
     setCurrentStep(1);
@@ -279,17 +270,15 @@ const Recrutement: React.FC = () => {
       case 1:
         return (
           <div className="step-content">
-            <div className="form-row">
+            <div className="form-grid">
               <div className="form-group">
-                <label><FontAwesomeIcon icon={faUser} /> Nom *</label>
-                <input type="text" name="nom" value={formData.nom} onChange={handleChange} required />
+                <label><FontAwesomeIcon icon={faUser} /> Nom complet *</label>
+                <input type="text" name="nom" value={formData.nom} onChange={handleChange} placeholder="Nom" required />
               </div>
               <div className="form-group">
                 <label><FontAwesomeIcon icon={faUser} /> Prénom *</label>
-                <input type="text" name="prenom" value={formData.prenom} onChange={handleChange} required />
+                <input type="text" name="prenom" value={formData.prenom} onChange={handleChange} placeholder="Prénom" required />
               </div>
-            </div>
-            <div className="form-row">
               <div className="form-group">
                 <label><FontAwesomeIcon icon={faVenusMars} /> Genre *</label>
                 <select name="genre" value={formData.genre} onChange={handleChange}>
@@ -298,17 +287,15 @@ const Recrutement: React.FC = () => {
                 </select>
               </div>
               <div className="form-group">
-                <label><FontAwesomeIcon icon={faIdCard} /> CIN *</label>
-                <input type="text" name="numero_cin" value={formData.numero_cin} onChange={handleChange} required />
+                <label><FontAwesomeIcon icon={faIdCard} /> Numéro CIN *</label>
+                <input type="text" name="numero_cin" value={formData.numero_cin} onChange={handleChange} placeholder="Ex: 123456789" required />
               </div>
-            </div>
-            <div className="form-row">
               <div className="form-group">
                 <label><FontAwesomeIcon icon={faPhone} /> Téléphone</label>
-                <input type="tel" name="tel" value={formData.tel} onChange={handleChange} />
+                <input type="tel" name="tel" value={formData.tel} onChange={handleChange} placeholder="+261 32 12 345 67" />
               </div>
               <div className="form-group">
-                <label><FontAwesomeIcon icon={faCalendarAlt} /> Date naissance *</label>
+                <label><FontAwesomeIcon icon={faCalendarAlt} /> Date de naissance *</label>
                 <input type="date" name="date_naissance" value={formData.date_naissance} onChange={handleChange} required />
               </div>
             </div>
@@ -318,17 +305,19 @@ const Recrutement: React.FC = () => {
       case 2:
         return (
           <div className="step-content">
-            <div className="form-row">
+            <div className="info-box">
+              <FontAwesomeIcon icon={faInfoCircle} />
+              <span>Informations professionnelles du personnel</span>
+            </div>
+            <div className="form-grid">
               <div className="form-group">
-                <label><FontAwesomeIcon icon={faCalendarAlt} /> Date entrée *</label>
+                <label><FontAwesomeIcon icon={faCalendarAlt} /> Date d'entrée *</label>
                 <input type="date" name="date_entree" value={formData.date_entree} onChange={handleChange} required />
               </div>
               <div className="form-group">
-                <label>Motif entrée</label>
+                <label><FontAwesomeIcon icon={faExchangeAlt} /> Motif d'entrée</label>
                 <input type="text" name="motif_entree" value={formData.motif_entree} onChange={handleChange} placeholder="Recrutement, Mutation..." />
               </div>
-            </div>
-            <div className="form-row">
               <div className="form-group">
                 <label><FontAwesomeIcon icon={faBuilding} /> Direction *</label>
                 <select name="id_direction" value={formData.id_direction} onChange={handleChange} required>
@@ -341,16 +330,14 @@ const Recrutement: React.FC = () => {
                 <select name="id_service" value={formData.id_service} onChange={handleChange} required disabled={!formData.id_direction}>
                   <option value="">{formData.id_direction ? "Sélectionner un service" : "Choisissez d'abord une direction"}</option>
                   {filteredServices.map(s => (
-                    <option key={s.id_service} value={s.id_service}>
-                      {s.nom_service}
-                    </option>
+                    <option key={s.id_service} value={s.id_service}>{s.nom_service}</option>
                   ))}
                 </select>
               </div>
-            </div>
-            <div className="form-group">
-              <label><FontAwesomeIcon icon={faUserTie} /> Poste *</label>
-              <input type="text" name="poste" value={formData.poste} onChange={handleChange} placeholder="Ex: Administrateur Réseau, Développeur Full Stack..." required />
+              <div className="form-group full-width">
+                <label><FontAwesomeIcon icon={faUserTie} /> Poste / Fonction *</label>
+                <input type="text" name="poste" value={formData.poste} onChange={handleChange} placeholder="Ex: Administrateur Réseau, Développeur Full Stack..." required />
+              </div>
             </div>
           </div>
         );
@@ -362,7 +349,7 @@ const Recrutement: React.FC = () => {
               <FontAwesomeIcon icon={faInfoCircle} />
               <span>Informations sur la carrière du personnel</span>
             </div>
-            <div className="form-row">
+            <div className="form-grid">
               <div className="form-group">
                 <label><FontAwesomeIcon icon={faLayerGroup} /> Catégorie *</label>
                 <select name="categorie" value={formData.categorie} onChange={handleChange} required>
@@ -377,8 +364,6 @@ const Recrutement: React.FC = () => {
                 <label><FontAwesomeIcon icon={faTag} /> Indice *</label>
                 <input type="text" name="indice" value={formData.indice} onChange={handleChange} placeholder="Ex: 450, 430, 380..." required />
               </div>
-            </div>
-            <div className="form-row">
               <div className="form-group">
                 <label><FontAwesomeIcon icon={faGraduationCap} /> Corps *</label>
                 <input type="text" name="corps" value={formData.corps} onChange={handleChange} placeholder="Ex: Ingénieur des Travaux Statistiques..." required />
@@ -387,8 +372,6 @@ const Recrutement: React.FC = () => {
                 <label><FontAwesomeIcon icon={faGraduationCap} /> Grade *</label>
                 <input type="text" name="grade" value={formData.grade} onChange={handleChange} placeholder="Ex: Ingénieur Principal, Technicien..." required />
               </div>
-            </div>
-            <div className="form-row">
               <div className="form-group">
                 <label><FontAwesomeIcon icon={faCalendarAlt} /> Date d'effet *</label>
                 <input type="date" name="date_effet_carriere" value={formData.date_effet_carriere} onChange={handleChange} required />
@@ -400,7 +383,11 @@ const Recrutement: React.FC = () => {
       case 4:
         return (
           <div className="step-content">
-            <div className="form-row">
+            <div className="info-box">
+              <FontAwesomeIcon icon={faInfoCircle} />
+              <span>Situation administrative du personnel</span>
+            </div>
+            <div className="form-grid">
               <div className="form-group">
                 <label><FontAwesomeIcon icon={faUserCheck} /> Statut administratif</label>
                 <select name="id_statut" value={formData.id_statut} onChange={handleChange}>
@@ -415,8 +402,6 @@ const Recrutement: React.FC = () => {
                   <option value="inactif">Inactif</option>
                 </select>
               </div>
-            </div>
-            <div className="form-row">
               <div className="form-group">
                 <label><FontAwesomeIcon icon={faExchangeAlt} /> Situation</label>
                 <select name="situation" value={formData.situation} onChange={handleChange}>
@@ -427,17 +412,15 @@ const Recrutement: React.FC = () => {
                 </select>
               </div>
               <div className="form-group">
-                <label>Date effet</label>
+                <label><FontAwesomeIcon icon={faCalendarAlt} /> Date effet situation</label>
                 <input type="date" name="date_situation" value={formData.date_situation} onChange={handleChange} />
               </div>
-            </div>
-            <div className="form-row">
               <div className="form-group">
-                <label>Destination</label>
+                <label><FontAwesomeIcon icon={faBuilding} /> Destination</label>
                 <input type="text" name="destination" value={formData.destination} onChange={handleChange} placeholder="Nouveau ministère/institut" />
               </div>
               <div className="form-group">
-                <label>Commentaire</label>
+                <label><FontAwesomeIcon icon={faComment} /> Commentaire</label>
                 <input type="text" name="commentaire_situation" value={formData.commentaire_situation} onChange={handleChange} />
               </div>
             </div>
@@ -451,27 +434,48 @@ const Recrutement: React.FC = () => {
               <FontAwesomeIcon icon={faInfoCircle} />
               <span>Historique avant l'arrivée du personnel</span>
             </div>
-            <div className="form-row">
+            <div className="form-grid">
               <div className="form-group">
-                <label>Ancien poste</label>
+                <label><FontAwesomeIcon icon={faBriefcase} /> Ancien poste</label>
                 <input type="text" name="ancien_poste" value={formData.ancien_poste} onChange={handleChange} placeholder="Ex: Développeur, Technicien..." />
               </div>
               <div className="form-group">
-                <label>Ancienne direction</label>
+                <label><FontAwesomeIcon icon={faBuilding} /> Ancienne direction</label>
                 <input type="text" name="ancien_direction" value={formData.ancien_direction} onChange={handleChange} placeholder="Ex: DSIC, DG..." />
               </div>
-            </div>
-            <div className="form-group full-width">
-              <label>Commentaire / Motif du changement</label>
-              <input type="text" name="commentaire_historique" value={formData.commentaire_historique} onChange={handleChange} />
+              <div className="form-group full-width">
+                <label><FontAwesomeIcon icon={faComment} /> Commentaire / Motif du changement</label>
+                <input type="text" name="commentaire_historique" value={formData.commentaire_historique} onChange={handleChange} />
+              </div>
             </div>
             <div className="summary-box">
-              <h4>Récapitulatif</h4>
-              <p><strong>{formData.nom} {formData.prenom}</strong> - {formData.numero_cin}</p>
-              <p>Direction: {directions.find(d => d.id_direction.toString() === formData.id_direction)?.nom_direction || '-'}</p>
-              <p>Service: {services.find(s => s.id_service.toString() === formData.id_service)?.nom_service || '-'}</p>
-              <p>Poste: {formData.poste || '-'}</p>
-              <p>Carrière: {formData.categorie} - {formData.corps} ({formData.grade})</p>
+              <h4>Récapitulatif du recrutement</h4>
+              <div className="summary-grid">
+                <div className="summary-item">
+                  <span className="summary-label">Nom complet :</span>
+                  <span className="summary-value">{formData.nom} {formData.prenom}</span>
+                </div>
+                <div className="summary-item">
+                  <span className="summary-label">CIN :</span>
+                  <span className="summary-value">{formData.numero_cin}</span>
+                </div>
+                <div className="summary-item">
+                  <span className="summary-label">Direction :</span>
+                  <span className="summary-value">{directions.find(d => d.id_direction.toString() === formData.id_direction)?.nom_direction || '-'}</span>
+                </div>
+                <div className="summary-item">
+                  <span className="summary-label">Service :</span>
+                  <span className="summary-value">{services.find(s => s.id_service.toString() === formData.id_service)?.nom_service || '-'}</span>
+                </div>
+                <div className="summary-item">
+                  <span className="summary-label">Poste :</span>
+                  <span className="summary-value">{formData.poste || '-'}</span>
+                </div>
+                <div className="summary-item">
+                  <span className="summary-label">Carrière :</span>
+                  <span className="summary-value">{formData.categorie} - {formData.corps} ({formData.grade})</span>
+                </div>
+              </div>
             </div>
           </div>
         );
@@ -481,41 +485,69 @@ const Recrutement: React.FC = () => {
   };
 
   return (
-    <div className="recrutement-container">
+    <div className="recrutement-page">
+      {successMessage && (
+        <div className="success-toast">
+          <FontAwesomeIcon icon={faCheck} />
+          {successMessage}
+        </div>
+      )}
+
       <div className="recrutement-header">
-        <h1>Nouveau recrutement</h1>
-        <p>Ajoutez un personnel en remplissant les informations ci-dessous</p>
+        <h1>
+          <FontAwesomeIcon icon={faUserPlus} />
+          Nouveau recrutement
+        </h1>
+        <p>Ajoutez un nouveau personnel en remplissant les informations ci-dessous</p>
       </div>
 
-      <div className="steps-indicator">
+      {/* Steps Indicator - Version cliquable */}
+      <div className="steps-container">
         {steps.map((step) => (
-          <div key={step.number} className={`step-item ${currentStep >= step.number ? 'active' : ''}`}>
-            <div className="step-circle"><FontAwesomeIcon icon={step.icon} /></div>
-            <span className="step-title">{step.title}</span>
-            {step.number < steps.length && <div className="step-line"></div>}
+          <div 
+            key={step.number} 
+            className={`step-wrapper ${currentStep >= step.number ? 'completed' : ''}`}
+            onClick={() => goToStep(step.number)}
+            style={{ cursor: currentStep >= step.number ? 'pointer' : 'not-allowed' }}
+          >
+            <div className={`step-circle ${currentStep === step.number ? 'active' : ''} ${currentStep > step.number ? 'done' : ''}`}>
+              {currentStep > step.number ? (
+                <FontAwesomeIcon icon={faCheck} />
+              ) : (
+                <FontAwesomeIcon icon={step.icon} />
+              )}
+            </div>
+            <span className="step-label">{step.title}</span>
+            {step.number < steps.length && <div className="step-connector"></div>}
           </div>
         ))}
       </div>
 
-      <div className="recrutement-form">
-        {renderStep()}
-        
-        <div className="form-navigation">
-          {currentStep > 1 && (
-            <button type="button" className="btn-prev" onClick={prevStep}>
-              <FontAwesomeIcon icon={faArrowLeft} /> Précédent
-            </button>
-          )}
-          {currentStep < 5 ? (
-            <button type="button" className="btn-next" onClick={nextStep}>
-              Suivant <FontAwesomeIcon icon={faArrowRight} />
-            </button>
-          ) : (
-            <button type="button" className="btn-submit" onClick={handleSubmit} disabled={loading}>
-              <FontAwesomeIcon icon={faSave} /> {loading ? 'Enregistrement...' : 'Enregistrer le personnel'}
-            </button>
-          )}
-        </div>
+      {/* Form Card */}
+      <div className="recrutement-card">
+        <form onSubmit={(e) => e.preventDefault()}>
+          {renderStep()}
+          
+          <div className="form-navigation">
+            {currentStep > 1 && (
+              <button type="button" className="btn-prev" onClick={prevStep}>
+                <FontAwesomeIcon icon={faArrowLeft} />
+                Précédent
+              </button>
+            )}
+            {currentStep < 5 ? (
+              <button type="button" className="btn-next" onClick={nextStep}>
+                Suivant
+                <FontAwesomeIcon icon={faArrowRight} />
+              </button>
+            ) : (
+              <button type="button" className="btn-submit" onClick={handleSubmit} disabled={loading}>
+                <FontAwesomeIcon icon={faSave} />
+                {loading ? 'Enregistrement...' : 'Enregistrer le personnel'}
+              </button>
+            )}
+          </div>
+        </form>
       </div>
     </div>
   );

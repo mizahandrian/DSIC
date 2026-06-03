@@ -100,7 +100,7 @@ class PersonnelController extends Controller
 
     public function index()
 {
-    // ✅ Retirer 'etat' qui n'a pas de relation définie
+    
     return Personnel::with(['direction', 'service'])->get();
 }
 

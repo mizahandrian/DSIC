@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faDatabase, faSearch, faEdit, faTrashAlt, faPlus, faTimes,
-  faSave,  faSyncAlt,
+  faSave, faSyncAlt, faChevronLeft, faChevronRight, faSpinner
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 import '../style/base-rohi.css';
@@ -147,19 +147,22 @@ const BaseRohi: React.FC = () => {
   );
 
   return (
-    <div className="base-rohi-container">
-      <div className="base-header">
-        <div className="base-title">
+    <div className="base-rohi-page">
+      {/* Header */}
+      <div className="page-header">
+        <div>
           <h1><FontAwesomeIcon icon={faDatabase} /> Base ROHI</h1>
           <p>Registre des Opérations Harmonisé et Intégré</p>
         </div>
-        <button className="btn-add" onClick={openAddModal}>
-          <FontAwesomeIcon icon={faPlus} /> Nouvelle entrée
+        <button className="btn-primary" onClick={openAddModal}>
+          <FontAwesomeIcon icon={faPlus} />
+          Nouvelle entrée
         </button>
       </div>
 
-      <div className="base-filters">
-        <div className="search-bar">
+      {/* Actions Bar */}
+      <div className="actions-bar">
+        <div className="search-box">
           <FontAwesomeIcon icon={faSearch} className="search-icon" />
           <input
             type="text"
@@ -168,81 +171,119 @@ const BaseRohi: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <button className="btn-refresh" onClick={fetchItems}>
-          <FontAwesomeIcon icon={faSyncAlt} /> Rafraîchir
-        </button>
+        <div className="actions-group">
+          <button className="btn-outline" onClick={fetchItems}>
+            <FontAwesomeIcon icon={faSyncAlt} />
+            Rafraîchir
+          </button>
+        </div>
       </div>
 
-      {loading ? (
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>Chargement...</p>
-        </div>
-      ) : (
-        <>
-          <div className="table-container">
-            <table className="base-table">
-              <thead>
-                <tr>
-                  <th>Matricule</th>
-                  <th>Nom complet</th>
-                  <th>Poste</th>
-                  <th>Porte/Bureau</th>
-                  <th>Téléphone</th>
-                  <th>Direction</th>
-                  <th>Service</th>
-                  <th className="actions-col">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedItems.map((item) => (
-                  <tr key={item.id_rohi}>
-                    <td className="matricule-cell">{item.immatricule}</td>
-                    <td><strong>{item.nom}</strong> {item.prenom}</td>
-                    <td>{item.poste || '-'}</td>
-                    <td>{item.porte || '-'}</td>
-                    <td>{item.telephone || '-'}</td>
-                    <td>{item.direction || '-'}</td>
-                    <td>{item.service || '-'}</td>
-                    <td className="actions-cell">
-                      <button className="action-btn edit" onClick={() => openEditModal(item)}>
-                        <FontAwesomeIcon icon={faEdit} /> Modifier
-                      </button>
-                      <button className="action-btn delete" onClick={() => setDeleteConfirm(item)}>
-                        <FontAwesomeIcon icon={faTrashAlt} /> Supprimer
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* Table */}
+      <div className="table-container">
+        {loading ? (
+          <div className="loading-state">
+            <FontAwesomeIcon icon={faSpinner} spin />
+            <p>Chargement des données...</p>
           </div>
-
-          {totalPages > 1 && (
-            <div className="pagination">
-              <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1} className="page-btn">«</button>
-              <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1} className="page-btn">‹</button>
-              <span className="page-info">Page {currentPage} sur {totalPages}</span>
-              <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages} className="page-btn">›</button>
-              <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages} className="page-btn">»</button>
+        ) : (
+          <>
+            <div className="table-wrapper">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Matricule</th>
+                    <th>Nom complet</th>
+                    <th>Poste</th>
+                    <th>Porte/Bureau</th>
+                    <th>Téléphone</th>
+                    <th>Direction</th>
+                    <th>Service</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedItems.map((item) => (
+                    <tr key={item.id_rohi}>
+                      <td className="matricule-cell">{item.immatricule}</td>
+                      <td className="name-cell">{item.nom} {item.prenom}</td>
+                      <td>{item.poste || '-'}</td>
+                      <td>{item.porte || '-'}</td>
+                      <td>{item.telephone || '-'}</td>
+                      <td>{item.direction || '-'}</td>
+                      <td>{item.service || '-'}</td>
+                      <td className="actions-cell">
+                        <button className="action-edit" onClick={() => openEditModal(item)}>
+                          <FontAwesomeIcon icon={faEdit} />
+                          Modifier
+                        </button>
+                        <button className="action-delete" onClick={() => setDeleteConfirm(item)}>
+                          <FontAwesomeIcon icon={faTrashAlt} />
+                          Supprimer
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          )}
 
-          {filteredItems.length === 0 && (
-            <div className="empty-state">
-              <p>Aucune entrée ROHI trouvée</p>
-            </div>
-          )}
-        </>
-      )}
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="pagination">
+                <button 
+                  onClick={() => setCurrentPage(1)} 
+                  disabled={currentPage === 1}
+                  className="page-btn"
+                >
+                  <FontAwesomeIcon icon={faChevronLeft} /> <FontAwesomeIcon icon={faChevronLeft} />
+                </button>
+                <button 
+                  onClick={() => setCurrentPage(currentPage - 1)} 
+                  disabled={currentPage === 1}
+                  className="page-btn"
+                >
+                  <FontAwesomeIcon icon={faChevronLeft} />
+                </button>
+                <span className="page-info">
+                  Page {currentPage} sur {totalPages}
+                </span>
+                <button 
+                  onClick={() => setCurrentPage(currentPage + 1)} 
+                  disabled={currentPage === totalPages}
+                  className="page-btn"
+                >
+                  <FontAwesomeIcon icon={faChevronRight} />
+                </button>
+                <button 
+                  onClick={() => setCurrentPage(totalPages)} 
+                  disabled={currentPage === totalPages}
+                  className="page-btn"
+                >
+                  <FontAwesomeIcon icon={faChevronRight} /> <FontAwesomeIcon icon={faChevronRight} />
+                </button>
+              </div>
+            )}
 
-      {/* Modal Ajout/Modification */}
+            {filteredItems.length === 0 && (
+              <div className="empty-state">
+                <FontAwesomeIcon icon={faDatabase} />
+                <p>Aucune entrée ROHI trouvée</p>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Add/Edit Modal */}
       {showModal && (
         <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>{editingItem ? 'Modifier l\'entrée ROHI' : 'Nouvelle entrée ROHI'}</h3>
-              <button className="modal-close" onClick={closeModal}><FontAwesomeIcon icon={faTimes} /></button>
+              <button className="modal-close" onClick={closeModal}>
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
             </div>
             <form onSubmit={handleSubmit}>
               <div className="modal-body">
@@ -288,9 +329,12 @@ const BaseRohi: React.FC = () => {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn-cancel" onClick={closeModal}>Annuler</button>
-                <button type="submit" className="btn-submit">
-                  <FontAwesomeIcon icon={faSave} /> {editingItem ? 'Modifier' : 'Ajouter'}
+                <button type="button" className="btn-cancel" onClick={closeModal}>
+                  Annuler
+                </button>
+                <button type="submit" className="btn-save">
+                  <FontAwesomeIcon icon={faSave} />
+                  {editingItem ? 'Modifier' : 'Ajouter'}
                 </button>
               </div>
             </form>
@@ -298,22 +342,30 @@ const BaseRohi: React.FC = () => {
         </div>
       )}
 
-      {/* Modal Confirmation suppression */}
+      {/* Delete Modal */}
       {deleteConfirm && (
         <div className="modal-overlay" onClick={() => setDeleteConfirm(null)}>
-          <div className="modal-container modal-confirm" onClick={(e) => e.stopPropagation()}>
+          <div className="modal modal-small" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Confirmer la suppression</h3>
-              <button className="modal-close" onClick={() => setDeleteConfirm(null)}><FontAwesomeIcon icon={faTimes} /></button>
+              <button className="modal-close" onClick={() => setDeleteConfirm(null)}>
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
             </div>
             <div className="modal-body">
               <p>Supprimer l'entrée :</p>
-              <p className="confirm-name"><strong>{deleteConfirm.immatricule} - {deleteConfirm.nom} {deleteConfirm.prenom}</strong></p>
-              <p className="warning">Cette action est irréversible.</p>
+              <div className="delete-preview">
+                <strong>{deleteConfirm.immatricule} - {deleteConfirm.nom} {deleteConfirm.prenom}</strong>
+              </div>
+              <p className="warning-text">Cette action est irréversible.</p>
             </div>
             <div className="modal-footer">
-              <button className="btn-cancel" onClick={() => setDeleteConfirm(null)}>Annuler</button>
-              <button className="btn-confirm" onClick={handleDelete}>Confirmer</button>
+              <button className="btn-cancel" onClick={() => setDeleteConfirm(null)}>
+                Annuler
+              </button>
+              <button className="btn-danger" onClick={handleDelete}>
+                Confirmer
+              </button>
             </div>
           </div>
         </div>

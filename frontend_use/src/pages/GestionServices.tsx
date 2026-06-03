@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faBriefcase, faSearch, faEdit, faTrashAlt, faPlus, faTimes,
-  faSave, faSyncAlt, faBuilding
+  faSave, faSyncAlt, faBuilding, faChevronLeft, faChevronRight, faSpinner
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 import '../style/gestion-services.css';
@@ -107,8 +107,6 @@ const GestionServices: React.FC = () => {
         await api.put(`/services/${editingService.id_service}`, serviceData);
       } else {
         await api.post('/services', serviceData);
-        //  IMPORTANT : refresh global
-          await fetchServices();
       }
       await fetchServices();
       closeModal();
@@ -121,23 +119,16 @@ const GestionServices: React.FC = () => {
   };
 
   const handleDelete = async () => {
-  if (!deleteConfirm) return;
-
-  try {
-    const res = await api.delete(`/services/${deleteConfirm.id_service}`);
-    console.log("SUPPRESSION OK:", res.data);
-
-    setServices(prev =>
-      prev.filter(s => s.id_service !== deleteConfirm.id_service)
-    );
-
-    setDeleteConfirm(null);
-
-  } catch (error: any) {
-    console.log("ERREUR SUPPRESSION:", error.response?.data || error.message);
-    alert(error.response?.data?.message || "Erreur lors de la suppression");
-  }
-};
+    if (!deleteConfirm) return;
+    try {
+      await api.delete(`/services/${deleteConfirm.id_service}`);
+      await fetchServices();
+      setDeleteConfirm(null);
+    } catch (error: any) {
+      console.error('Erreur:', error);
+      alert(error.response?.data?.message || "Erreur lors de la suppression");
+    }
+  };
 
   const openAddModal = () => {
     setEditingService(null);
@@ -165,7 +156,6 @@ const GestionServices: React.FC = () => {
     return dir ? dir.nom_direction : '-';
   };
 
-  // Pagination
   const totalPages = Math.ceil(filteredServices.length / itemsPerPage);
   const paginatedServices = filteredServices.slice(
     (currentPage - 1) * itemsPerPage,
@@ -173,21 +163,22 @@ const GestionServices: React.FC = () => {
   );
 
   return (
-    <div className="services-container">
-      {/* En-tête */}
-      <div className="services-header">
-        <div className="services-title">
+    <div className="services-page">
+      {/* Header */}
+      <div className="page-header">
+        <div>
           <h1><FontAwesomeIcon icon={faBriefcase} /> Services</h1>
           <p>Gestion des services par direction</p>
         </div>
-        <button className="btn-add" onClick={openAddModal}>
-          <FontAwesomeIcon icon={faPlus} /> Nouveau service
+        <button className="btn-primary" onClick={openAddModal}>
+          <FontAwesomeIcon icon={faPlus} />
+          Nouveau service
         </button>
       </div>
 
-      {/* Filtres */}
-      <div className="services-filters">
-        <div className="search-bar">
+      {/* Actions Bar */}
+      <div className="actions-bar">
+        <div className="search-box">
           <FontAwesomeIcon icon={faSearch} className="search-icon" />
           <input
             type="text"
@@ -196,95 +187,129 @@ const GestionServices: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <select 
-          className="filter-select"
-          value={filterDirection}
-          onChange={(e) => setFilterDirection(e.target.value)}
-        >
-          <option value="all">Toutes les directions</option>
-          {directions.map(d => (
-            <option key={d.id_direction} value={d.id_direction}>{d.nom_direction}</option>
-          ))}
-        </select>
-        <button className="btn-refresh" onClick={fetchServices}>
-          <FontAwesomeIcon icon={faSyncAlt} /> Rafraîchir
-        </button>
+        <div className="actions-group">
+          <select 
+            className="filter-select"
+            value={filterDirection}
+            onChange={(e) => setFilterDirection(e.target.value)}
+          >
+            <option value="all">Toutes les directions</option>
+            {directions.map(d => (
+              <option key={d.id_direction} value={d.id_direction}>{d.nom_direction}</option>
+            ))}
+          </select>
+          <button className="btn-outline" onClick={fetchServices}>
+            <FontAwesomeIcon icon={faSyncAlt} />
+            Rafraîchir
+          </button>
+        </div>
       </div>
 
-      {/* Tableau des services */}
-      {loading ? (
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>Chargement...</p>
-        </div>
-      ) : (
-        <>
-          <div className="table-container">
-            <table className="services-table">
-              <thead>
-                <tr>
-                  <th>Nom</th>
-                  <th>Direction</th>
-                  <th>Postes</th>
-                  <th>Personnels</th>
-                  <th>Description</th>
-                  <th className="actions-col">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedServices.map((service) => (
-                  <tr key={service.id_service}>
-                    <td className="name-cell">
-                      <strong>{service.nom_service}</strong>
-                    </td>
-                    <td>
-                      <span className="direction-badge">
-                        <FontAwesomeIcon icon={faBuilding} /> {getDirectionName(service.id_direction)}
-                      </span>
-                    </td>
-                    <td className="stats-cell">{service.nombre_postes || 0}</td>
-                    <td className="stats-cell">{service.nombre_personnels || 0}</td>
-                    <td className="desc-cell">{service.description || '-'}</td>
-                    <td className="actions-cell">
-                      <button className="action-btn edit" onClick={() => openEditModal(service)}>
-                        <FontAwesomeIcon icon={faEdit} /> Modifier
-                      </button>
-                      <button className="action-btn delete" onClick={() => setDeleteConfirm(service)}>
-                        <FontAwesomeIcon icon={faTrashAlt} /> Supprimer
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* Table */}
+      <div className="table-container">
+        {loading ? (
+          <div className="loading-state">
+            <FontAwesomeIcon icon={faSpinner} spin />
+            <p>Chargement des services...</p>
           </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="pagination">
-              <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1} className="page-btn">«</button>
-              <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1} className="page-btn">‹</button>
-              <span className="page-info">Page {currentPage} sur {totalPages}</span>
-              <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages} className="page-btn">›</button>
-              <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages} className="page-btn">»</button>
+        ) : (
+          <>
+            <div className="table-wrapper">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Nom</th>
+                    <th>Direction</th>
+                    <th>Postes</th>
+                    <th>Personnels</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedServices.map((service) => (
+                    <tr key={service.id_service}>
+                      <td className="name-cell">{service.nom_service}</td>
+                      <td>
+                        <span className="direction-badge">
+                          <FontAwesomeIcon icon={faBuilding} /> {getDirectionName(service.id_direction)}
+                        </span>
+                      </td>
+                      <td className="stats-cell">{service.nombre_postes || 0}</td>
+                      <td className="stats-cell">{service.nombre_personnels || 0}</td>
+                      <td className="desc-cell">{service.description || '-'}</td>
+                      <td className="actions-cell">
+                        <button className="action-edit" onClick={() => openEditModal(service)}>
+                          <FontAwesomeIcon icon={faEdit} />
+                          Modifier
+                        </button>
+                        <button className="action-delete" onClick={() => setDeleteConfirm(service)}>
+                          <FontAwesomeIcon icon={faTrashAlt} />
+                          Supprimer
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          )}
 
-          {filteredServices.length === 0 && (
-            <div className="empty-state">
-              <p>Aucun service trouvé</p>
-            </div>
-          )}
-        </>
-      )}
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="pagination">
+                <button 
+                  onClick={() => setCurrentPage(1)} 
+                  disabled={currentPage === 1}
+                  className="page-btn"
+                >
+                  <FontAwesomeIcon icon={faChevronLeft} /> <FontAwesomeIcon icon={faChevronLeft} />
+                </button>
+                <button 
+                  onClick={() => setCurrentPage(currentPage - 1)} 
+                  disabled={currentPage === 1}
+                  className="page-btn"
+                >
+                  <FontAwesomeIcon icon={faChevronLeft} />
+                </button>
+                <span className="page-info">
+                  Page {currentPage} sur {totalPages}
+                </span>
+                <button 
+                  onClick={() => setCurrentPage(currentPage + 1)} 
+                  disabled={currentPage === totalPages}
+                  className="page-btn"
+                >
+                  <FontAwesomeIcon icon={faChevronRight} />
+                </button>
+                <button 
+                  onClick={() => setCurrentPage(totalPages)} 
+                  disabled={currentPage === totalPages}
+                  className="page-btn"
+                >
+                  <FontAwesomeIcon icon={faChevronRight} /> <FontAwesomeIcon icon={faChevronRight} />
+                </button>
+              </div>
+            )}
 
-      {/* Modal Ajout/Modification */}
+            {filteredServices.length === 0 && (
+              <div className="empty-state">
+                <FontAwesomeIcon icon={faBriefcase} />
+                <p>Aucun service trouvé</p>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Add/Edit Modal */}
       {showModal && (
         <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>{editingService ? 'Modifier le service' : 'Nouveau service'}</h3>
-              <button className="modal-close" onClick={closeModal}><FontAwesomeIcon icon={faTimes} /></button>
+              <button className="modal-close" onClick={closeModal}>
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
             </div>
             <form onSubmit={handleSubmit}>
               <div className="modal-body">
@@ -320,9 +345,12 @@ const GestionServices: React.FC = () => {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn-cancel" onClick={closeModal}>Annuler</button>
-                <button type="submit" className="btn-submit">
-                  <FontAwesomeIcon icon={faSave} /> {editingService ? 'Modifier' : 'Ajouter'}
+                <button type="button" className="btn-cancel" onClick={closeModal}>
+                  Annuler
+                </button>
+                <button type="submit" className="btn-save">
+                  <FontAwesomeIcon icon={faSave} />
+                  {editingService ? 'Modifier' : 'Ajouter'}
                 </button>
               </div>
             </form>
@@ -330,22 +358,30 @@ const GestionServices: React.FC = () => {
         </div>
       )}
 
-      {/* Modal Confirmation suppression */}
+      {/* Delete Modal */}
       {deleteConfirm && (
         <div className="modal-overlay" onClick={() => setDeleteConfirm(null)}>
-          <div className="modal-container modal-confirm" onClick={(e) => e.stopPropagation()}>
+          <div className="modal modal-small" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Confirmer la suppression</h3>
-              <button className="modal-close" onClick={() => setDeleteConfirm(null)}><FontAwesomeIcon icon={faTimes} /></button>
+              <button className="modal-close" onClick={() => setDeleteConfirm(null)}>
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
             </div>
             <div className="modal-body">
               <p>Supprimer le service :</p>
-              <p className="confirm-name"><strong>{deleteConfirm.nom_service}</strong></p>
-              <p className="warning">Cette action est irréversible.</p>
+              <div className="delete-preview">
+                <strong>{deleteConfirm.nom_service}</strong>
+              </div>
+              <p className="warning-text">Cette action est irréversible.</p>
             </div>
             <div className="modal-footer">
-              <button className="btn-cancel" onClick={() => setDeleteConfirm(null)}>Annuler</button>
-              <button className="btn-confirm" onClick={handleDelete}>Confirmer</button>
+              <button className="btn-cancel" onClick={() => setDeleteConfirm(null)}>
+                Annuler
+              </button>
+              <button className="btn-danger" onClick={handleDelete}>
+                Confirmer
+              </button>
             </div>
           </div>
         </div>

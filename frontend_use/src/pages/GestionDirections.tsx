@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faBuilding, faSearch, faEdit, faTrashAlt, faPlus, faTimes,
-  faSave, faSyncAlt
+  faSave, faSyncAlt, faChevronLeft, faChevronRight, faSpinner
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 import '../style/gestion-directions.css';
@@ -138,7 +138,6 @@ const GestionDirections: React.FC = () => {
     }
   };
 
-  // Pagination
   const totalPages = Math.ceil(filteredDirections.length / itemsPerPage);
   const paginatedDirections = filteredDirections.slice(
     (currentPage - 1) * itemsPerPage,
@@ -146,21 +145,50 @@ const GestionDirections: React.FC = () => {
   );
 
   return (
-    <div className="directions-container">
-      {/* En-tête */}
-      <div className="directions-header">
-        <div className="directions-title">
+    <div className="directions-page">
+      {/* Header */}
+      <div className="page-header">
+        <div>
           <h1><FontAwesomeIcon icon={faBuilding} /> Directions</h1>
-          <p>Gestion des directions de l'INSTAT</p>
+          <p>Gestion des directions et départements</p>
         </div>
-        <button className="btn-add" onClick={openAddModal}>
-          <FontAwesomeIcon icon={faPlus} /> Nouvelle direction
+        <button className="btn-primary" onClick={openAddModal}>
+          <FontAwesomeIcon icon={faPlus} />
+          Nouvelle direction
         </button>
       </div>
 
-      {/* Filtres */}
-      <div className="directions-filters">
-        <div className="search-bar">
+      {/* Stats */}
+      <div className="stats-row">
+        <div className="stat-card">
+          <div className="stat-info">
+            <span className="stat-value">{directions.length}</span>
+            <span className="stat-label">Total directions</span>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-info">
+            <span className="stat-value">{directions.filter(d => d.type === 'centrale').length}</span>
+            <span className="stat-label">Centrales</span>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-info">
+            <span className="stat-value">{directions.filter(d => d.type === 'regionale').length}</span>
+            <span className="stat-label">Régionales</span>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-info">
+            <span className="stat-value">{directions.filter(d => d.type === 'provinciale').length}</span>
+            <span className="stat-label">Provinciales</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Actions Bar */}
+      <div className="actions-bar">
+        <div className="search-box">
           <FontAwesomeIcon icon={faSearch} className="search-icon" />
           <input
             type="text"
@@ -169,95 +197,129 @@ const GestionDirections: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <select 
-          className="filter-select"
-          value={filterType}
-          onChange={(e) => setFilterType(e.target.value)}
-        >
-          <option value="all">Tous les types</option>
-          <option value="centrale">Centrales</option>
-          <option value="regionale">Régionales</option>
-          <option value="provinciale">Provinciales</option>
-        </select>
-        <button className="btn-refresh" onClick={fetchDirections}>
-          <FontAwesomeIcon icon={faSyncAlt} /> Rafraîchir
-        </button>
+        <div className="actions-group">
+          <select 
+            className="filter-select"
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+          >
+            <option value="all">Tous les types</option>
+            <option value="centrale">Centrales</option>
+            <option value="regionale">Régionales</option>
+            <option value="provinciale">Provinciales</option>
+          </select>
+          <button className="btn-outline" onClick={fetchDirections}>
+            <FontAwesomeIcon icon={faSyncAlt} />
+            Rafraîchir
+          </button>
+        </div>
       </div>
 
-      {/* Tableau des directions */}
-      {loading ? (
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>Chargement...</p>
-        </div>
-      ) : (
-        <>
-          <div className="table-container">
-            <table className="directions-table">
-              <thead>
-                <tr>
-                  <th>Nom</th>
-                  <th>Type</th>
-                  <th>Services</th>
-                  <th>Personnels</th>
-                  <th>Description</th>
-                  <th className="actions-col">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedDirections.map((direction) => (
-                  <tr key={direction.id_direction}>
-                    <td className="name-cell">
-                      <strong>{direction.nom_direction}</strong>
-                    </td>
-                    <td>
-                      <span className={`type-badge type-${direction.type}`}>
-                        {getTypeLabel(direction.type)}
-                      </span>
-                    </td>
-                    <td className="stats-cell">{direction.nombre_services || 0}</td>
-                    <td className="stats-cell">{direction.nombre_personnels || 0}</td>
-                    <td className="desc-cell">{direction.description || '-'}</td>
-                    <td className="actions-cell">
-                      <button className="action-btn edit" onClick={() => openEditModal(direction)}>
-                        <FontAwesomeIcon icon={faEdit} /> Modifier
-                      </button>
-                      <button className="action-btn delete" onClick={() => setDeleteConfirm(direction)}>
-                        <FontAwesomeIcon icon={faTrashAlt} /> Supprimer
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* Table */}
+      <div className="table-container">
+        {loading ? (
+          <div className="loading-state">
+            <FontAwesomeIcon icon={faSpinner} spin />
+            <p>Chargement des directions...</p>
           </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="pagination">
-              <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1} className="page-btn">«</button>
-              <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1} className="page-btn">‹</button>
-              <span className="page-info">Page {currentPage} sur {totalPages}</span>
-              <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages} className="page-btn">›</button>
-              <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages} className="page-btn">»</button>
+        ) : (
+          <>
+            <div className="table-wrapper">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Nom</th>
+                    <th>Type</th>
+                    <th>Services</th>
+                    <th>Personnels</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedDirections.map((direction) => (
+                    <tr key={direction.id_direction}>
+                      <td className="name-cell">{direction.nom_direction}</td>
+                      <td>
+                        <span className={`type-badge ${direction.type}`}>
+                          {getTypeLabel(direction.type)}
+                        </span>
+                      </td>
+                      <td>{direction.nombre_services || 0}</td>
+                      <td>{direction.nombre_personnels || 0}</td>
+                      <td className="desc-cell">{direction.description || '-'}</td>
+                      <td className="actions-cell">
+                        <button className="action-edit" onClick={() => openEditModal(direction)}>
+                          <FontAwesomeIcon icon={faEdit} />
+                          Modifier
+                        </button>
+                        <button className="action-delete" onClick={() => setDeleteConfirm(direction)}>
+                          <FontAwesomeIcon icon={faTrashAlt} />
+                          Supprimer
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          )}
 
-          {filteredDirections.length === 0 && (
-            <div className="empty-state">
-              <p>Aucune direction trouvée</p>
-            </div>
-          )}
-        </>
-      )}
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="pagination">
+                <button 
+                  onClick={() => setCurrentPage(1)} 
+                  disabled={currentPage === 1}
+                  className="page-btn"
+                >
+                  <FontAwesomeIcon icon={faChevronLeft} /> <FontAwesomeIcon icon={faChevronLeft} />
+                </button>
+                <button 
+                  onClick={() => setCurrentPage(currentPage - 1)} 
+                  disabled={currentPage === 1}
+                  className="page-btn"
+                >
+                  <FontAwesomeIcon icon={faChevronLeft} />
+                </button>
+                <span className="page-info">
+                  Page {currentPage} sur {totalPages}
+                </span>
+                <button 
+                  onClick={() => setCurrentPage(currentPage + 1)} 
+                  disabled={currentPage === totalPages}
+                  className="page-btn"
+                >
+                  <FontAwesomeIcon icon={faChevronRight} />
+                </button>
+                <button 
+                  onClick={() => setCurrentPage(totalPages)} 
+                  disabled={currentPage === totalPages}
+                  className="page-btn"
+                >
+                  <FontAwesomeIcon icon={faChevronRight} /> <FontAwesomeIcon icon={faChevronRight} />
+                </button>
+              </div>
+            )}
 
-      {/* Modal Ajout/Modification */}
+            {filteredDirections.length === 0 && (
+              <div className="empty-state">
+                <FontAwesomeIcon icon={faBuilding} />
+                <p>Aucune direction trouvée</p>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Add/Edit Modal */}
       {showModal && (
         <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>{editingDirection ? 'Modifier la direction' : 'Nouvelle direction'}</h3>
-              <button className="modal-close" onClick={closeModal}><FontAwesomeIcon icon={faTimes} /></button>
+              <button className="modal-close" onClick={closeModal}>
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
             </div>
             <form onSubmit={handleSubmit}>
               <div className="modal-body">
@@ -268,7 +330,7 @@ const GestionDirections: React.FC = () => {
                     name="nom_direction"
                     value={formData.nom_direction}
                     onChange={handleInputChange}
-                    placeholder="Ex: DSIC, DG, DR/Tana..."
+                    placeholder="Ex: Direction des Systèmes d'Information"
                     required
                   />
                 </div>
@@ -292,9 +354,12 @@ const GestionDirections: React.FC = () => {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn-cancel" onClick={closeModal}>Annuler</button>
-                <button type="submit" className="btn-submit">
-                  <FontAwesomeIcon icon={faSave} /> {editingDirection ? 'Modifier' : 'Ajouter'}
+                <button type="button" className="btn-cancel" onClick={closeModal}>
+                  Annuler
+                </button>
+                <button type="submit" className="btn-save" disabled={loading}>
+                  <FontAwesomeIcon icon={faSave} />
+                  {editingDirection ? 'Modifier' : 'Ajouter'}
                 </button>
               </div>
             </form>
@@ -302,22 +367,30 @@ const GestionDirections: React.FC = () => {
         </div>
       )}
 
-      {/* Modal Confirmation suppression */}
+      {/* Delete Modal */}
       {deleteConfirm && (
         <div className="modal-overlay" onClick={() => setDeleteConfirm(null)}>
-          <div className="modal-container modal-confirm" onClick={(e) => e.stopPropagation()}>
+          <div className="modal modal-small" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Confirmer la suppression</h3>
-              <button className="modal-close" onClick={() => setDeleteConfirm(null)}><FontAwesomeIcon icon={faTimes} /></button>
+              <button className="modal-close" onClick={() => setDeleteConfirm(null)}>
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
             </div>
             <div className="modal-body">
               <p>Supprimer la direction :</p>
-              <p className="confirm-name"><strong>{deleteConfirm.nom_direction}</strong></p>
-              <p className="warning">Cette action est irréversible.</p>
+              <div className="delete-preview">
+                <strong>{deleteConfirm.nom_direction}</strong>
+              </div>
+              <p className="warning-text">Cette action est irréversible.</p>
             </div>
             <div className="modal-footer">
-              <button className="btn-cancel" onClick={() => setDeleteConfirm(null)}>Annuler</button>
-              <button className="btn-confirm" onClick={handleDelete}>Confirmer</button>
+              <button className="btn-cancel" onClick={() => setDeleteConfirm(null)}>
+                Annuler
+              </button>
+              <button className="btn-danger" onClick={handleDelete}>
+                Confirmer
+              </button>
             </div>
           </div>
         </div>
