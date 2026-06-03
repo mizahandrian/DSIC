@@ -1,382 +1,545 @@
 /* src/style/recrutement.css */
-.recrutement-container {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-  
-  .recrutement-header {
-    margin-bottom: 32px;
-  }
-  
-  .recrutement-header h1 {
-    font-size: 28px;
-    font-weight: 600;
-    color: #1e293b;
-    margin-bottom: 8px;
-  }
-  
-  .recrutement-header p {
-    font-size: 14px;
-    color: #64748b;
-  }
-  
-  /* Indicateur d'étapes */
-  .steps-indicator {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 40px;
-    position: relative;
-  }
-  
-  .step-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-    flex: 1;
-  }
-  
-  .step-circle {
-    width: 48px;
-    height: 48px;
-    background: #f8fafc;
-    border: 2px solid #e2e8f0;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    color: #94a3b8;
-    transition: all 0.3s;
-    margin-bottom: 8px;
-  }
-  
-  .step-item.active .step-circle {
-    background: #10b981;
-    border-color: #10b981;
-    color: white;
-  }
-  
-  .step-title {
-    font-size: 12px;
-    font-weight: 500;
-    color: #94a3b8;
-  }
-  
-  .step-item.active .step-title {
-    color: #10b981;
-  }
-  
-  .step-line {
-    position: absolute;
-    top: 24px;
-    left: 50%;
-    width: 100%;
-    height: 2px;
-    background: #e2e8f0;
-    z-index: -1;
-  }
-  
-  .step-item:last-child .step-line {
-    display: none;
-  }
-  
-  /* Formulaire */
-  .recrutement-form {
-    background: white;
-    border-radius: 24px;
-    padding: 32px;
-    border: 1px solid #eef2f6;
-  }
-  
-  .step-content {
-    animation: fadeIn 0.3s ease;
-  }
-  
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateX(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-  
-  .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 20px;
-  }
-  
-  .form-group {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .form-group.full-width {
-    grid-column: span 2;
-  }
-  
-  .form-group label {
-    font-size: 13px;
-    font-weight: 500;
-    color: #334155;
-    margin-bottom: 6px;
-  }
-  
-  .form-group label svg {
-    margin-right: 6px;
-    color: #10b981;
-    font-size: 12px;
-  }
-  
-  .form-group input,
-  .form-group select {
-    padding: 12px 14px;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    font-size: 14px;
-    transition: all 0.2s;
-    background: #fafbfc;
-  }
-  
-  .form-group input:focus,
-  .form-group select:focus {
-    outline: none;
-    border-color: #10b981;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.08);
-  }
-  
-  /* Info box */
-  .info-box {
-    background: #f0fdf4;
-    border: 1px solid #d1fae5;
-    border-radius: 16px;
-    padding: 14px 18px;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: #10b981;
-    font-size: 13px;
-  }
-  
-  /* Summary box */
-  .summary-box {
-    background: #f8fafc;
-    border-radius: 16px;
-    padding: 20px;
-    margin-top: 20px;
-    border: 1px solid #eef2f6;
-  }
-  
-  .summary-box h4 {
-    font-size: 14px;
-    font-weight: 600;
-    color: #1e293b;
-    margin-bottom: 12px;
-  }
-  
-  .summary-box p {
-    font-size: 13px;
-    color: #334155;
-    margin-bottom: 6px;
-  }
-  
-  /* Navigation */
-  .form-navigation {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 32px;
-    padding-top: 24px;
-    border-top: 1px solid #eef2f6;
-  }
-  
-  .btn-prev,
-  .btn-next,
-  .btn-submit {
-    padding: 12px 28px;
-    border-radius: 40px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  .btn-prev {
-    background: white;
-    border: 1px solid #e2e8f0;
-    color: #64748b;
-  }
-  
-  .btn-prev:hover {
-    background: #f8fafc;
-  }
-  
-  .btn-next {
-    background: #10b981;
-    border: none;
-    color: white;
-  }
-  
-  .btn-next:hover {
-    background: #0d9488;
-    transform: translateX(2px);
-  }
-  
-  .btn-submit {
-    background: #10b981;
-    border: none;
-    color: white;
-    margin-left: auto;
-  }
-  
-  .btn-submit:hover:not(:disabled) {
-    background: #0d9488;
-  }
-  
-  .btn-submit:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-  
-  /* Responsive */
-  @media (max-width: 768px) {
-    .recrutement-form {
-      padding: 20px;
-    }
-    .form-row {
-      grid-template-columns: 1fr;
-      gap: 16px;
-    }
-    .form-group.full-width {
-      grid-column: span 1;
-    }
-    .steps-indicator {
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-    .step-line {
-      display: none;
-    }
-    .form-navigation {
-      flex-direction: column;
-      gap: 12px;
-    }
-    .btn-prev,
-    .btn-next,
-    .btn-submit {
-      width: 100%;
-      justify-content: center;
-    }
-  }
+.recrutement-page {
+  min-height: calc(100vh - 70px);
+  background: #f5f7fa;
+  padding: 2rem;
+}
 
-  /* Ajouter à la fin du fichier recrutement.css */
+/* Header */
+.recrutement-header {
+  max-width: 1000px;
+  margin: 0 auto 2rem auto;
+}
 
-/* Styles pour les selects avec bouton d'ajout */
-.select-with-button {
+.recrutement-header h1 {
   display: flex;
-  gap: 8px;
   align-items: center;
+  gap: 0.75rem;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
 }
 
-.select-with-button select {
-  flex: 1;
+.recrutement-header h1 svg {
+  color: #4f46e5;
+  font-size: 1.5rem;
 }
 
-.btn-add-quick {
+.recrutement-header p {
+  color: #64748b;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Success Toast */
+.success-toast {
+  position: fixed;
+  top: 80px;
+  right: 20px;
   background: #10b981;
   color: white;
-  border: none;
-  padding: 10px 14px;
+  padding: 12px 20px;
   border-radius: 12px;
-  cursor: pointer;
-  font-size: 13px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  transition: all 0.2s;
-  white-space: nowrap;
+  gap: 10px;
+  font-size: 0.875rem;
+  z-index: 1000;
+  animation: slideInRight 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.btn-add-quick:hover {
-  background: #0d9488;
-  transform: translateY(-1px);
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
-.hint-text {
-  display: block;
-  font-size: 11px;
-  color: #f59e0b;
-  margin-top: 5px;
+/* Steps Container */
+.steps-container {
+  max-width: 1000px;
+  margin: 0 auto 2rem auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  padding: 1.5rem 2rem;
+  border-radius: 16px;
+  border: 1px solid #e9ecef;
 }
 
-/* Modal petit */
-.modal-small {
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  transition: all 0.3s ease;
+}
+
+.step-wrapper:not(.completed) {
+  cursor: not-allowed;
+}
+
+.step-wrapper.completed {
+  cursor: pointer;
+}
+
+.step-wrapper.completed:hover .step-circle:not(.active) {
+  transform: scale(1.05);
+  border-color: #4f46e5;
+  background: #f0f0ff;
+}
+
+.step-circle {
+  width: 48px;
+  height: 48px;
+  background: #f1f5f9;
+  border: 2px solid #e2e8f0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: #94a3b8;
+  transition: all 0.3s ease;
+  margin-bottom: 0.75rem;
+  z-index: 2;
+  position: relative;
+}
+
+.step-circle.active {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: white;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.step-circle.done {
+  background: #10b981;
+  border-color: #10b981;
+  color: white;
+}
+
+.step-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  transition: color 0.3s ease;
+}
+
+.step-wrapper.completed .step-label {
+  color: #10b981;
+}
+
+.step-wrapper .step-circle.active + .step-label {
+  color: #4f46e5;
+  font-weight: 600;
+}
+
+/* Connecteur - Version grise sans vert */
+.step-connector {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: #e2e8f0;
+  z-index: 1;
+}
+
+.step-wrapper:last-child .step-connector {
+  display: none;
+}
+
+/* Suppression de la couleur verte du connecteur */
+.step-wrapper.completed .step-connector {
+  background: #e2e8f0;
+}
+
+/* Form Card */
+.recrutement-card {
+  max-width: 1000px;
+  margin: 0 auto;
   background: white;
   border-radius: 20px;
-  width: 90%;
-  max-width: 450px;
-  max-height: 90vh;
-  overflow-y: auto;
-  animation: fadeInUp 0.3s ease;
+  border: 1px solid #e9ecef;
+  overflow: hidden;
+  transition: all 0.3s ease;
 }
 
-.modal-small .modal-header {
-  padding: 20px 24px;
-  border-bottom: 1px solid #eef2f6;
+.recrutement-card form {
+  padding: 2rem;
+}
+
+/* Step Content */
+.step-content {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Form Grid */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group.full-width {
+  grid-column: span 2;
+}
+
+.form-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: #64748b;
+}
+
+.form-group label svg {
+  color: #4f46e5;
+  font-size: 0.75rem;
+}
+
+.form-group input,
+.form-group select {
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  background: #fafbfc;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  background: white;
+}
+
+/* Info Box */
+.info-box {
+  background: #f0fdf4;
+  border: 1px solid #d1fae5;
+  border-radius: 12px;
+  padding: 0.875rem 1rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #10b981;
+  font-size: 0.813rem;
+}
+
+/* Summary Box */
+.summary-box {
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  border: 1px solid #e9ecef;
+}
+
+.summary-box h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.summary-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e2e8f0;
 }
 
-.modal-small .modal-header h3 {
-  font-size: 18px;
-  font-weight: 600;
+.summary-label {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.summary-value {
+  font-size: 0.813rem;
+  font-weight: 500;
   color: #1e293b;
+}
+
+/* Form Navigation */
+.form-navigation {
   display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.btn-prev,
+.btn-next,
+.btn-submit {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 40px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.modal-small .modal-body {
-  padding: 24px;
-}
-
-.modal-small .modal-footer {
-  padding: 16px 24px;
-  border-top: 1px solid #eef2f6;
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-}
-
-.modal-small .btn-cancel {
+.btn-prev {
   background: white;
   border: 1px solid #e2e8f0;
   color: #64748b;
-  padding: 8px 20px;
-  border-radius: 40px;
-  cursor: pointer;
 }
 
-.modal-small .btn-confirm {
-  background: #10b981;
-  color: white;
+.btn-prev:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.btn-next {
+  background: #4f46e5;
   border: none;
-  padding: 8px 20px;
-  border-radius: 40px;
-  cursor: pointer;
+  color: white;
+  margin-left: auto;
 }
 
-.modal-small .btn-confirm:hover {
-  background: #0d9488;
+.btn-next:hover {
+  background: #4338ca;
+  transform: translateX(2px);
+}
+
+.btn-submit {
+  background: #10b981;
+  border: none;
+  color: white;
+  margin-left: auto;
+}
+
+.btn-submit:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .recrutement-page {
+    padding: 1rem;
+  }
+
+  .steps-container {
+    flex-wrap: wrap;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .step-wrapper {
+    flex: none;
+    width: calc(33.33% - 0.5rem);
+  }
+
+  .step-connector {
+    display: none;
+  }
+
+  .recrutement-card form {
+    padding: 1.5rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .form-group.full-width {
+    grid-column: span 1;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .form-navigation {
+    flex-direction: column;
+  }
+
+  .btn-prev,
+  .btn-next,
+  .btn-submit {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn-next,
+  .btn-submit {
+    margin-left: 0;
+  }
+}
+
+/* Dark Mode Support */
+body.dark-mode .recrutement-page {
+  background: #0f172a;
+}
+
+body.dark-mode .recrutement-header h1 {
+  color: #f1f5f9;
+}
+
+body.dark-mode .recrutement-header p {
+  color: #94a3b8;
+}
+
+body.dark-mode .steps-container {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark-mode .step-circle {
+  background: #334155;
+  border-color: #475569;
+  color: #94a3b8;
+}
+
+body.dark-mode .step-circle.active {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: white;
+}
+
+body.dark-mode .step-circle.done {
+  background: #10b981;
+  border-color: #10b981;
+}
+
+body.dark-mode .step-label {
+  color: #94a3b8;
+}
+
+body.dark-mode .step-connector {
+  background: #334155;
+}
+
+body.dark-mode .recrutement-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark-mode .form-group label {
+  color: #94a3b8;
+}
+
+body.dark-mode .form-group input,
+body.dark-mode .form-group select {
+  background: #334155;
+  border-color: #475569;
+  color: #f1f5f9;
+}
+
+body.dark-mode .form-group input:focus,
+body.dark-mode .form-group select:focus {
+  background: #475569;
+  border-color: #4f46e5;
+}
+
+body.dark-mode .info-box {
+  background: #064e3b;
+  border-color: #10b981;
+  color: #34d399;
+}
+
+body.dark-mode .summary-box {
+  background: #334155;
+  border-color: #475569;
+}
+
+body.dark-mode .summary-box h4 {
+  color: #f1f5f9;
+}
+
+body.dark-mode .summary-item {
+  border-bottom-color: #475569;
+}
+
+body.dark-mode .summary-label {
+  color: #94a3b8;
+}
+
+body.dark-mode .summary-value {
+  color: #f1f5f9;
+}
+
+body.dark-mode .form-navigation {
+  border-top-color: #334155;
+}
+
+body.dark-mode .btn-prev {
+  background: #334155;
+  border-color: #475569;
+  color: #cbd5e1;
+}
+
+body.dark-mode .btn-prev:hover {
+  background: #475569;
+}
+
+body.dark-mode .success-toast {
+  background: #059669;
+}
+
+/* Animation au clic sur les étapes */
+.step-wrapper:active .step-circle {
+  transform: scale(0.95);
 }

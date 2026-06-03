@@ -17,11 +17,11 @@ class RecrutementController extends Controller
             'nom'            => 'required|string',
             'prenom'         => 'required|string',
             'numero_cin'     => 'required|unique:personnels,numero_cin',
-            'matricule'      => 'nullable|string|unique:personnels,matricule',
             'date_naissance' => 'required|date',
             'date_entree'    => 'required|date',
         ]);
 
+        // ✅ Helper pour nettoyer toutes les dates → format Y-m-d
         $parseDate = function(?string $date): ?string {
             if (!$date || trim($date) === '') return null;
             try {
@@ -34,21 +34,20 @@ class RecrutementController extends Controller
         try {
             DB::beginTransaction();
 
-            // 1. Créer le PERSONNEL
+            // ✅ 1. Créer le PERSONNEL
             $personnel = Personnel::create([
-                'matricule'              => $request->matricule ?? null,
                 'nom'                    => $request->nom,
                 'prenom'                 => $request->prenom,
                 'genre'                  => $request->genre ?? null,
                 'numero_cin'             => $request->numero_cin,
                 'tel'                    => $request->tel ?? null,
-                'date_naissance'         => $parseDate($request->date_naissance),
-                'date_entree'            => $parseDate($request->date_entree),
+                'date_naissance'         => $parseDate($request->date_naissance),      // ✅
+                'date_entree'            => $parseDate($request->date_entree),          // ✅
                 'motif_entree'           => $request->motif_entree ?? null,
 
                 'id_direction'           => $request->id_direction ?: null,
                 'id_service'             => $request->id_service ?: null,
-                'id_poste'               => $request->id_poste ?: null,
+                'id_poste'               => null,
                 'id_carriere'            => null,
                 'id_etat'                => $request->id_etat ?: null,
                 'id_statut'              => $request->id_statut ?: null,
@@ -61,18 +60,22 @@ class RecrutementController extends Controller
                 'indice'                 => $request->indice ?? null,
                 'corps'                  => $request->corps ?? null,
                 'grade'                  => $request->grade ?? null,
-                'date_effet_carriere'    => $parseDate($request->date_effet_carriere),
+                'date_effet_carriere'    => $parseDate($request->date_effet_carriere),  // ✅
 
                 'statut'                 => $request->statut ?? null,
-                'etat'                   => $request->id_etat == 1 ? 'Actif' : 'Inactif',
+                'etat'                   => $request->etat ?? 'actif',
 
                 'situation'              => $request->situation ?? null,
-                'date_situation'         => $parseDate($request->date_situation),
+                'date_situation'         => $parseDate($request->date_situation),       // ✅
                 'destination'            => $request->destination ?? null,
                 'commentaire_situation'  => $request->commentaire_situation ?? null,
+
+                'ancien_poste'           => $request->ancien_poste ?? null,
+                'ancien_direction'       => $request->ancien_direction ?? null,
+                'commentaire_historique' => $request->commentaire_historique ?? null,
             ]);
 
-            // 2. Créer la CARRIÈRE
+            // ✅ 2. Créer la CARRIÈRE
             if ($request->filled('categorie') && $request->filled('corps') && $request->filled('grade')) {
                 $carriere = Carriere::create([
                     'personnel_id' => $personnel->id,
@@ -80,16 +83,16 @@ class RecrutementController extends Controller
                     'indice'       => $request->indice ?? '-',
                     'corps'        => $request->corps,
                     'grade'        => $request->grade,
-                    'date_effet'   => $parseDate($request->date_effet_carriere) ?? now()->format('Y-m-d'),
+                    'date_effet'   => $parseDate($request->date_effet_carriere) ?? now()->format('Y-m-d'), // ✅
                 ]);
 
                 $personnel->update(['id_carriere' => $carriere->id_carriere]);
             }
 
-            // 3. Créer l'HISTORIQUE  ✅ corrigé : personnel_id → id_personnel
+            // ✅ 3. Créer l'HISTORIQUE
             if ($request->filled('ancien_poste') || $request->filled('ancien_direction')) {
                 Historique::create([
-                    'id_personnel'     => $personnel->id,  // ✅ corrigé
+                    'personnel_id'     => $personnel->id,
                     'ancien_poste'     => $request->ancien_poste ?? null,
                     'ancien_direction' => $request->ancien_direction ?? null,
                     'motif_changement' => $request->commentaire_historique ?? null,
