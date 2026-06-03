@@ -1089,3 +1089,490 @@ body.dark-mode .badge-inactive {
   background: #7f1d1d;
   color: #ef4444;
 }
+
+
+/* ========== NOUVEAUX STYLES DASHBOARD ========== */
+
+/* Loading State */
+.dashboard-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1rem;
+  color: #64748b;
+}
+
+.dashboard-loading svg {
+  font-size: 2rem;
+  color: #4f46e5;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Welcome Section */
+.welcome-section {
+  margin-bottom: 2rem;
+}
+
+.welcome-section h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 0.25rem 0;
+}
+
+.welcome-section p {
+  color: #64748b;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Stats Cards - Version sobre */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid #e9ecef;
+  transition: all 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.stat-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+/* Status Cards */
+.status-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.status-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  border: 1px solid #e9ecef;
+  transition: all 0.2s;
+}
+
+.status-card.active:hover {
+  border-color: #10b981;
+}
+
+.status-card.inactive:hover {
+  border-color: #94a3b8;
+}
+
+.status-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.75rem;
+}
+
+.status-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.status-label {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.status-progress {
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #10b981;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.status-card.inactive .progress-fill {
+  background: #cbd5e1;
+}
+
+/* Quick Actions */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.quick-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.25rem;
+  text-align: center;
+  text-decoration: none;
+  border: 1px solid #e9ecef;
+  transition: all 0.2s;
+  display: block;
+}
+
+.quick-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  border-color: #4f46e5;
+}
+
+.quick-icon {
+  width: 48px;
+  height: 48px;
+  background: #f1f5f9;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.75rem;
+  font-size: 1.25rem;
+  color: #4f46e5;
+  transition: all 0.2s;
+}
+
+.quick-card:hover .quick-icon {
+  background: #4f46e5;
+  color: white;
+}
+
+.quick-card h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 0.25rem 0;
+}
+
+.quick-card p {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* Charts Section */
+.charts-section {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.chart-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.25rem;
+  border: 1px solid #e9ecef;
+  transition: all 0.2s;
+}
+
+.chart-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.chart-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.chart-icon {
+  width: 40px;
+  height: 40px;
+  background: #f1f5f9;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: #4f46e5;
+}
+
+.chart-header h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.chart-header p {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  margin: 0.25rem 0 0 0;
+}
+
+.chart-container {
+  height: 260px;
+  position: relative;
+}
+
+.no-data {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #94a3b8;
+  font-size: 0.813rem;
+}
+
+/* Recent Section */
+.recent-section {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e9ecef;
+  overflow: hidden;
+}
+
+.recent-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.recent-header h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.view-link {
+  font-size: 0.75rem;
+  color: #4f46e5;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: color 0.2s;
+}
+
+.view-link:hover {
+  color: #4338ca;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.recent-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.recent-table th {
+  text-align: left;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  background: #f8fafc;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.recent-table td {
+  padding: 0.75rem 1.25rem;
+  font-size: 0.813rem;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.recent-table tr:hover td {
+  background: #f8fafc;
+}
+
+.recent-table .matricule {
+  font-weight: 600;
+  color: #4f46e5;
+  font-family: monospace;
+}
+
+.recent-table .name {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.empty-row {
+  text-align: center;
+  padding: 2rem;
+  color: #94a3b8;
+}
+
+/* Dark Mode pour le Dashboard */
+body.dark-mode .dashboard-loading {
+  color: #94a3b8;
+}
+
+body.dark-mode .welcome-section h1 {
+  color: #f1f5f9;
+}
+
+body.dark-mode .welcome-section p {
+  color: #94a3b8;
+}
+
+body.dark-mode .stat-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark-mode .stat-value {
+  color: #f1f5f9;
+}
+
+body.dark-mode .status-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark-mode .status-value {
+  color: #f1f5f9;
+}
+
+body.dark-mode .quick-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark-mode .quick-card h4 {
+  color: #f1f5f9;
+}
+
+body.dark-mode .quick-icon {
+  background: #334155;
+}
+
+body.dark-mode .chart-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark-mode .chart-header h3 {
+  color: #f1f5f9;
+}
+
+body.dark-mode .chart-icon {
+  background: #334155;
+}
+
+body.dark-mode .recent-section {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark-mode .recent-header {
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .recent-header h3 {
+  color: #f1f5f9;
+}
+
+body.dark-mode .recent-table th {
+  background: #334155;
+  color: #94a3b8;
+  border-bottom-color: #475569;
+}
+
+body.dark-mode .recent-table td {
+  color: #cbd5e1;
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .recent-table tr:hover td {
+  background: #334155;
+}
+
+body.dark-mode .recent-table .name {
+  color: #f1f5f9;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .quick-actions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .charts-section {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .status-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+  
+  .chart-container {
+    height: 220px;
+  }
+}
