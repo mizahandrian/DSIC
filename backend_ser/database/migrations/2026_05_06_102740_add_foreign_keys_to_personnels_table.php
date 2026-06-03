@@ -23,7 +23,7 @@ return new class extends Migration {
             }
             if (!Schema::hasColumn('personnels', 'id_carriere')) {
                 $table->unsignedBigInteger('id_carriere')->nullable();
-                $table->foreign('id_carriere')->references('id')->on('carrieres')->nullOnDelete();
+                $table->foreign('id_carriere')->references('id_carriere')->on('carrieres')->nullOnDelete();
             }
             if (!Schema::hasColumn('personnels', 'id_etat')) {
                 $table->unsignedBigInteger('id_etat')->nullable();

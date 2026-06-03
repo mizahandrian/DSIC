@@ -1,56 +1,219 @@
 // src/pages/Settings.tsx
-import React, { useState } from 'react';
-import '../style/settings.css'; // optionnel
+import React, { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faMoon,
+  faBell,
+  faGlobe,
+  faShieldAlt,
+  faToggleOn,
+  faToggleOff,
+  faEnvelope,
+  faSms,
+  faPalette
+} from '@fortawesome/free-solid-svg-icons';
+import '../style/settings.css';
 
 const Settings: React.FC = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [smsNotifications, setSmsNotifications] = useState(false);
+  const [twoFactor, setTwoFactor] = useState(false);
+
+  // Charger les préférences depuis localStorage
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('userSettings');
+    if (savedSettings) {
+      const settings = JSON.parse(savedSettings);
+      setDarkMode(settings.darkMode || false);
+      setNotifications(settings.notifications !== undefined ? settings.notifications : true);
+      setEmailNotifications(settings.emailNotifications !== undefined ? settings.emailNotifications : true);
+      setSmsNotifications(settings.smsNotifications || false);
+      setTwoFactor(settings.twoFactor || false);
+    }
+  }, []);
+
+  // Sauvegarder les préférences
+  const saveSettings = (key: string, value: any) => {
+    const currentSettings = JSON.parse(localStorage.getItem('userSettings') || '{}');
+    const newSettings = { ...currentSettings, [key]: value };
+    localStorage.setItem('userSettings', JSON.stringify(newSettings));
+  };
+
+  const handleDarkModeToggle = () => {
+    const newValue = !darkMode;
+    setDarkMode(newValue);
+    saveSettings('darkMode', newValue);
+    if (newValue) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  };
+
+  const handleNotificationsToggle = () => {
+    const newValue = !notifications;
+    setNotifications(newValue);
+    saveSettings('notifications', newValue);
+  };
+
+  const handleEmailNotificationsToggle = () => {
+    const newValue = !emailNotifications;
+    setEmailNotifications(newValue);
+    saveSettings('emailNotifications', newValue);
+  };
+
+  const handleSmsNotificationsToggle = () => {
+    const newValue = !smsNotifications;
+    setSmsNotifications(newValue);
+    saveSettings('smsNotifications', newValue);
+  };
+
+  const handleTwoFactorToggle = () => {
+    const newValue = !twoFactor;
+    setTwoFactor(newValue);
+    saveSettings('twoFactor', newValue);
+  };
 
   return (
-    <div className="settings-container">
-      <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#1e293b', marginBottom: '24px' }}>
-        ⚙️ Paramètres
-      </h1>
+    <div className="settings-page">
+      <div className="settings-header">
+        <h1>
+          <FontAwesomeIcon icon={faGlobe} />
+          Paramètres
+        </h1>
+        <p>Gérez vos préférences et configurations</p>
+      </div>
 
-      <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-        <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <h3 style={{ margin: 0 }}>Mode sombre</h3>
-            <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '14px' }}>Activer/désactiver le thème sombre</p>
+      <div className="settings-content">
+        {/* Section Apparence */}
+        <div className="settings-card">
+          <div className="card-header">
+            <div className="card-icon">
+              <FontAwesomeIcon icon={faPalette} />
+            </div>
+            <div className="card-title">
+              <h3>Apparence</h3>
+              <p>Personnalisez l'affichage de l'application</p>
+            </div>
           </div>
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            style={{
-              padding: '8px 16px',
-              background: darkMode ? '#1e293b' : '#10b981',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer'
-            }}
-          >
-            {darkMode ? 'Désactiver' : 'Activer'}
-          </button>
+          <div className="settings-item">
+            <div className="item-info">
+              <div className="item-icon">
+                <FontAwesomeIcon icon={faMoon} />
+              </div>
+              <div className="item-text">
+                <label>Mode sombre</label>
+                <p>Activer le thème sombre pour une meilleure expérience nocturne</p>
+              </div>
+            </div>
+            <button 
+              className={`toggle-btn ${darkMode ? 'active' : ''}`}
+              onClick={handleDarkModeToggle}
+            >
+              <FontAwesomeIcon icon={darkMode ? faToggleOn : faToggleOff} />
+              {darkMode ? 'Activé' : 'Désactivé'}
+            </button>
+          </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <h3 style={{ margin: 0 }}>Notifications</h3>
-            <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '14px' }}>Recevoir des alertes importantes</p>
+        {/* Section Notifications */}
+        <div className="settings-card">
+          <div className="card-header">
+            <div className="card-icon">
+              <FontAwesomeIcon icon={faBell} />
+            </div>
+            <div className="card-title">
+              <h3>Notifications</h3>
+              <p>Gérez vos alertes et communications</p>
+            </div>
           </div>
-          <button
-            onClick={() => setNotifications(!notifications)}
-            style={{
-              padding: '8px 16px',
-              background: notifications ? '#10b981' : '#ef4444',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer'
-            }}
-          >
-            {notifications ? 'Activées' : 'Désactivées'}
-          </button>
+          <div className="settings-item">
+            <div className="item-info">
+              <div className="item-icon">
+                <FontAwesomeIcon icon={faBell} />
+              </div>
+              <div className="item-text">
+                <label>Notifications push</label>
+                <p>Recevoir des notifications sur votre navigateur</p>
+              </div>
+            </div>
+            <button 
+              className={`toggle-btn ${notifications ? 'active' : ''}`}
+              onClick={handleNotificationsToggle}
+            >
+              <FontAwesomeIcon icon={notifications ? faToggleOn : faToggleOff} />
+              {notifications ? 'Activées' : 'Désactivées'}
+            </button>
+          </div>
+          <div className="settings-item">
+            <div className="item-info">
+              <div className="item-icon">
+                <FontAwesomeIcon icon={faEnvelope} />
+              </div>
+              <div className="item-text">
+                <label>Notifications email</label>
+                <p>Recevoir des alertes par email</p>
+              </div>
+            </div>
+            <button 
+              className={`toggle-btn ${emailNotifications ? 'active' : ''}`}
+              onClick={handleEmailNotificationsToggle}
+            >
+              <FontAwesomeIcon icon={emailNotifications ? faToggleOn : faToggleOff} />
+              {emailNotifications ? 'Activées' : 'Désactivées'}
+            </button>
+          </div>
+          <div className="settings-item">
+            <div className="item-info">
+              <div className="item-icon">
+                <FontAwesomeIcon icon={faSms} />
+              </div>
+              <div className="item-text">
+                <label>Notifications SMS</label>
+                <p>Recevoir des alertes par SMS</p>
+              </div>
+            </div>
+            <button 
+              className={`toggle-btn ${smsNotifications ? 'active' : ''}`}
+              onClick={handleSmsNotificationsToggle}
+            >
+              <FontAwesomeIcon icon={smsNotifications ? faToggleOn : faToggleOff} />
+              {smsNotifications ? 'Activées' : 'Désactivées'}
+            </button>
+          </div>
+        </div>
+
+        {/* Section Sécurité */}
+        <div className="settings-card">
+          <div className="card-header">
+            <div className="card-icon">
+              <FontAwesomeIcon icon={faShieldAlt} />
+            </div>
+            <div className="card-title">
+              <h3>Sécurité</h3>
+              <p>Protégez votre compte</p>
+            </div>
+          </div>
+          <div className="settings-item">
+            <div className="item-info">
+              <div className="item-icon">
+                <FontAwesomeIcon icon={faShieldAlt} />
+              </div>
+              <div className="item-text">
+                <label>Double authentification</label>
+                <p>Renforcez la sécurité de votre compte</p>
+              </div>
+            </div>
+            <button 
+              className={`toggle-btn ${twoFactor ? 'active' : ''}`}
+              onClick={handleTwoFactorToggle}
+            >
+              <FontAwesomeIcon icon={twoFactor ? faToggleOn : faToggleOff} />
+              {twoFactor ? 'Activée' : 'Désactivée'}
+            </button>
+          </div>
         </div>
       </div>
     </div>

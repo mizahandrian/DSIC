@@ -8,10 +8,10 @@ return new class extends Migration {
     public function up(): void
     {
        Schema::create('carrieres', function (Blueprint $table) {
-    $table->id();
-    $table->foreignId('personnel_id')->constrained()->onDelete('cascade');
+            $table->id('id_carriere');
+            $table->foreignId('personnel_id')->constrained()->onDelete('cascade');
 
-    $table->string('categorie');
+            $table->string('categorie');
     $table->string('indice');
     $table->string('corps');
     $table->string('grade');
