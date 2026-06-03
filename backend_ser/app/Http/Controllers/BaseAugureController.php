@@ -12,7 +12,7 @@ class BaseAugureController extends Controller
     public function index()
 {
     return response()->json(
-        BaseAugure::orderBy('id_augure', 'desc')->get()
+        BaseAugure::orderBy('id', 'desc')->get()
     );
 }
 

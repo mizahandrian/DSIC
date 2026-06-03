@@ -36,6 +36,7 @@ class RecrutementController extends Controller
 
             // ✅ 1. Créer le PERSONNEL
             $personnel = Personnel::create([
+                'matricule'              => $request->matricule ?? null,
                 'nom'                    => $request->nom,
                 'prenom'                 => $request->prenom,
                 'genre'                  => $request->genre ?? null,
@@ -90,15 +91,15 @@ class RecrutementController extends Controller
             }
 
             // ✅ 3. Créer l'HISTORIQUE
-            if ($request->filled('ancien_poste') || $request->filled('ancien_direction')) {
-                Historique::create([
-                    'personnel_id'     => $personnel->id,
-                    'ancien_poste'     => $request->ancien_poste ?? null,
-                    'ancien_direction' => $request->ancien_direction ?? null,
-                    'motif_changement' => $request->commentaire_historique ?? null,
-                    'date_changement'  => now()->format('Y-m-d'),
-                ]);
-            }
+if ($request->filled('ancien_poste') || $request->filled('ancien_direction')) {
+    Historique::create([
+        'id_personnel'     => $personnel->id,  // ← corrigé : personnel_id → id_personnel
+        'ancien_poste'     => $request->ancien_poste ?? null,
+        'ancien_direction' => $request->ancien_direction ?? null,
+        'motif_changement' => $request->commentaire_historique ?? null,
+        'date_changement'  => now()->format('Y-m-d'),
+    ]);
+}
 
             DB::commit();
 

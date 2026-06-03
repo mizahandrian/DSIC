@@ -9,7 +9,7 @@ class Personnel extends Model
     protected $table = 'personnels';
 
     protected $fillable = [
-        'nom', 'prenom', 'genre', 'numero_cin', 'tel', 'date_naissance',
+        'matricule', 'nom', 'prenom', 'genre', 'numero_cin', 'tel', 'date_naissance',
         'date_entree', 'motif_entree',
         'id_direction', 'id_service', 'id_poste', 'id_carriere', 'id_etat', 'id_statut',
         'direction', 'service', 'poste',
