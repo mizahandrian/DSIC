@@ -1,13 +1,17 @@
 // src/pages/Login.tsx
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { authAPI, setAuthToken } from '../Service/api';
+import { useNavigate, Link } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEnvelope, faLock, faEye, faEyeSlash, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import api from '../Service/api';
 
 const Login: React.FC = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -15,46 +19,82 @@ const Login: React.FC = () => {
     setError('');
 
     try {
-      const response = await authAPI.login({ email, password });
-      const { token, user } = response.data;
+      const response = await api.post('/login', { email, password });
       
-      setAuthToken(token);
-      localStorage.setItem('user', JSON.stringify(user));
+      // Nettoyer les anciennes données
+      localStorage.clear();
       
+      // Stocker les nouvelles données
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+      }
+      if (response.data.user) {
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      }
+      
+      // Forcer la redirection avec window.location
       window.location.href = '/dashboard';
+      
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Email ou mot de passe incorrect');
+      console.error("Erreur:", err);
+      if (err.response?.status === 401) {
+        setError('Email ou mot de passe incorrect');
+      } else if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError('Erreur de connexion au serveur');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="auth-form">
-      {error && <div className="error-message">{error}</div>}
-      
-      <div className="form-group">
-        <label>Email</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="exemple@instat.mg"
-          required
-          disabled={loading}
-        />
+    <form className="login-form" onSubmit={handleSubmit}>
+      {error && (
+        <div className="alert-error">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          {error}
+        </div>
+      )}
+
+      <div className="input-group">
+        <label>Email professionnel</label>
+        <div className="input-icon-wrapper">
+          <FontAwesomeIcon icon={faEnvelope} className="input-icon" />
+          <input
+            type="email"
+            placeholder="nom@instat.mg"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
       </div>
 
-      <div className="form-group">
+      <div className="input-group">
         <label>Mot de passe</label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="••••••••"
-          required
-          disabled={loading}
-        />
+        <div className="input-icon-wrapper">
+          <FontAwesomeIcon icon={faLock} className="input-icon" />
+          <input
+            type={showPassword ? 'text' : 'password'}
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button
+            type="button"
+            className="password-toggle"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+          </button>
+        </div>
       </div>
 
       <div className="form-options">
@@ -63,8 +103,15 @@ const Login: React.FC = () => {
         </Link>
       </div>
 
-      <button type="submit" disabled={loading} className="submit-btn">
-        {loading ? 'CONNEXION...' : 'SE CONNECTER'}
+      <button type="submit" className="login-btn" disabled={loading}>
+        {loading ? (
+          <span className="loading-spinner-small"></span>
+        ) : (
+          <>
+            Se connecter
+            <FontAwesomeIcon icon={faArrowRight} />
+          </>
+        )}
       </button>
     </form>
   );

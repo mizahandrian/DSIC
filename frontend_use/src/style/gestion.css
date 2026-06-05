@@ -790,3 +790,26 @@ body.dark-mode .form-group select {
     max-width: 95%;
   }
 }
+
+/* Ajoutez à la fin de gestion-personnels.css */
+
+.badge-code {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background: #f1f5f9;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #475569;
+  font-family: monospace;
+}
+
+.full-width {
+  grid-column: span 2;
+}
+
+/* Dark mode */
+body.dark-mode .badge-code {
+  background: #334155;
+  color: #94a3b8;
+}

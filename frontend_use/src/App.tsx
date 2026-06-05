@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AuthLayout from './components/AuthLayout';
 import MainLayout from './components/MainLayout';
+import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import SuperAdmin from './pages/SuperAdmin';
 import Recrutement from './pages/Recrutement';
@@ -74,6 +75,8 @@ const App: React.FC = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/verify-code" element={<VerifyCode />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/login" element={<Login />} />
+        
         
         {/* Routes protégées avec layout principal */}
         <Route element={isAuthenticated ? <MainLayout /> : <Navigate to="/login" />}>

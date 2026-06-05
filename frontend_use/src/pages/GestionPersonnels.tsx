@@ -8,7 +8,7 @@ import {
   faUserCheck, faUserTimes, faVenusMars,
   faIdCard, faPhone, faCalendarAlt,
   faBuilding, faBriefcase, faUserTie, faSave, faTimes,
-  faPen, faSpinner
+  faPen, faSpinner, faTag, faLayerGroup, faGraduationCap, faMapMarkerAlt
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 
@@ -31,6 +31,12 @@ interface Personnel {
   service?: string | null;
   poste?: string | null;
   etat?: string | null;
+  // Nouveaux champs
+  corps_code?: string | null;
+  indice?: string | null;
+  grade_code?: string | null;
+  region_code?: string | null;
+  region_libelle?: string | null;
 }
 
 interface Direction {
@@ -106,6 +112,11 @@ const GestionPersonnels: React.FC = () => {
         direction: p.direction?.nom_direction ?? null,
         service: p.service?.nom_service ?? null,
         etat: p.etat ?? null,
+        corps_code: p.corps_code ?? null,
+        indice: p.indice ?? null,
+        grade_code: p.grade_code ?? null,
+        region_code: p.region_code ?? null,
+        region_libelle: p.region_libelle ?? null,
       }));
       setPersonnels(mappedData);
       setHasMore(false);
@@ -152,7 +163,9 @@ const GestionPersonnels: React.FC = () => {
         p.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.numero_cin.includes(searchTerm) ||
-        p.id.toString().includes(searchTerm)
+        p.id.toString().includes(searchTerm) ||
+        (p.corps_code && p.corps_code.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (p.grade_code && p.grade_code.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
@@ -197,6 +210,11 @@ const GestionPersonnels: React.FC = () => {
     setEditFormData({
       ...personnel,
       poste: personnel.poste || '',
+      corps_code: personnel.corps_code || '',
+      indice: personnel.indice || '',
+      grade_code: personnel.grade_code || '',
+      region_code: personnel.region_code || '',
+      region_libelle: personnel.region_libelle || '',
     });
     setIsEditing(false);
     if (personnel.id_direction) {
@@ -244,11 +262,12 @@ const GestionPersonnels: React.FC = () => {
   };
 
   const exportToCSV = () => {
-    const headers = ['ID', 'Nom', 'Prénom', 'CIN', 'Téléphone', 'Genre', 'Direction', 'Service', 'Poste', 'Date entrée', 'Statut'];
+    const headers = ['ID', 'Nom', 'Prénom', 'CIN', 'Téléphone', 'Genre', 'Direction', 'Service', 'Poste', 'Date entrée', 'Statut', 'Code Corps', 'Indice', 'Grade', 'Région'];
     const csvData = filteredPersonnels.map(p => [
       p.id, p.nom, p.prenom, p.numero_cin, p.tel, p.genre === 'M' ? 'Masculin' : 'Féminin',
       p.direction || '-', p.service || '-', p.poste || '-',
-      new Date(p.date_entree).toLocaleDateString('fr-FR'), p.etat || 'Actif'
+      new Date(p.date_entree).toLocaleDateString('fr-FR'), p.etat || 'Actif',
+      p.corps_code || '-', p.indice || '-', p.grade_code || '-', p.region_libelle || p.region_code || '-'
     ]);
     const csvContent = [headers, ...csvData].map(row => row.join(',')).join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -284,7 +303,7 @@ const GestionPersonnels: React.FC = () => {
         </Link>
       </div>
 
-      {/* Stats Cards - Sobres */}
+      {/* Stats Cards */}
       <div className="stats-row">
         {statsCards.map((card, i) => (
           <div className="stat-card" key={i}>
@@ -303,7 +322,7 @@ const GestionPersonnels: React.FC = () => {
           <FontAwesomeIcon icon={faSearch} className="search-icon" />
           <input
             type="text"
-            placeholder="Rechercher par nom, prénom, CIN ou matricule..."
+            placeholder="Rechercher par nom, prénom, CIN, corps, grade..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -341,6 +360,10 @@ const GestionPersonnels: React.FC = () => {
                     <th>Direction</th>
                     <th>Service</th>
                     <th>Poste</th>
+                    <th>Code Corps</th>
+                    <th>Indice</th>
+                    <th>Grade</th>
+                    <th>Région</th>
                     <th onClick={() => handleSort('date_entree')}>Date entrée {getSortIcon('date_entree')}</th>
                     <th>Statut</th>
                     <th>Actions</th>
@@ -352,7 +375,7 @@ const GestionPersonnels: React.FC = () => {
                       key={personnel.id} 
                       ref={index === displayedPersonnels.length - 1 ? lastRowRef : null}
                     >
-                      <td className="matricule">{personnel.matricule || '-'}</td>
+                      <td className="matricule">{personnel.matricule || personnel.id || '-'}</td>
                       <td className="name">{personnel.nom} {personnel.prenom}</td>
                       <td>{personnel.numero_cin}</td>
                       <td>{personnel.tel || '-'}</td>
@@ -360,6 +383,10 @@ const GestionPersonnels: React.FC = () => {
                       <td>{personnel.direction || '-'}</td>
                       <td>{personnel.service || '-'}</td>
                       <td>{personnel.poste || '-'}</td>
+                      <td><span className="badge-code">{personnel.corps_code || '-'}</span></td>
+                      <td>{personnel.indice || '-'}</td>
+                      <td>{personnel.grade_code || '-'}</td>
+                      <td>{personnel.region_libelle || personnel.region_code || '-'}</td>
                       <td>{new Date(personnel.date_entree).toLocaleDateString('fr-FR')}</td>
                       <td>
                         <span className={`status ${personnel.etat === 'Actif' ? 'status-active' : 'status-inactive'}`}>
@@ -412,7 +439,7 @@ const GestionPersonnels: React.FC = () => {
               <div className="delete-info">
                 <strong>{selectedPersonnel.nom} {selectedPersonnel.prenom}</strong>
                 <span>CIN: {selectedPersonnel.numero_cin}</span>
-                <span>Matricule: #{selectedPersonnel.id}</span>
+                <span>Matricule: {selectedPersonnel.matricule || selectedPersonnel.id}</span>
               </div>
               <p className="warning">Cette action est irréversible.</p>
             </div>
@@ -453,7 +480,7 @@ const GestionPersonnels: React.FC = () => {
                   <div className="details-grid">
                     <div className="detail">
                       <label><FontAwesomeIcon icon={faIdCard} /> Matricule</label>
-                      <span>#{selectedPersonnel.id}</span>
+                      <span>{selectedPersonnel.matricule || selectedPersonnel.id}</span>
                     </div>
                     <div className="detail">
                       <label><FontAwesomeIcon icon={faIdCard} /> CIN</label>
@@ -486,6 +513,22 @@ const GestionPersonnels: React.FC = () => {
                     <div className="detail">
                       <label><FontAwesomeIcon icon={faUserTie} /> Poste</label>
                       <span>{selectedPersonnel.poste || '-'}</span>
+                    </div>
+                    <div className="detail">
+                      <label><FontAwesomeIcon icon={faTag} /> Code Corps</label>
+                      <span>{selectedPersonnel.corps_code || '-'}</span>
+                    </div>
+                    <div className="detail">
+                      <label><FontAwesomeIcon icon={faLayerGroup} /> Indice</label>
+                      <span>{selectedPersonnel.indice || '-'}</span>
+                    </div>
+                    <div className="detail">
+                      <label><FontAwesomeIcon icon={faGraduationCap} /> Grade</label>
+                      <span>{selectedPersonnel.grade_code || '-'}</span>
+                    </div>
+                    <div className="detail">
+                      <label><FontAwesomeIcon icon={faMapMarkerAlt} /> Région</label>
+                      <span>{selectedPersonnel.region_libelle || selectedPersonnel.region_code || '-'}</span>
                     </div>
                     <div className="detail">
                       <label>Motif entrée</label>
@@ -565,6 +608,33 @@ const GestionPersonnels: React.FC = () => {
                         <option value="Actif">Actif</option>
                         <option value="Inactif">Inactif</option>
                       </select>
+                    </div>
+                  </div>
+                  {/* Nouveaux champs pour Corps, Indice, Grade, Région */}
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label><FontAwesomeIcon icon={faTag} /> Code Corps</label>
+                      <input type="text" name="corps_code" value={editFormData.corps_code || ''} onChange={handleEditChange} placeholder="Ex: 01, 02..." />
+                    </div>
+                    <div className="form-group">
+                      <label><FontAwesomeIcon icon={faLayerGroup} /> Indice</label>
+                      <input type="text" name="indice" value={editFormData.indice || ''} onChange={handleEditChange} placeholder="Ex: 450, 430..." />
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label><FontAwesomeIcon icon={faGraduationCap} /> Grade Code</label>
+                      <input type="text" name="grade_code" value={editFormData.grade_code || ''} onChange={handleEditChange} placeholder="Ex: ING-PR, TECH-SUP..." />
+                    </div>
+                    <div className="form-group">
+                      <label><FontAwesomeIcon icon={faMapMarkerAlt} /> Région Code</label>
+                      <input type="text" name="region_code" value={editFormData.region_code || ''} onChange={handleEditChange} placeholder="Ex: 01, 02, 03..." />
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group full-width">
+                      <label><FontAwesomeIcon icon={faMapMarkerAlt} /> Région Libellé</label>
+                      <input type="text" name="region_libelle" value={editFormData.region_libelle || ''} onChange={handleEditChange} placeholder="Ex: Analamanga, Atsinanana..." />
                     </div>
                   </div>
                 </div>

@@ -274,7 +274,7 @@ const Recrutement: React.FC = () => {
           <div className="step-content">
             <div className="form-grid">
               <div className="form-group">
-                <label><FontAwesomeIcon icon={faUser} /> Matricule *</label>
+                <label><FontAwesomeIcon icon={faIdCard} /> Matricule *</label>
                 <input type="text" name="matricule" value={formData.matricule} onChange={handleChange} placeholder="Matricule" required />
               </div>
               <div className="form-group">
