@@ -14,6 +14,7 @@ import api from '../Service/api';
 
 interface Personnel {
   id: number;
+  matricule: string | null;
   nom: string;
   prenom: string;
   tel: string;
@@ -351,7 +352,7 @@ const GestionPersonnels: React.FC = () => {
                       key={personnel.id} 
                       ref={index === displayedPersonnels.length - 1 ? lastRowRef : null}
                     >
-                      <td className="matricule">#{personnel.id}</td>
+                      <td className="matricule">{personnel.matricule || '-'}</td>
                       <td className="name">{personnel.nom} {personnel.prenom}</td>
                       <td>{personnel.numero_cin}</td>
                       <td>{personnel.tel || '-'}</td>

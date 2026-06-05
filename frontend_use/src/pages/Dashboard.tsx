@@ -375,7 +375,7 @@ const Dashboard: React.FC = () => {
             <tbody>
               {stats.recents.map((p: any) => (
                 <tr key={p.id}>
-                  <td className="matricule">#{p.id}</td>
+                  <td className="matricule">{p.matricule || '-'}</td>
                   <td className="name">{p.nom}</td>
                   <td>{p.prenom}</td>
                   <td>{p.poste || '-'}</td>

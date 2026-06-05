@@ -14,8 +14,10 @@ const MainLayout: React.FC = () => {
 
   return (
     <div className="dashboard-container">
-      <Sidebar className={isSidebarOpen ? 'open' : ''} onClose={() => setIsSidebarOpen(false)} />
-      {isSidebarOpen && <div className="sidebar-overlay" onClick={() => setIsSidebarOpen(false)}></div>}
+      <Sidebar 
+        isMobileOpen={isSidebarOpen} 
+        onMobileClose={() => setIsSidebarOpen(false)} 
+      />
       <Header onMenuClick={handleMenuClick} />
       <main className="main-content">
         <Outlet />
