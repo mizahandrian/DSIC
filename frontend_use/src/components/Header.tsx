@@ -40,10 +40,16 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   }, [user]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/login');
-  };
+  // ✅ Sauvegarder les données modifiées avec une clé par email
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  if (currentUser.email) {
+    localStorage.setItem(`profile_${currentUser.email}`, JSON.stringify(currentUser));
+  }
+
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  navigate('/login');
+};
 
   const getUserInitial = () => {
     if (user.prenom && user.name) {

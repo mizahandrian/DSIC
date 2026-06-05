@@ -21,16 +21,23 @@ const Login: React.FC = () => {
     try {
       const response = await api.post('/login', { email, password });
       
-      // Nettoyer les anciennes données
-      localStorage.clear();
+  
       
       // Stocker les nouvelles données
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
       }
       if (response.data.user) {
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-      }
+  const email = response.data.user.email;
+
+  // ✅ Récupérer les modifications sauvegardées pour cet email
+  const savedProfile = JSON.parse(localStorage.getItem(`profile_${email}`) || '{}');
+
+  // Fusionner : modifications sauvegardées prennent priorité
+  const mergedUser = { ...response.data.user, ...savedProfile };
+
+  localStorage.setItem('user', JSON.stringify(mergedUser));
+}
       
       // Forcer la redirection avec window.location
       window.location.href = '/dashboard';

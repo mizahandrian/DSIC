@@ -17,6 +17,24 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import '../style/profile.css';
 
+const compressImage = (file: File, maxWidth = 100): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const scale = maxWidth / img.width;
+      canvas.width = maxWidth;
+      canvas.height = img.height * scale;
+      canvas.getContext('2d')?.drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL('image/jpeg', 0.4)); // qualité 40%, très léger
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+};
+
 interface UserProfile {
   id?: number;
   name: string;
@@ -58,44 +76,32 @@ const Profile: React.FC = () => {
   }, []);
 
   const loadUserData = () => {
-    setLoading(true);
-    try {
-      // Récupérer depuis localStorage (ce qui vient de votre API après connexion)
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      
-      setProfile({
-        name: user.name || user.nom || 'Martin',
-        prenom: user.prenom || 'Thomas',
-        email: user.email || 'thomas.martin@entreprise.com',
-        phone: user.phone || user.telephone || '+33 6 12 34 56 78',
-        sexe: user.sexe || 'homme',
-        role: user.role || user.poste || 'Chef de département RH',
-        matricule: user.matricule || 'RH-2024-001',
-        direction: user.direction || 'Ressources Humaines',
-        service: user.service || 'Administration RH',
-        dateEmbauche: user.dateEmbauche || '2020-03-15',
-        avatar: user.avatar || ''
-      });
-      setFormData({
-        name: user.name || user.nom || 'Martin',
-        prenom: user.prenom || 'Thomas',
-        email: user.email || 'thomas.martin@entreprise.com',
-        phone: user.phone || user.telephone || '+33 6 12 34 56 78',
-        sexe: user.sexe || 'homme',
-        role: user.role || user.poste || 'Chef de département RH',
-        matricule: user.matricule || 'RH-2024-001',
-        direction: user.direction || 'Ressources Humaines',
-        service: user.service || 'Administration RH',
-        dateEmbauche: user.dateEmbauche || '2020-03-15',
-        avatar: user.avatar || ''
-      });
-    } catch (error) {
-      console.error('Erreur chargement profil:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  try {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
 
+    const userData = {
+      name: user.name || user.nom || '',
+      prenom: user.prenom || '',
+      email: user.email || '',
+      phone: user.phone || user.telephone || '',
+      sexe: (user.sexe as 'homme' | 'femme') || 'homme',
+      role: user.role || user.poste || '',
+      matricule: user.matricule || '',
+      direction: user.direction || '',
+      service: user.service || '',
+      dateEmbauche: user.dateEmbauche || '',
+      avatar: user.avatar || ''
+    };
+
+    setProfile(userData);
+    setFormData(userData); // ✅ même objet pour les deux
+  } catch (error) {
+    console.error('Erreur chargement profil:', error);
+  } finally {
+    setLoading(false);
+  }
+};
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -123,38 +129,30 @@ const Profile: React.FC = () => {
   };
 
   const uploadAvatar = async () => {
-    if (!avatarFile) return;
-    
-    setUploadingAvatar(true);
-    try {
-      // Simuler l'upload vers votre API
-      // const formDataUpload = new FormData();
-      // formDataUpload.append('avatar', avatarFile);
-      // const response = await userAPI.uploadAvatar(formDataUpload);
-      // const avatarUrl = response.data.avatarUrl;
-      
-      // Simulation d'upload
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const avatarUrl = formData.avatar;
-      
-      // Mettre à jour le profil avec le nouvel avatar
-      const updatedProfile = { ...profile, avatar: avatarUrl };
-      setProfile(updatedProfile);
-      
-      // Mettre à jour localStorage
-      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const updatedUser = { ...currentUser, avatar: avatarUrl };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      
-      setAvatarFile(null);
-      alert('Photo de profil mise à jour avec succès !');
-    } catch (error) {
-      console.error('Erreur upload avatar:', error);
-      alert('Erreur lors de l\'upload de la photo');
-    } finally {
-      setUploadingAvatar(false);
-    }
-  };
+  if (!avatarFile) return;
+
+  setUploadingAvatar(true);
+  try {
+    // Compression via canvas
+    const compressed = await compressImage(avatarFile, 100);
+
+    const updatedProfile = { ...profile, avatar: compressed };
+    setProfile(updatedProfile);
+    setFormData({ ...formData, avatar: compressed });
+
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    localStorage.setItem('user', JSON.stringify({ ...currentUser, avatar: compressed }));
+
+    setAvatarFile(null);
+    alert('Photo de profil mise à jour avec succès !');
+  } catch (error) {
+    console.error('Erreur upload avatar:', error);
+    alert('Erreur lors de l\'upload de la photo');
+  } finally {
+    setUploadingAvatar(false);
+  }
+};
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
