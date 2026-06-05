@@ -793,23 +793,34 @@ body.dark-mode .form-group select {
 
 /* Ajoutez à la fin de gestion-personnels.css */
 
-.badge-code {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  background: #f1f5f9;
-  border-radius: 6px;
-  font-size: 0.7rem;
-  font-weight: 500;
-  color: #475569;
+/* En-tête du tableau - gris clair */
+.data-table th {
+  background: #e8edf2;
+  color: #334155;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid #d1d9e6;
+}
+
+/* Style pour les cellules de codes (corps, indice, grade) */
+.code-cell {
   font-family: monospace;
+  font-weight: 500;
+  color: #4a5b6e;
+  background: #f8fafc;
 }
 
-.full-width {
-  grid-column: span 2;
+/* Dark mode pour l'en-tête */
+body.dark-mode .data-table th {
+  background: #2d3a48;
+  color: #cbd5e1;
+  border-bottom-color: #3d4a5a;
 }
 
-/* Dark mode */
-body.dark-mode .badge-code {
-  background: #334155;
+body.dark-mode .code-cell {
+  background: #1e293b;
   color: #94a3b8;
 }

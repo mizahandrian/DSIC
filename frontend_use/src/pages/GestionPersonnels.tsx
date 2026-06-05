@@ -8,7 +8,7 @@ import {
   faUserCheck, faUserTimes, faVenusMars,
   faIdCard, faPhone, faCalendarAlt,
   faBuilding, faBriefcase, faUserTie, faSave, faTimes,
-  faPen, faSpinner, faTag, faLayerGroup, faGraduationCap, faMapMarkerAlt
+  faPen, faSpinner, faTag, faLayerGroup, faGraduationCap
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 
@@ -31,12 +31,11 @@ interface Personnel {
   service?: string | null;
   poste?: string | null;
   etat?: string | null;
-  // Nouveaux champs
-  corps_code?: string | null;
+  // Champs de carrière (venant du recrutement)
+  categorie?: string | null;
+  corps?: string | null;
   indice?: string | null;
-  grade_code?: string | null;
-  region_code?: string | null;
-  region_libelle?: string | null;
+  grade?: string | null;
 }
 
 interface Direction {
@@ -112,11 +111,11 @@ const GestionPersonnels: React.FC = () => {
         direction: p.direction?.nom_direction ?? null,
         service: p.service?.nom_service ?? null,
         etat: p.etat ?? null,
-        corps_code: p.corps_code ?? null,
+        // Récupération des champs de carrière
+        categorie: p.categorie ?? null,
+        corps: p.corps ?? null,
         indice: p.indice ?? null,
-        grade_code: p.grade_code ?? null,
-        region_code: p.region_code ?? null,
-        region_libelle: p.region_libelle ?? null,
+        grade: p.grade ?? null,
       }));
       setPersonnels(mappedData);
       setHasMore(false);
@@ -160,12 +159,13 @@ const GestionPersonnels: React.FC = () => {
     
     if (searchTerm) {
       filtered = filtered.filter(p => 
-        p.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.numero_cin.includes(searchTerm) ||
-        p.id.toString().includes(searchTerm) ||
-        (p.corps_code && p.corps_code.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (p.grade_code && p.grade_code.toLowerCase().includes(searchTerm.toLowerCase()))
+        p.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.prenom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.numero_cin?.includes(searchTerm) ||
+        p.id?.toString().includes(searchTerm) ||
+        p.matricule?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.corps?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.grade?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -210,11 +210,9 @@ const GestionPersonnels: React.FC = () => {
     setEditFormData({
       ...personnel,
       poste: personnel.poste || '',
-      corps_code: personnel.corps_code || '',
+      corps: personnel.corps || '',
       indice: personnel.indice || '',
-      grade_code: personnel.grade_code || '',
-      region_code: personnel.region_code || '',
-      region_libelle: personnel.region_libelle || '',
+      grade: personnel.grade || '',
     });
     setIsEditing(false);
     if (personnel.id_direction) {
@@ -262,12 +260,13 @@ const GestionPersonnels: React.FC = () => {
   };
 
   const exportToCSV = () => {
-    const headers = ['ID', 'Nom', 'Prénom', 'CIN', 'Téléphone', 'Genre', 'Direction', 'Service', 'Poste', 'Date entrée', 'Statut', 'Code Corps', 'Indice', 'Grade', 'Région'];
+    const headers = ['ID', 'Matricule', 'Nom', 'Prénom', 'CIN', 'Téléphone', 'Genre', 'Direction', 'Service', 'Poste', 'Corps', 'Indice', 'Grade', 'Date entrée', 'Statut'];
     const csvData = filteredPersonnels.map(p => [
-      p.id, p.nom, p.prenom, p.numero_cin, p.tel, p.genre === 'M' ? 'Masculin' : 'Féminin',
+      p.id, p.matricule || '-', p.nom, p.prenom, p.numero_cin, p.tel || '-', 
+      p.genre === 'M' ? 'Masculin' : 'Féminin',
       p.direction || '-', p.service || '-', p.poste || '-',
-      new Date(p.date_entree).toLocaleDateString('fr-FR'), p.etat || 'Actif',
-      p.corps_code || '-', p.indice || '-', p.grade_code || '-', p.region_libelle || p.region_code || '-'
+      p.corps || '-', p.indice || '-', p.grade || '-',
+      new Date(p.date_entree).toLocaleDateString('fr-FR'), p.etat || 'Actif'
     ]);
     const csvContent = [headers, ...csvData].map(row => row.join(',')).join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -322,7 +321,7 @@ const GestionPersonnels: React.FC = () => {
           <FontAwesomeIcon icon={faSearch} className="search-icon" />
           <input
             type="text"
-            placeholder="Rechercher par nom, prénom, CIN, corps, grade..."
+            placeholder="Rechercher par nom, prénom, CIN, matricule, corps, grade..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -352,7 +351,7 @@ const GestionPersonnels: React.FC = () => {
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th onClick={() => handleSort('id')}>Matricule {getSortIcon('id')}</th>
+                    <th onClick={() => handleSort('matricule')}>Matricule {getSortIcon('matricule')}</th>
                     <th onClick={() => handleSort('nom')}>Nom complet {getSortIcon('nom')}</th>
                     <th onClick={() => handleSort('numero_cin')}>CIN {getSortIcon('numero_cin')}</th>
                     <th>Téléphone</th>
@@ -360,10 +359,9 @@ const GestionPersonnels: React.FC = () => {
                     <th>Direction</th>
                     <th>Service</th>
                     <th>Poste</th>
-                    <th>Code Corps</th>
+                    <th>Corps</th>
                     <th>Indice</th>
                     <th>Grade</th>
-                    <th>Région</th>
                     <th onClick={() => handleSort('date_entree')}>Date entrée {getSortIcon('date_entree')}</th>
                     <th>Statut</th>
                     <th>Actions</th>
@@ -375,7 +373,7 @@ const GestionPersonnels: React.FC = () => {
                       key={personnel.id} 
                       ref={index === displayedPersonnels.length - 1 ? lastRowRef : null}
                     >
-                      <td className="matricule">{personnel.matricule || personnel.id || '-'}</td>
+                      <td className="matricule">{personnel.matricule || `#${personnel.id}`}</td>
                       <td className="name">{personnel.nom} {personnel.prenom}</td>
                       <td>{personnel.numero_cin}</td>
                       <td>{personnel.tel || '-'}</td>
@@ -383,10 +381,9 @@ const GestionPersonnels: React.FC = () => {
                       <td>{personnel.direction || '-'}</td>
                       <td>{personnel.service || '-'}</td>
                       <td>{personnel.poste || '-'}</td>
-                      <td><span className="badge-code">{personnel.corps_code || '-'}</span></td>
-                      <td>{personnel.indice || '-'}</td>
-                      <td>{personnel.grade_code || '-'}</td>
-                      <td>{personnel.region_libelle || personnel.region_code || '-'}</td>
+                      <td className="code-cell">{personnel.corps || '-'}</td>
+                      <td className="code-cell">{personnel.indice || '-'}</td>
+                      <td className="code-cell">{personnel.grade || '-'}</td>
                       <td>{new Date(personnel.date_entree).toLocaleDateString('fr-FR')}</td>
                       <td>
                         <span className={`status ${personnel.etat === 'Actif' ? 'status-active' : 'status-inactive'}`}>
@@ -515,8 +512,8 @@ const GestionPersonnels: React.FC = () => {
                       <span>{selectedPersonnel.poste || '-'}</span>
                     </div>
                     <div className="detail">
-                      <label><FontAwesomeIcon icon={faTag} /> Code Corps</label>
-                      <span>{selectedPersonnel.corps_code || '-'}</span>
+                      <label><FontAwesomeIcon icon={faTag} /> Corps</label>
+                      <span>{selectedPersonnel.corps || '-'}</span>
                     </div>
                     <div className="detail">
                       <label><FontAwesomeIcon icon={faLayerGroup} /> Indice</label>
@@ -524,11 +521,7 @@ const GestionPersonnels: React.FC = () => {
                     </div>
                     <div className="detail">
                       <label><FontAwesomeIcon icon={faGraduationCap} /> Grade</label>
-                      <span>{selectedPersonnel.grade_code || '-'}</span>
-                    </div>
-                    <div className="detail">
-                      <label><FontAwesomeIcon icon={faMapMarkerAlt} /> Région</label>
-                      <span>{selectedPersonnel.region_libelle || selectedPersonnel.region_code || '-'}</span>
+                      <span>{selectedPersonnel.grade || '-'}</span>
                     </div>
                     <div className="detail">
                       <label>Motif entrée</label>
@@ -540,25 +533,29 @@ const GestionPersonnels: React.FC = () => {
                 <div className="edit-form">
                   <div className="form-row">
                     <div className="form-group">
+                      <label>Matricule</label>
+                      <input type="text" name="matricule" value={editFormData.matricule || ''} onChange={handleEditChange} placeholder="Ex: RH-001" />
+                    </div>
+                    <div className="form-group">
                       <label>Nom *</label>
                       <input type="text" name="nom" value={editFormData.nom || ''} onChange={handleEditChange} />
                     </div>
+                  </div>
+                  <div className="form-row">
                     <div className="form-group">
                       <label>Prénom *</label>
                       <input type="text" name="prenom" value={editFormData.prenom || ''} onChange={handleEditChange} />
                     </div>
-                  </div>
-                  <div className="form-row">
                     <div className="form-group">
                       <label>CIN *</label>
                       <input type="text" name="numero_cin" value={editFormData.numero_cin || ''} onChange={handleEditChange} />
                     </div>
+                  </div>
+                  <div className="form-row">
                     <div className="form-group">
                       <label>Téléphone</label>
                       <input type="tel" name="tel" value={editFormData.tel || ''} onChange={handleEditChange} />
                     </div>
-                  </div>
-                  <div className="form-row">
                     <div className="form-group">
                       <label>Genre *</label>
                       <select name="genre" value={editFormData.genre || 'M'} onChange={handleEditChange}>
@@ -566,22 +563,22 @@ const GestionPersonnels: React.FC = () => {
                         <option value="F">Féminin</option>
                       </select>
                     </div>
+                  </div>
+                  <div className="form-row">
                     <div className="form-group">
                       <label>Date naissance *</label>
                       <input type="date" name="date_naissance" value={editFormData.date_naissance || ''} onChange={handleEditChange} />
                     </div>
-                  </div>
-                  <div className="form-row">
                     <div className="form-group">
                       <label>Date entrée *</label>
                       <input type="date" name="date_entree" value={editFormData.date_entree || ''} onChange={handleEditChange} />
                     </div>
+                  </div>
+                  <div className="form-row">
                     <div className="form-group">
                       <label>Motif entrée</label>
                       <input type="text" name="motif_entree" value={editFormData.motif_entree || ''} onChange={handleEditChange} />
                     </div>
-                  </div>
-                  <div className="form-row">
                     <div className="form-group">
                       <label>Direction *</label>
                       <select name="id_direction" value={editFormData.id_direction || ''} onChange={handleEditChange}>
@@ -589,6 +586,8 @@ const GestionPersonnels: React.FC = () => {
                         {directions.map(d => <option key={d.id_direction} value={d.id_direction}>{d.nom_direction}</option>)}
                       </select>
                     </div>
+                  </div>
+                  <div className="form-row">
                     <div className="form-group">
                       <label>Service *</label>
                       <select name="id_service" value={editFormData.id_service || ''} onChange={handleEditChange}>
@@ -596,25 +595,16 @@ const GestionPersonnels: React.FC = () => {
                         {services.map(s => <option key={s.id_service} value={s.id_service}>{s.nom_service}</option>)}
                       </select>
                     </div>
-                  </div>
-                  <div className="form-row">
                     <div className="form-group">
                       <label>Poste *</label>
                       <input type="text" name="poste" value={editFormData.poste || ''} onChange={handleEditChange} />
                     </div>
-                    <div className="form-group">
-                      <label>État *</label>
-                      <select name="etat" value={editFormData.etat || 'Actif'} onChange={handleEditChange}>
-                        <option value="Actif">Actif</option>
-                        <option value="Inactif">Inactif</option>
-                      </select>
-                    </div>
                   </div>
-                  {/* Nouveaux champs pour Corps, Indice, Grade, Région */}
+                  {/* Champs carrière */}
                   <div className="form-row">
                     <div className="form-group">
-                      <label><FontAwesomeIcon icon={faTag} /> Code Corps</label>
-                      <input type="text" name="corps_code" value={editFormData.corps_code || ''} onChange={handleEditChange} placeholder="Ex: 01, 02..." />
+                      <label><FontAwesomeIcon icon={faTag} /> Corps</label>
+                      <input type="text" name="corps" value={editFormData.corps || ''} onChange={handleEditChange} placeholder="Ex: Ingénieur, Technicien..." />
                     </div>
                     <div className="form-group">
                       <label><FontAwesomeIcon icon={faLayerGroup} /> Indice</label>
@@ -623,18 +613,15 @@ const GestionPersonnels: React.FC = () => {
                   </div>
                   <div className="form-row">
                     <div className="form-group">
-                      <label><FontAwesomeIcon icon={faGraduationCap} /> Grade Code</label>
-                      <input type="text" name="grade_code" value={editFormData.grade_code || ''} onChange={handleEditChange} placeholder="Ex: ING-PR, TECH-SUP..." />
+                      <label><FontAwesomeIcon icon={faGraduationCap} /> Grade</label>
+                      <input type="text" name="grade" value={editFormData.grade || ''} onChange={handleEditChange} placeholder="Ex: Principal, Supérieur..." />
                     </div>
                     <div className="form-group">
-                      <label><FontAwesomeIcon icon={faMapMarkerAlt} /> Région Code</label>
-                      <input type="text" name="region_code" value={editFormData.region_code || ''} onChange={handleEditChange} placeholder="Ex: 01, 02, 03..." />
-                    </div>
-                  </div>
-                  <div className="form-row">
-                    <div className="form-group full-width">
-                      <label><FontAwesomeIcon icon={faMapMarkerAlt} /> Région Libellé</label>
-                      <input type="text" name="region_libelle" value={editFormData.region_libelle || ''} onChange={handleEditChange} placeholder="Ex: Analamanga, Atsinanana..." />
+                      <label>État *</label>
+                      <select name="etat" value={editFormData.etat || 'Actif'} onChange={handleEditChange}>
+                        <option value="Actif">Actif</option>
+                        <option value="Inactif">Inactif</option>
+                      </select>
                     </div>
                   </div>
                 </div>
