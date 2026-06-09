@@ -17,6 +17,7 @@ interface SituationPersonnel {
   id_personnel: number;
   personnel_nom?: string;
   personnel_prenom?: string;
+  personnel_matricule?: string;
   statut_administratif: 'fonctionnaire' | 'prive';
   provenance: string;
   destination: string;
@@ -37,7 +38,7 @@ const SituationPersonnels: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingSituation, setEditingSituation] = useState<SituationPersonnel | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<SituationPersonnel | null>(null);
-  const [personnels, setPersonnels] = useState<{ id: number; nom: string; prenom: string; statut_administratif?: string }[]>([]);
+  const [personnels, setPersonnels] = useState<{ id: number; nom: string; prenom: string; matricule?: string; statut_administratif?: string }[]>([]);
   
   // États pour les notifications popup
   const [showNotificationModal, setShowNotificationModal] = useState(false);
@@ -55,6 +56,8 @@ const SituationPersonnels: React.FC = () => {
     type_mobilite: 'formation',
     commentaire: ''
   });
+
+  const [matriculeAffiche, setMatriculeAffiche] = useState('');
 
   useEffect(() => {
     fetchSituations();
@@ -182,8 +185,9 @@ const SituationPersonnels: React.FC = () => {
     setLoading(true);
     try {
       const response = await api.get('/situation-personnels');
+      console.log('data reçue:', response.data[0])
       setSituations(response.data);
-      setNotificationChecked(false);
+      // setNotificationChecked(false);
     } catch (error) {
       console.error('Erreur:', error);
     } finally {
@@ -198,6 +202,7 @@ const SituationPersonnels: React.FC = () => {
         id: p.id,
         nom: p.nom,
         prenom: p.prenom,
+        matricule: p.matricule,   
         statut_administratif: p.statut_administratif || 'fonctionnaire'
       })));
     } catch (error) {
@@ -223,6 +228,10 @@ const SituationPersonnels: React.FC = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'id_personnel') {
+    const selected = personnels.find(p => p.id === Number(value));
+    setMatriculeAffiche(selected?.matricule || '');
+  }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -258,6 +267,7 @@ const SituationPersonnels: React.FC = () => {
 
   const openAddModal = () => {
     setEditingSituation(null);
+    setMatriculeAffiche('');
     setFormData({
       id_personnel: '',
       statut_administratif: 'fonctionnaire',
@@ -273,6 +283,7 @@ const SituationPersonnels: React.FC = () => {
 
   const openEditModal = (situation: SituationPersonnel) => {
     setEditingSituation(situation);
+    setMatriculeAffiche(situation.personnel_matricule || '');
     setFormData({
       id_personnel: situation.id_personnel.toString(),
       statut_administratif: situation.statut_administratif || 'fonctionnaire',
@@ -502,7 +513,8 @@ const SituationPersonnels: React.FC = () => {
                     
                     return (
                       <tr key={situation.id_disposition} className={isExpired ? 'expired-row' : isNearExpiry ? 'near-expiry-row' : ''}>
-                        <td className="id-cell">#{situation.id_disposition}</td>
+                        <td className="id-cell">
+                          {situation.personnel_matricule || '—'}</td>
                         <td className="name-cell">
                           {situation.personnel_prenom} {situation.personnel_nom}
                         </td>
@@ -617,6 +629,21 @@ const SituationPersonnels: React.FC = () => {
                       ))}
                     </select>
                   </div>
+                  <div className="form-group">
+    <label><FontAwesomeIcon icon={faUserCheck} /> Matricule</label>
+    <input
+      type="text"
+      value={matriculeAffiche}
+      readOnly
+      placeholder="Sélectionner un personnel"
+      style={{ 
+        backgroundColor: '#f1f5f9', 
+        cursor: 'not-allowed',
+        fontWeight: '600',
+        color: '#334155'
+      }}
+    />
+  </div>
                   <div className="form-group">
                     <label><FontAwesomeIcon icon={faUserTag} /> Statut administratif *</label>
                     <select name="statut_administratif" value={formData.statut_administratif} onChange={handleInputChange} required>
