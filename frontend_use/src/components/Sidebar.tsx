@@ -1,5 +1,5 @@
 // src/components/Sidebar.tsx
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
@@ -11,20 +11,17 @@ import {
   faBriefcase,
   faBuilding,
   faCog,
-  faChevronLeft,
-  faChevronRight,
-  faUserCircle
+  faUserCircle,
+  faExchangeAlt
 } from '@fortawesome/free-solid-svg-icons';
 import logoInstat from '../assets/image/Logo-INSTAT.png';
 
 interface SidebarProps {
-  isCollapsed?: boolean;
-  onToggle?: () => void;
   isMobileOpen?: boolean;
   onMobileClose?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, onToggle, isMobileOpen = false, onMobileClose }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen = false, onMobileClose }) => {
   const menuItems = [
     { path: '/dashboard', name: 'Tableau de bord', icon: faTachometerAlt },
     { path: '/super-admin', name: 'Super Admin', icon: faUserShield },
@@ -32,6 +29,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, onToggle, isMobi
     { path: '/gestion-personnels', name: 'Liste des personnels', icon: faList },
     { path: '/gestion-directions', name: 'Directions', icon: faBuilding },
     { path: '/gestion-services', name: 'Services', icon: faBriefcase },
+    { path: '/situation-personnels', name: 'Situation', icon: faExchangeAlt },
     { path: '/base-rohi', name: 'Base ROHI', icon: faDatabase },
     { path: '/base-augure', name: 'Base AUGURE', icon: faDatabase },
     { path: '/settings', name: 'Paramètres', icon: faCog },
@@ -39,23 +37,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, onToggle, isMobi
 
   return (
     <>
-      <div className={`sidebar ${isCollapsed ? 'collapsed' : ''} ${isMobileOpen ? 'open' : ''}`}>
+      <div className={`sidebar ${isMobileOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <div className={`sidebar-logo ${isCollapsed ? 'collapsed' : ''}`}>
+          <div className="sidebar-logo">
             <img src={logoInstat} alt="INSTAT" />
           </div>
-          {!isCollapsed && (
-            <>
-              <h2>INSTAT Madagascar</h2>
-              <p>Gestion RH</p>
-            </>
-          )}
-          {/* <button className="sidebar-toggle" onClick={onToggle}>
-            <FontAwesomeIcon icon={isCollapsed ? faChevronRight : faChevronLeft} />
-          </button> */}
+          <div className="sidebar-brand">
+            <h2>INSTAT Madagascar</h2>
+            <p>Gestion RH</p>
+          </div>
         </div>
-        
-        <nav className="sidebar-nav">
+
+        <div className="sidebar-nav">
           {menuItems.map((item) => (
             <NavLink
               key={item.path}
@@ -63,11 +56,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, onToggle, isMobi
               className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
               onClick={onMobileClose}
             >
-              <FontAwesomeIcon icon={item.icon} className="nav-icon" />
+              <div className="nav-icon">
+                <FontAwesomeIcon icon={item.icon} />
+              </div>
               <span className="nav-text">{item.name}</span>
             </NavLink>
           ))}
-        </nav>
+        </div>
       </div>
       {isMobileOpen && <div className="sidebar-overlay" onClick={onMobileClose}></div>}
     </>

@@ -155,29 +155,29 @@ const Profile: React.FC = () => {
 
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
+  
+  try {
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const updatedUser = { ...currentUser, ...formData };
     
-    try {
-      // Mettre à jour via votre API
-      // await userAPI.updateProfile(formData);
-      
-      // Mettre à jour localStorage
-      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const updatedUser = { ...currentUser, ...formData };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      
-      setProfile(formData);
-      setIsEditing(false);
-      
-      alert('Profil mis à jour avec succès');
-    } catch (error) {
-      console.error('Erreur mise à jour:', error);
-      alert('Erreur lors de la mise à jour');
-    } finally {
-      setLoading(false);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    
+    // ✅ Sauvegarder aussi dans profile_${email} immédiatement
+    if (updatedUser.email) {
+      localStorage.setItem(`profile_${updatedUser.email}`, JSON.stringify(updatedUser));
     }
-  };
+    
+    setProfile(formData);
+    setIsEditing(false);
+    alert('Profil mis à jour avec succès');
+  } catch (error) {
+    alert('Erreur lors de la mise à jour');
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (loading) {
     return (

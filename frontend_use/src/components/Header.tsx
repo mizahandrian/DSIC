@@ -1,8 +1,9 @@
-// src/components/Header.tsx - Ajouter un bouton hamburger
+// src/components/Header.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSignOutAlt, faUser, faBars } from '@fortawesome/free-solid-svg-icons';
+import NotificationBell from './NotificationBell';
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -15,17 +16,14 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
     return JSON.parse(localStorage.getItem('user') || '{}');
   });
 
-  // Écouter les changements dans localStorage pour mettre à jour l'avatar
   useEffect(() => {
     const handleStorageChange = () => {
       const updatedUser = JSON.parse(localStorage.getItem('user') || '{}');
       setUser(updatedUser);
     };
 
-    // Écouter les changements de localStorage
     window.addEventListener('storage', handleStorageChange);
     
-    // Vérifier périodiquement les changements (pour les mises à jour dans la même page)
     const interval = setInterval(() => {
       const updatedUser = JSON.parse(localStorage.getItem('user') || '{}');
       if (JSON.stringify(updatedUser) !== JSON.stringify(user)) {
@@ -40,16 +38,14 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   }, [user]);
 
   const handleLogout = () => {
-  // ✅ Sauvegarder les données modifiées avec une clé par email
-  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-  if (currentUser.email) {
-    localStorage.setItem(`profile_${currentUser.email}`, JSON.stringify(currentUser));
-  }
-
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  navigate('/login');
-};
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    if (currentUser.email) {
+      localStorage.setItem(`profile_${currentUser.email}`, JSON.stringify(currentUser));
+    }
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
 
   const getUserInitial = () => {
     if (user.prenom && user.name) {
@@ -61,11 +57,9 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   };
 
   const getUserAvatar = () => {
-    // Si l'utilisateur a un avatar, l'afficher
     if (user.avatar) {
       return <img src={user.avatar} alt="Avatar" className="user-avatar-img" />;
     }
-    // Sinon afficher les initiales
     return <div className="user-avatar-initials">{getUserInitial()}</div>;
   };
 
@@ -76,6 +70,13 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         <FontAwesomeIcon icon={faBars} />
       </button>
 
+      {/* Espace vide pour pousser la notification et le profil à droite */}
+      <div style={{ flex: 1 }}></div>
+
+      {/* Notification Bell - à côté du profil */}
+      <NotificationBell />
+
+      {/* Menu utilisateur */}
       <div className="header-user" onClick={() => setDropdownOpen(!dropdownOpen)}>
         <div className="user-avatar">
           {getUserAvatar()}

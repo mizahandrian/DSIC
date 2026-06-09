@@ -22,6 +22,7 @@ import {
   faSpinner
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
+import '../style/dashboard.css';
 
 ChartJS.register(
   CategoryScale,
@@ -115,8 +116,8 @@ const Dashboard: React.FC = () => {
       {
         label: 'Personnels',
         data: stats.directionsData.map(d => d.count),
-        backgroundColor: '#4f46e5',
-        borderColor: '#4338ca',
+        backgroundColor: '#11212D',
+        borderColor: '#11212D',
         borderWidth: 1,
         borderRadius: 8,
         barPercentage: 0.65,
@@ -152,17 +153,17 @@ const Dashboard: React.FC = () => {
       y: {
         beginAtZero: true,
         grid: { color: '#e2e8f0' },
-        ticks: { color: '#64748b', stepSize: 1 },
+        ticks: { color: '#06141B', stepSize: 1 },
         title: {
           display: true,
           text: 'Nombre de personnels',
-          color: '#64748b',
+          color: '#06141B',
           font: { size: 11 },
         },
       },
       x: {
         grid: { display: false },
-        ticks: { color: '#64748b', font: { size: 11 } },
+        ticks: { color: '#06141B', font: { size: 11 } },
       },
     },
   };
@@ -179,10 +180,10 @@ const Dashboard: React.FC = () => {
       {
         label: 'Effectifs',
         data: evolutionData,
-        borderColor: '#4f46e5',
+        borderColor: '#06141B',
         backgroundColor: 'rgba(79, 70, 229, 0.05)',
         borderWidth: 2,
-        pointBackgroundColor: '#4f46e5',
+        pointBackgroundColor: '#11212D',
         pointBorderColor: '#ffffff',
         pointBorderWidth: 2,
         pointRadius: 4,
@@ -201,7 +202,7 @@ const Dashboard: React.FC = () => {
         position: 'top' as const,
         labels: {
           font: { size: 11 },
-          color: '#64748b',
+          color: '#11212D',
           boxWidth: 10,
           usePointStyle: true,
           pointStyle: 'circle',
@@ -220,32 +221,32 @@ const Dashboard: React.FC = () => {
       y: {
         beginAtZero: true,
         grid: { color: '#e2e8f0' },
-        ticks: { color: '#64748b', stepSize: 10 },
+        ticks: { color: '#06141B', stepSize: 10 },
         title: {
           display: true,
           text: 'Nombre de personnels',
-          color: '#64748b',
+          color: '#06141B',
           font: { size: 11 },
         },
       },
       x: {
         grid: { display: false },
-        ticks: { color: '#64748b', font: { size: 11 } },
+        ticks: { color: '#06141B', font: { size: 11 } },
       },
     },
   };
 
   const statCards = [
-    { title: 'Personnels', value: stats.totalPersonnels, icon: faUsers, color: '#4f46e5', bg: '#e0e7ff' },
-    { title: 'Directions', value: stats.totalDirections, icon: faBuilding, color: '#4f46e5', bg: '#e0e7ff' },
-    { title: 'Services', value: stats.totalServices, icon: faBriefcase, color: '#4f46e5', bg: '#e0e7ff' },
-    { title: 'Postes', value: stats.totalPostes, icon: faUserTie, color: '#4f46e5', bg: '#e0e7ff' },
+    { title: 'Personnels', value: stats.totalPersonnels, icon: faUsers, color: '#11212D', bg: '#e0e7ff' },
+    { title: 'Directions', value: stats.totalDirections, icon: faBuilding, color: '#11212D', bg: '#e0e7ff' },
+    { title: 'Services', value: stats.totalServices, icon: faBriefcase, color: '#11212D', bg: '#e0e7ff' },
+    { title: 'Postes', value: stats.totalPostes, icon: faUserTie, color: '#11212D', bg: '#e0e7ff' },
   ];
 
   const quickActions = [
     { title: 'Ajouter un personnel', icon: faUserPlus, desc: 'Nouveau recrutement', link: '/recrutement' },
     { title: 'Modifier un personnel', icon: faUserEdit, desc: 'Mettre à jour', link: '/gestion-personnels' },
-    { title: 'Gérer les statuts', icon: faUserCheck, desc: 'Actif/Inactif', link: '/gestion-personnels' },
+    { title: 'Gérer les situations', icon: faUserCheck, desc: 'Gestion des mobilités', link: '/situation-personnels' },
     { title: 'Exporter les données', icon: faFileAlt, desc: 'Rapports CSV', link: '/gestion-personnels' },
   ];
 

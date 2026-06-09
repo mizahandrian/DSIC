@@ -8,7 +8,9 @@ import {
   faUserCheck, faUserTimes, faVenusMars,
   faIdCard, faPhone, faCalendarAlt,
   faBuilding, faBriefcase, faUserTie, faSave, faTimes,
-  faPen, faSpinner, faTag, faLayerGroup, faGraduationCap
+  faPen, faSpinner, faTag, faLayerGroup, faGraduationCap,
+  faHistory, faExchangeAlt, faHome, faArrowRight, faClock,
+  faInfoCircle, faCalendar, faMapMarkerAlt
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 
@@ -31,11 +33,20 @@ interface Personnel {
   service?: string | null;
   poste?: string | null;
   etat?: string | null;
-  // Champs de carrière (venant du recrutement)
   categorie?: string | null;
   corps?: string | null;
   indice?: string | null;
   grade?: string | null;
+}
+
+interface HistoriqueMobilite {
+  id_disposition: number;
+  type_mobilite: string;
+  provenance: string;
+  destination: string;
+  date_debut: string;
+  date_fin: string;
+  statut: string;
 }
 
 interface Direction {
@@ -59,6 +70,8 @@ const GestionPersonnels: React.FC = () => {
   const [selectedPersonnel, setSelectedPersonnel] = useState<Personnel | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
+  const [showHistoriqueModal, setShowHistoriqueModal] = useState(false);
+  const [historiqueMobilites, setHistoriqueMobilites] = useState<HistoriqueMobilite[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editFormData, setEditFormData] = useState<Partial<Personnel>>({});
   const [loadingMore, setLoadingMore] = useState(false);
@@ -79,7 +92,6 @@ const GestionPersonnels: React.FC = () => {
     filterAndSortPersonnels();
   }, [personnels, searchTerm, sortField, sortDirection]);
 
-  // Infinite scroll observer
   useEffect(() => {
     if (observerRef.current) {
       observerRef.current.disconnect();
@@ -111,7 +123,6 @@ const GestionPersonnels: React.FC = () => {
         direction: p.direction?.nom_direction ?? null,
         service: p.service?.nom_service ?? null,
         etat: p.etat ?? null,
-        // Récupération des champs de carrière
         categorie: p.categorie ?? null,
         corps: p.corps ?? null,
         indice: p.indice ?? null,
@@ -124,6 +135,22 @@ const GestionPersonnels: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchHistoriquePersonnel = async (personnelId: number) => {
+    try {
+      const response = await api.get(`/situation-personnels/personnel/${personnelId}`);
+      setHistoriqueMobilites(response.data);
+    } catch (error) {
+      console.error('Erreur chargement historique:', error);
+      setHistoriqueMobilites([]);
+    }
+  };
+
+  const openHistoriqueModal = async (personnel: Personnel) => {
+    setSelectedPersonnel(personnel);
+    await fetchHistoriquePersonnel(personnel.id);
+    setShowHistoriqueModal(true);
   };
 
   const loadMore = () => {
@@ -288,6 +315,22 @@ const GestionPersonnels: React.FC = () => {
   const itemsPerPage = 20;
   const displayedPersonnels = filteredPersonnels.slice(0, page * itemsPerPage);
 
+  const getTypeMobiliteLabel = (type: string) => {
+    switch(type) {
+      case 'formation': return 'Formation';
+      case 'mission': return 'Mission';
+      case 'detachement': return 'Détachement';
+      case 'stage': return 'Stage';
+      default: return type;
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR');
+  };
+
   return (
     <div className="gestion-personnels">
       {/* Header */}
@@ -448,204 +491,335 @@ const GestionPersonnels: React.FC = () => {
         </div>
       )}
 
-      {/* View/Edit Modal */}
-      {showViewModal && selectedPersonnel && (
-        <div className="modal-overlay" onClick={() => { setShowViewModal(false); setIsEditing(false); }}>
+      {/* View Modal */}
+      {showViewModal && selectedPersonnel && !isEditing && (
+        <div className="modal-overlay" onClick={() => { setShowViewModal(false); }}>
           <div className="modal modal-large" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>
-                <FontAwesomeIcon icon={isEditing ? faPen : faUserTie} />
-                {isEditing ? 'Modifier le personnel' : 'Détails du personnel'}
+                <FontAwesomeIcon icon={faUserTie} />
+                Détails du personnel
               </h3>
-              <button className="modal-close" onClick={() => { setShowViewModal(false); setIsEditing(false); }}>✕</button>
+              <button className="modal-close" onClick={() => { setShowViewModal(false); }}>
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
             </div>
             
             <div className="modal-body">
-              {!isEditing ? (
-                <>
-                  <div className="profile-summary">
-                    <div className="avatar">
-                      <span>{selectedPersonnel.nom.charAt(0)}{selectedPersonnel.prenom.charAt(0)}</span>
-                    </div>
-                    <div>
-                      <h4>{selectedPersonnel.nom} {selectedPersonnel.prenom}</h4>
-                      <span className={`status ${selectedPersonnel.etat === 'Actif' ? 'status-active' : 'status-inactive'}`}>
-                        {selectedPersonnel.etat || 'Actif'}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="details-grid">
-                    <div className="detail">
-                      <label><FontAwesomeIcon icon={faIdCard} /> Matricule</label>
-                      <span>{selectedPersonnel.matricule || selectedPersonnel.id}</span>
-                    </div>
-                    <div className="detail">
-                      <label><FontAwesomeIcon icon={faIdCard} /> CIN</label>
-                      <span>{selectedPersonnel.numero_cin}</span>
-                    </div>
-                    <div className="detail">
-                      <label><FontAwesomeIcon icon={faPhone} /> Téléphone</label>
-                      <span>{selectedPersonnel.tel || '-'}</span>
-                    </div>
-                    <div className="detail">
-                      <label><FontAwesomeIcon icon={faVenusMars} /> Genre</label>
-                      <span>{selectedPersonnel.genre === 'M' ? 'Masculin' : 'Féminin'}</span>
-                    </div>
-                    <div className="detail">
-                      <label><FontAwesomeIcon icon={faCalendarAlt} /> Date naissance</label>
-                      <span>{new Date(selectedPersonnel.date_naissance).toLocaleDateString('fr-FR')}</span>
-                    </div>
-                    <div className="detail">
-                      <label><FontAwesomeIcon icon={faCalendarAlt} /> Date entrée</label>
-                      <span>{new Date(selectedPersonnel.date_entree).toLocaleDateString('fr-FR')}</span>
-                    </div>
-                    <div className="detail">
-                      <label><FontAwesomeIcon icon={faBuilding} /> Direction</label>
-                      <span>{selectedPersonnel.direction || '-'}</span>
-                    </div>
-                    <div className="detail">
-                      <label><FontAwesomeIcon icon={faBriefcase} /> Service</label>
-                      <span>{selectedPersonnel.service || '-'}</span>
-                    </div>
-                    <div className="detail">
-                      <label><FontAwesomeIcon icon={faUserTie} /> Poste</label>
-                      <span>{selectedPersonnel.poste || '-'}</span>
-                    </div>
-                    <div className="detail">
-                      <label><FontAwesomeIcon icon={faTag} /> Corps</label>
-                      <span>{selectedPersonnel.corps || '-'}</span>
-                    </div>
-                    <div className="detail">
-                      <label><FontAwesomeIcon icon={faLayerGroup} /> Indice</label>
-                      <span>{selectedPersonnel.indice || '-'}</span>
-                    </div>
-                    <div className="detail">
-                      <label><FontAwesomeIcon icon={faGraduationCap} /> Grade</label>
-                      <span>{selectedPersonnel.grade || '-'}</span>
-                    </div>
-                    <div className="detail">
-                      <label>Motif entrée</label>
-                      <span>{selectedPersonnel.motif_entree || '-'}</span>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="edit-form">
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Matricule</label>
-                      <input type="text" name="matricule" value={editFormData.matricule || ''} onChange={handleEditChange} placeholder="Ex: RH-001" />
-                    </div>
-                    <div className="form-group">
-                      <label>Nom *</label>
-                      <input type="text" name="nom" value={editFormData.nom || ''} onChange={handleEditChange} />
-                    </div>
-                  </div>
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Prénom *</label>
-                      <input type="text" name="prenom" value={editFormData.prenom || ''} onChange={handleEditChange} />
-                    </div>
-                    <div className="form-group">
-                      <label>CIN *</label>
-                      <input type="text" name="numero_cin" value={editFormData.numero_cin || ''} onChange={handleEditChange} />
-                    </div>
-                  </div>
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Téléphone</label>
-                      <input type="tel" name="tel" value={editFormData.tel || ''} onChange={handleEditChange} />
-                    </div>
-                    <div className="form-group">
-                      <label>Genre *</label>
-                      <select name="genre" value={editFormData.genre || 'M'} onChange={handleEditChange}>
-                        <option value="M">Masculin</option>
-                        <option value="F">Féminin</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Date naissance *</label>
-                      <input type="date" name="date_naissance" value={editFormData.date_naissance || ''} onChange={handleEditChange} />
-                    </div>
-                    <div className="form-group">
-                      <label>Date entrée *</label>
-                      <input type="date" name="date_entree" value={editFormData.date_entree || ''} onChange={handleEditChange} />
-                    </div>
-                  </div>
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Motif entrée</label>
-                      <input type="text" name="motif_entree" value={editFormData.motif_entree || ''} onChange={handleEditChange} />
-                    </div>
-                    <div className="form-group">
-                      <label>Direction *</label>
-                      <select name="id_direction" value={editFormData.id_direction || ''} onChange={handleEditChange}>
-                        <option value="">Sélectionner</option>
-                        {directions.map(d => <option key={d.id_direction} value={d.id_direction}>{d.nom_direction}</option>)}
-                      </select>
-                    </div>
-                  </div>
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Service *</label>
-                      <select name="id_service" value={editFormData.id_service || ''} onChange={handleEditChange}>
-                        <option value="">Sélectionner</option>
-                        {services.map(s => <option key={s.id_service} value={s.id_service}>{s.nom_service}</option>)}
-                      </select>
-                    </div>
-                    <div className="form-group">
-                      <label>Poste *</label>
-                      <input type="text" name="poste" value={editFormData.poste || ''} onChange={handleEditChange} />
-                    </div>
-                  </div>
-                  {/* Champs carrière */}
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label><FontAwesomeIcon icon={faTag} /> Corps</label>
-                      <input type="text" name="corps" value={editFormData.corps || ''} onChange={handleEditChange} placeholder="Ex: Ingénieur, Technicien..." />
-                    </div>
-                    <div className="form-group">
-                      <label><FontAwesomeIcon icon={faLayerGroup} /> Indice</label>
-                      <input type="text" name="indice" value={editFormData.indice || ''} onChange={handleEditChange} placeholder="Ex: 450, 430..." />
-                    </div>
-                  </div>
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label><FontAwesomeIcon icon={faGraduationCap} /> Grade</label>
-                      <input type="text" name="grade" value={editFormData.grade || ''} onChange={handleEditChange} placeholder="Ex: Principal, Supérieur..." />
-                    </div>
-                    <div className="form-group">
-                      <label>État *</label>
-                      <select name="etat" value={editFormData.etat || 'Actif'} onChange={handleEditChange}>
-                        <option value="Actif">Actif</option>
-                        <option value="Inactif">Inactif</option>
-                      </select>
-                    </div>
-                  </div>
+              <div className="profile-summary">
+                <div className="avatar">
+                  <span>{selectedPersonnel.nom.charAt(0)}{selectedPersonnel.prenom.charAt(0)}</span>
                 </div>
-              )}
+                <div>
+                  <h4>{selectedPersonnel.nom} {selectedPersonnel.prenom}</h4>
+                  <span className={`status ${selectedPersonnel.etat === 'Actif' ? 'status-active' : 'status-inactive'}`}>
+                    {selectedPersonnel.etat || 'Actif'}
+                  </span>
+                </div>
+              </div>
+              <div className="details-grid">
+                <div className="detail">
+                  <label><FontAwesomeIcon icon={faIdCard} /> Matricule</label>
+                  <span>{selectedPersonnel.matricule || selectedPersonnel.id}</span>
+                </div>
+                <div className="detail">
+                  <label><FontAwesomeIcon icon={faIdCard} /> CIN</label>
+                  <span>{selectedPersonnel.numero_cin}</span>
+                </div>
+                <div className="detail">
+                  <label><FontAwesomeIcon icon={faPhone} /> Téléphone</label>
+                  <span>{selectedPersonnel.tel || '-'}</span>
+                </div>
+                <div className="detail">
+                  <label><FontAwesomeIcon icon={faVenusMars} /> Genre</label>
+                  <span>{selectedPersonnel.genre === 'M' ? 'Masculin' : 'Féminin'}</span>
+                </div>
+                <div className="detail">
+                  <label><FontAwesomeIcon icon={faCalendarAlt} /> Date naissance</label>
+                  <span>{new Date(selectedPersonnel.date_naissance).toLocaleDateString('fr-FR')}</span>
+                </div>
+                <div className="detail">
+                  <label><FontAwesomeIcon icon={faCalendarAlt} /> Date entrée</label>
+                  <span>{new Date(selectedPersonnel.date_entree).toLocaleDateString('fr-FR')}</span>
+                </div>
+                <div className="detail">
+                  <label><FontAwesomeIcon icon={faBuilding} /> Direction</label>
+                  <span>{selectedPersonnel.direction || '-'}</span>
+                </div>
+                <div className="detail">
+                  <label><FontAwesomeIcon icon={faBriefcase} /> Service</label>
+                  <span>{selectedPersonnel.service || '-'}</span>
+                </div>
+                <div className="detail">
+                  <label><FontAwesomeIcon icon={faUserTie} /> Poste</label>
+                  <span>{selectedPersonnel.poste || '-'}</span>
+                </div>
+                <div className="detail">
+                  <label><FontAwesomeIcon icon={faTag} /> Corps</label>
+                  <span>{selectedPersonnel.corps || '-'}</span>
+                </div>
+                <div className="detail">
+                  <label><FontAwesomeIcon icon={faLayerGroup} /> Indice</label>
+                  <span>{selectedPersonnel.indice || '-'}</span>
+                </div>
+                <div className="detail">
+                  <label><FontAwesomeIcon icon={faGraduationCap} /> Grade</label>
+                  <span>{selectedPersonnel.grade || '-'}</span>
+                </div>
+                <div className="detail">
+                  <label>Motif entrée</label>
+                  <span>{selectedPersonnel.motif_entree || '-'}</span>
+                </div>
+              </div>
             </div>
 
             <div className="modal-footer">
-              {!isEditing ? (
-                <>
-                  <button className="btn-edit" onClick={handleEdit}>
-                    <FontAwesomeIcon icon={faPen} /> Modifier
-                  </button>
-                  <button className="btn-cancel" onClick={() => { setShowViewModal(false); setIsEditing(false); }}>Fermer</button>
-                </>
-              ) : (
-                <>
-                  <button className="btn-cancel" onClick={handleCancelEdit}>
-                    <FontAwesomeIcon icon={faTimes} /> Annuler
-                  </button>
-                  <button className="btn-save" onClick={handleSaveEdit}>
-                    <FontAwesomeIcon icon={faSave} /> Enregistrer
-                  </button>
-                </>
-              )}
+              <button className="btn-edit" onClick={handleEdit}>
+                <FontAwesomeIcon icon={faPen} /> Modifier
+              </button>
+              <button className="btn-history" onClick={() => openHistoriqueModal(selectedPersonnel)}>
+                <FontAwesomeIcon icon={faHistory} /> Historique
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {showViewModal && selectedPersonnel && isEditing && (
+        <div className="modal-overlay" onClick={() => { setIsEditing(false); }}>
+          <div className="modal modal-large" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>
+                <FontAwesomeIcon icon={faPen} />
+                Modifier le personnel
+              </h3>
+              <button className="modal-close" onClick={() => { setIsEditing(false); }}>
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="edit-form">
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Matricule</label>
+                    <input type="text" name="matricule" value={editFormData.matricule || ''} onChange={handleEditChange} placeholder="Ex: RH-001" />
+                  </div>
+                  <div className="form-group">
+                    <label>Nom *</label>
+                    <input type="text" name="nom" value={editFormData.nom || ''} onChange={handleEditChange} />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Prénom *</label>
+                    <input type="text" name="prenom" value={editFormData.prenom || ''} onChange={handleEditChange} />
+                  </div>
+                  <div className="form-group">
+                    <label>CIN *</label>
+                    <input type="text" name="numero_cin" value={editFormData.numero_cin || ''} onChange={handleEditChange} />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Téléphone</label>
+                    <input type="tel" name="tel" value={editFormData.tel || ''} onChange={handleEditChange} />
+                  </div>
+                  <div className="form-group">
+                    <label>Genre *</label>
+                    <select name="genre" value={editFormData.genre || 'M'} onChange={handleEditChange}>
+                      <option value="M">Masculin</option>
+                      <option value="F">Féminin</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Date naissance *</label>
+                    <input type="date" name="date_naissance" value={editFormData.date_naissance || ''} onChange={handleEditChange} />
+                  </div>
+                  <div className="form-group">
+                    <label>Date entrée *</label>
+                    <input type="date" name="date_entree" value={editFormData.date_entree || ''} onChange={handleEditChange} />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Motif entrée</label>
+                    <input type="text" name="motif_entree" value={editFormData.motif_entree || ''} onChange={handleEditChange} />
+                  </div>
+                  <div className="form-group">
+                    <label>Direction *</label>
+                    <select name="id_direction" value={editFormData.id_direction || ''} onChange={handleEditChange}>
+                      <option value="">Sélectionner</option>
+                      {directions.map(d => <option key={d.id_direction} value={d.id_direction}>{d.nom_direction}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Service *</label>
+                    <select name="id_service" value={editFormData.id_service || ''} onChange={handleEditChange}>
+                      <option value="">Sélectionner</option>
+                      {services.map(s => <option key={s.id_service} value={s.id_service}>{s.nom_service}</option>)}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Poste *</label>
+                    <input type="text" name="poste" value={editFormData.poste || ''} onChange={handleEditChange} />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label><FontAwesomeIcon icon={faTag} /> Corps</label>
+                    <input type="text" name="corps" value={editFormData.corps || ''} onChange={handleEditChange} placeholder="Ex: Ingénieur, Technicien..." />
+                  </div>
+                  <div className="form-group">
+                    <label><FontAwesomeIcon icon={faLayerGroup} /> Indice</label>
+                    <input type="text" name="indice" value={editFormData.indice || ''} onChange={handleEditChange} placeholder="Ex: 450, 430..." />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label><FontAwesomeIcon icon={faGraduationCap} /> Grade</label>
+                    <input type="text" name="grade" value={editFormData.grade || ''} onChange={handleEditChange} placeholder="Ex: Principal, Supérieur..." />
+                  </div>
+                  <div className="form-group">
+                    <label>État *</label>
+                    <select name="etat" value={editFormData.etat || 'Actif'} onChange={handleEditChange}>
+                      <option value="Actif">Actif</option>
+                      <option value="Inactif">Inactif</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn-cancel" onClick={handleCancelEdit}>
+                <FontAwesomeIcon icon={faTimes} /> Annuler
+              </button>
+              <button className="btn-save" onClick={handleSaveEdit}>
+                <FontAwesomeIcon icon={faSave} /> Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Historique Modal - Séparé */}
+      {showHistoriqueModal && selectedPersonnel && (
+        <div className="modal-overlay" onClick={() => setShowHistoriqueModal(false)}>
+          <div className="modal modal-historique" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>
+                <FontAwesomeIcon icon={faHistory} />
+                Historique complet - {selectedPersonnel.prenom} {selectedPersonnel.nom}
+              </h3>
+              <button className="modal-close" onClick={() => setShowHistoriqueModal(false)}>
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
+            </div>
+            <div className="modal-body historique-body">
+              {/* Section Informations générales du recrutement */}
+              <div className="recrutement-info">
+                <h4>
+                  <FontAwesomeIcon icon={faInfoCircle} />
+                  Informations du recrutement
+                </h4>
+                <div className="info-grid-historique">
+                  <div className="info-item">
+                    <label>Date d'entrée</label>
+                    <span>{formatDate(selectedPersonnel.date_entree)}</span>
+                  </div>
+                  <div className="info-item">
+                    <label>Motif d'entrée</label>
+                    <span>{selectedPersonnel.motif_entree || '-'}</span>
+                  </div>
+                  <div className="info-item">
+                    <label>Direction</label>
+                    <span>{selectedPersonnel.direction || '-'}</span>
+                  </div>
+                  <div className="info-item">
+                    <label>Service</label>
+                    <span>{selectedPersonnel.service || '-'}</span>
+                  </div>
+                  <div className="info-item">
+                    <label>Poste</label>
+                    <span>{selectedPersonnel.poste || '-'}</span>
+                  </div>
+                  <div className="info-item">
+                    <label>Catégorie</label>
+                    <span>{selectedPersonnel.categorie || '-'}</span>
+                  </div>
+                  <div className="info-item">
+                    <label>Corps</label>
+                    <span>{selectedPersonnel.corps || '-'}</span>
+                  </div>
+                  <div className="info-item">
+                    <label>Indice</label>
+                    <span>{selectedPersonnel.indice || '-'}</span>
+                  </div>
+                  <div className="info-item">
+                    <label>Grade</label>
+                    <span>{selectedPersonnel.grade || '-'}</span>
+                  </div>
+                  <div className="info-item">
+                    <label>Statut actuel</label>
+                    <span className={`status-badge ${selectedPersonnel.etat === 'Actif' ? 'status-active' : 'status-inactive'}`}>
+                      {selectedPersonnel.etat || 'Actif'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section Historique des mobilités */}
+              <div className="mobilites-historique">
+                <h4>
+                  <FontAwesomeIcon icon={faExchangeAlt} />
+                  Historique des mobilités
+                </h4>
+                {historiqueMobilites.length === 0 ? (
+                  <div className="no-historique">
+                    <FontAwesomeIcon icon={faHistory} />
+                    <p>Aucune mobilité enregistrée pour ce personnel</p>
+                  </div>
+                ) : (
+                  <div className="mobilites-list">
+                    {historiqueMobilites.map((mob, index) => (
+                      <div key={mob.id_disposition} className="mobilite-card">
+                        <div className="mobilite-header">
+                          <span className={`mobilite-type ${mob.type_mobilite}`}>
+                            {getTypeMobiliteLabel(mob.type_mobilite)}
+                          </span>
+                          <span className="mobilite-periode">
+                            <FontAwesomeIcon icon={faCalendar} />
+                            {formatDate(mob.date_debut)} → {formatDate(mob.date_fin)}
+                          </span>
+                        </div>
+                        <div className="mobilite-path">
+                          <div className="path-origine">
+                            <FontAwesomeIcon icon={faHome} />
+                            <span>{mob.provenance}</span>
+                          </div>
+                          <FontAwesomeIcon icon={faArrowRight} className="arrow-icon" />
+                          <div className="path-destination">
+                            <FontAwesomeIcon icon={faMapMarkerAlt} />
+                            <span>{mob.destination}</span>
+                          </div>
+                        </div>
+                        <div className="mobilite-footer">
+                          <span className={`statut-mobilite ${mob.statut}`}>
+                            {mob.statut === 'en_cours' ? 'En cours' : mob.statut === 'depasse' ? 'Dépassé' : 'Terminé'}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn-cancel" onClick={() => setShowHistoriqueModal(false)}>Fermer</button>
             </div>
           </div>
         </div>

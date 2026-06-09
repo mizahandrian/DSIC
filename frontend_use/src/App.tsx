@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AuthLayout from './components/AuthLayout';
-import MainLayout from './components/MainLayout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import SuperAdmin from './pages/SuperAdmin';
@@ -11,31 +10,19 @@ import GestionPersonnels from './pages/GestionPersonnels';
 import ForgotPassword from './pages/ForgotPassword';
 import VerifyCode from './pages/VerifyCode';
 import ResetPassword from './pages/ResetPassword';
-import api from './Service/api';
-import './style/recrutement.css';
-import './style/gestion.css';
 import GestionDirections from './pages/GestionDirections';
 import GestionServices from './pages/GestionServices';
 import BaseRohi from './pages/BaseRohi';
 import BaseAugure from './pages/BaseAugure';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
+import SituationPersonnels from './pages/SituationPersonnels';
+import Sidebar from './components/Sidebar';
+import Header from './components/Header';
+import api from './Service/api';
 
-
-// Pages temporaires (à remplacer plus tard)
-/*const SuperAdmin = () => (
-  <div style={{ padding: '24px' }}>
-    <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#1e293b', marginBottom: '8px' }}>Super Admin</h1>
-    <p style={{ color: '#64748b' }}>Gestion des utilisateurs (à venir)</p>
-  </div>
-);*/
-
-const Bases = () => (
-  <div style={{ padding: '24px' }}>
-    <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#1e293b', marginBottom: '8px' }}>Bases</h1>
-    <p style={{ color: '#64748b' }}>Base ROHI et Base AUGURE (à venir)</p>
-  </div>
-);
+import './style/recrutement.css';
+import './style/gestion.css';
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -61,43 +48,59 @@ const App: React.FC = () => {
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <div style={{ width: '40px', height: '40px', border: '2px solid #eef2f6', borderTopColor: '#10b981', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+        <div style={{ width: '40px', height: '40px', border: '2px solid #eef2f6', borderTopColor: '#4A5C6A', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
+  // Layout pour pages protégées
+  const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
+    const [isMobileOpen, setIsMobileOpen] = useState(false);
+    
+    if (!isAuthenticated) {
+      return <Navigate to="/login" replace />;
+    }
+
+    return (
+      <div className="dashboard-container">
+        <Sidebar 
+          isMobileOpen={isMobileOpen}
+          onMobileClose={() => setIsMobileOpen(false)}
+        />
+        <Header onMenuClick={() => setIsMobileOpen(!isMobileOpen)} />
+        <main className="main-content">
+          {children}
+        </main>
+      </div>
+    );
+  };
+
   return (
     <BrowserRouter>
       <Routes>
         {/* Routes publiques */}
-        <Route path="/login" element={<AuthLayout />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/verify-code" element={<VerifyCode />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<AuthLayout><Login /></AuthLayout>} />
+        <Route path="/forgot-password" element={<AuthLayout><ForgotPassword /></AuthLayout>} />
+        <Route path="/verify-code" element={<AuthLayout><VerifyCode /></AuthLayout>} />
+        <Route path="/reset-password" element={<AuthLayout><ResetPassword /></AuthLayout>} />
         
+        {/* Routes protégées */}
+        <Route path="/dashboard" element={<ProtectedLayout><Dashboard /></ProtectedLayout>} />
+        <Route path="/super-admin" element={<ProtectedLayout><SuperAdmin /></ProtectedLayout>} />
+        <Route path="/recrutement" element={<ProtectedLayout><Recrutement /></ProtectedLayout>} />
+        <Route path="/gestion-personnels" element={<ProtectedLayout><GestionPersonnels /></ProtectedLayout>} />
+        <Route path="/gestion-directions" element={<ProtectedLayout><GestionDirections /></ProtectedLayout>} />
+        <Route path="/gestion-services" element={<ProtectedLayout><GestionServices /></ProtectedLayout>} />
+        <Route path="/base-rohi" element={<ProtectedLayout><BaseRohi /></ProtectedLayout>} />
+        <Route path="/base-augure" element={<ProtectedLayout><BaseAugure /></ProtectedLayout>} />
+        <Route path="/profile" element={<ProtectedLayout><Profile /></ProtectedLayout>} />
+        <Route path="/settings" element={<ProtectedLayout><Settings /></ProtectedLayout>} />
+        <Route path="/situation-personnels" element={<ProtectedLayout><SituationPersonnels /></ProtectedLayout>} />
         
-        {/* Routes protégées avec layout principal */}
-        <Route element={isAuthenticated ? <MainLayout /> : <Navigate to="/login" />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/super-admin" element={<SuperAdmin />} />
-          <Route path="/recrutement" element={<Recrutement />} />
-          <Route path="/gestion-personnels" element={<GestionPersonnels />} />
-          <Route path="/bases" element={<Bases />} />
-          <Route path="/" element={<Navigate to="/dashboard" />} />
-          <Route path="/gestion-directions" element={<GestionDirections />} />
-          <Route path="/gestion-services" element={<GestionServices />} />
-          <Route path="/base-rohi" element ={<BaseRohi/>}/>
-          <Route path="/base-augure" element ={<BaseAugure/>}/>
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/settings" element={<Settings />} />
-          
-          
-        </Route>
-        
-        {/* Redirection par défaut */}
-        <Route path="*" element={<Navigate to="/login" />} />
+        {/* Redirections */}
+        <Route path="/" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />
+        <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />
       </Routes>
     </BrowserRouter>
   );
