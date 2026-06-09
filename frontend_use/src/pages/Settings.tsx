@@ -32,6 +32,13 @@ const Settings: React.FC = () => {
       setSmsNotifications(settings.smsNotifications || false);
       setTwoFactor(settings.twoFactor || false);
     }
+    
+    // Appliquer le mode sombre au chargement
+    if (darkMode) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
   }, []);
 
   // Sauvegarder les préférences
@@ -39,6 +46,25 @@ const Settings: React.FC = () => {
     const currentSettings = JSON.parse(localStorage.getItem('userSettings') || '{}');
     const newSettings = { ...currentSettings, [key]: value };
     localStorage.setItem('userSettings', JSON.stringify(newSettings));
+    
+    // Mettre à jour la variable globale pour les notifications
+    if (key === 'notifications' || key === 'emailNotifications' || key === 'smsNotifications') {
+      updateGlobalNotificationSettings();
+    }
+  };
+
+  // Mettre à jour les paramètres globaux des notifications
+  const updateGlobalNotificationSettings = () => {
+    const savedSettings = JSON.parse(localStorage.getItem('userSettings') || '{}');
+    const notificationSettings = {
+      notifications: savedSettings.notifications !== undefined ? savedSettings.notifications : true,
+      emailNotifications: savedSettings.emailNotifications !== undefined ? savedSettings.emailNotifications : true,
+      smsNotifications: savedSettings.smsNotifications || false
+    };
+    localStorage.setItem('notificationPreferences', JSON.stringify(notificationSettings));
+    
+    // Déclencher un événement pour informer le NotificationBell des changements
+    window.dispatchEvent(new CustomEvent('notificationSettingsChanged', { detail: notificationSettings }));
   };
 
   const handleDarkModeToggle = () => {
@@ -136,7 +162,7 @@ const Settings: React.FC = () => {
               </div>
               <div className="item-text">
                 <label>Notifications push</label>
-                <p>Recevoir des notifications sur votre navigateur</p>
+                <p>Recevoir des notifications sur votre navigateur (arrivées, départs, mobilités)</p>
               </div>
             </div>
             <button 

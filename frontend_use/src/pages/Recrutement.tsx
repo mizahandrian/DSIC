@@ -11,6 +11,7 @@ import {
   faUserPlus, faComment
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
+import { triggerNotification } from '../components/NotificationBell';
 
 interface Direction {
   id_direction: number;
@@ -218,6 +219,15 @@ const Recrutement: React.FC = () => {
 
       await api.post('/recrutement', personnelData);
       
+      // === NOTIFICATION AJOUTÉE ICI ===
+      triggerNotification(
+        'success',
+        '✅ Nouveau personnel ajouté',
+        `${formData.prenom} ${formData.nom} a été recruté avec succès`,
+        '/gestion-personnels'
+      );
+      // ===============================
+      
       setSuccessMessage("Personnel ajouté avec succès !");
       setTimeout(() => {
         navigate('/gestion-personnels');
@@ -399,7 +409,6 @@ const Recrutement: React.FC = () => {
                 <select name="id_statut" value={formData.id_statut} onChange={handleChange}>
                   <option value="actif">Fonctionnaire</option>
                   <option value="inactif">Prive</option>
-                  {/* {statuts.map(s => <option key={s.id} value={s.id}>{s.nom_statut} ({s.type_statut})</option>)} */}
                 </select>
               </div>
               <div className="form-group">

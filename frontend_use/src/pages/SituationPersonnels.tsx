@@ -10,6 +10,7 @@ import {
   faBriefcase, faChartLine, faDatabase, faUserTag, faBriefcase as faBriefcaseIcon
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
+import { triggerNotification } from '../components/NotificationBell';
 import '../style/situation-personnels.css';
 
 interface SituationPersonnel {
@@ -229,10 +230,31 @@ const SituationPersonnels: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      const personnel = personnels.find(p => p.id === parseInt(formData.id_personnel));
+      const personnelName = personnel ? `${personnel.prenom} ${personnel.nom}` : 'Un personnel';
+      
       if (editingSituation) {
         await api.put(`/situation-personnels/${editingSituation.id_disposition}`, formData);
+        
+        // === NOTIFICATION DE MODIFICATION ===
+        triggerNotification(
+          'info',
+          '📋 Mobilité modifiée',
+          `La mobilité de ${personnelName} a été mise à jour`,
+          '/situation-personnels'
+        );
+        // ================================
       } else {
         await api.post('/situation-personnels', formData);
+        
+        // === NOTIFICATION D'AJOUT ===
+        triggerNotification(
+          'info',
+          '🚀 Nouvelle mobilité',
+          `${personnelName} est en ${getTypeLabel(formData.type_mobilite)} à ${formData.destination}`,
+          '/situation-personnels'
+        );
+        // ==============================
       }
       await fetchSituations();
       closeModal();
@@ -247,7 +269,19 @@ const SituationPersonnels: React.FC = () => {
   const handleDelete = async () => {
     if (!deleteConfirm) return;
     try {
+      const personnelName = `${deleteConfirm.personnel_prenom} ${deleteConfirm.personnel_nom}`;
+      
       await api.delete(`/situation-personnels/${deleteConfirm.id_disposition}`);
+      
+      // === NOTIFICATION DE RETOUR ===
+      triggerNotification(
+        'success',
+        '🏠 Retour de mobilité',
+        `${personnelName} est revenu de ${deleteConfirm.destination}`,
+        '/situation-personnels'
+      );
+      // ==============================
+      
       await fetchSituations();
       setDeleteConfirm(null);
     } catch (error) {
@@ -331,7 +365,7 @@ const SituationPersonnels: React.FC = () => {
         </div>
       </div>
 
-      {/* Popup Modal de notification */}
+      {/* Popup Modal de notification - inchangé */}
       {showNotificationModal && (
         <div className="modal-overlay" onClick={closeNotificationModal}>
           <div className="notification-modal" onClick={(e) => e.stopPropagation()}>
@@ -408,7 +442,7 @@ const SituationPersonnels: React.FC = () => {
         </div>
       )}
 
-      {/* Statistiques */}
+      {/* Statistiques - inchangé */}
       <div className="stats-row">
         <div className="stat-card">
           <div className="stat-icon situ-active">
@@ -448,7 +482,7 @@ const SituationPersonnels: React.FC = () => {
         </div>
       </div>
 
-      {/* Actions Bar */}
+      {/* Actions Bar - inchangé */}
       <div className="actions-bar">
         <div className="search-box">
           <FontAwesomeIcon icon={faSearch} className="search-icon" />
@@ -467,7 +501,7 @@ const SituationPersonnels: React.FC = () => {
         </div>
       </div>
 
-      {/* Table */}
+      {/* Table - inchangé */}
       <div className="table-container">
         {loading ? (
           <div className="loading-state">
@@ -592,7 +626,7 @@ const SituationPersonnels: React.FC = () => {
         )}
       </div>
 
-      {/* Add/Edit Modal - Agrandi */}
+      {/* Add/Edit Modal - inchangé */}
       {showModal && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal modal-large" onClick={(e) => e.stopPropagation()}>
@@ -709,7 +743,7 @@ const SituationPersonnels: React.FC = () => {
         </div>
       )}
 
-      {/* Delete Modal */}
+      {/* Delete Modal - inchangé */}
       {deleteConfirm && (
         <div className="modal-overlay" onClick={() => setDeleteConfirm(null)}>
           <div className="modal modal-small" onClick={(e) => e.stopPropagation()}>

@@ -51,7 +51,7 @@
 }
 
 .sidebar-header {
-  padding: 32px 20px;
+  padding: 19px 20px;
   text-align: center;
   border-bottom: 1px solid #eef2f6;
   transition: padding 0.3s ease;
@@ -153,7 +153,7 @@
 
 /* Navigation */
 .sidebar-nav {
-  padding: 20px 12px;
+  padding:9px 12px;
   transition: padding 0.3s ease;
 }
 

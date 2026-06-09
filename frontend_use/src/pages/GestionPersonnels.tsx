@@ -13,6 +13,7 @@ import {
   faInfoCircle, faCalendar, faMapMarkerAlt
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
+import { triggerNotification } from '../components/NotificationBell';
 
 interface Personnel {
   id: number;
@@ -223,6 +224,16 @@ const GestionPersonnels: React.FC = () => {
     if (!selectedPersonnel) return;
     try {
       await api.delete(`/personnels/${selectedPersonnel.id}`);
+      
+      // === NOTIFICATION AJOUTÉE ===
+      triggerNotification(
+        'warning',
+        '🗑️ Personnel supprimé',
+        `${selectedPersonnel.prenom} ${selectedPersonnel.nom} a été supprimé de la base`,
+        '/gestion-personnels'
+      );
+      // ==========================
+      
       fetchPersonnels();
       setShowDeleteModal(false);
       setSelectedPersonnel(null);
@@ -270,6 +281,16 @@ const GestionPersonnels: React.FC = () => {
     if (!selectedPersonnel) return;
     try {
       await api.put(`/personnels/${selectedPersonnel.id}`, editFormData);
+      
+      // === NOTIFICATION AJOUTÉE ===
+      triggerNotification(
+        'info',
+        '✏️ Personnel modifié',
+        `Les informations de ${editFormData.prenom} ${editFormData.nom} ont été mises à jour`,
+        '/gestion-personnels'
+      );
+      // ==========================
+      
       fetchPersonnels();
       setIsEditing(false);
       alert('Personnel modifié avec succès');

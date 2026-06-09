@@ -23,22 +23,41 @@ interface Notification {
   personnelName?: string;
 }
 
+interface NotificationPreferences {
+  notifications: boolean;
+  emailNotifications: boolean;
+  smsNotifications: boolean;
+}
+
 const NotificationBell: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const [preferences, setPreferences] = useState<NotificationPreferences>({
+    notifications: true,
+    emailNotifications: true,
+    smsNotifications: false
+  });
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Charger les notifications depuis localStorage
   useEffect(() => {
     loadNotifications();
+    loadPreferences();
     
     // Écouter les événements de notification
     const handleNewNotification = (event: CustomEvent<Notification>) => {
+      console.log('Nouvelle notification reçue:', event.detail);
       addNotification(event.detail);
     };
     
+    // Écouter les changements de paramètres
+    const handleSettingsChange = (event: CustomEvent<NotificationPreferences>) => {
+      setPreferences(event.detail);
+    };
+    
     window.addEventListener('new-notification', handleNewNotification as EventListener);
+    window.addEventListener('notificationSettingsChanged', handleSettingsChange as EventListener);
     
     // Vérifier les situations expirées toutes les heures
     checkExpiredSituations();
@@ -46,9 +65,18 @@ const NotificationBell: React.FC = () => {
     
     return () => {
       window.removeEventListener('new-notification', handleNewNotification as EventListener);
+      window.removeEventListener('notificationSettingsChanged', handleSettingsChange as EventListener);
       clearInterval(interval);
     };
   }, []);
+
+  // Mettre à jour le compteur à chaque changement des notifications
+  useEffect(() => {
+    const count = notifications.filter(n => !n.read).length;
+    setUnreadCount(count);
+    // Sauvegarder le compteur dans localStorage pour persistance
+    localStorage.setItem('notification-unread-count', count.toString());
+  }, [notifications]);
 
   // Fermer le dropdown quand on clique dehors
   useEffect(() => {
@@ -61,46 +89,80 @@ const NotificationBell: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const loadPreferences = () => {
+    const saved = localStorage.getItem('notificationPreferences');
+    if (saved) {
+      setPreferences(JSON.parse(saved));
+    } else {
+      const defaultPrefs = {
+        notifications: true,
+        emailNotifications: true,
+        smsNotifications: false
+      };
+      setPreferences(defaultPrefs);
+      localStorage.setItem('notificationPreferences', JSON.stringify(defaultPrefs));
+    }
+  };
+
   const loadNotifications = () => {
     const saved = localStorage.getItem('app-notifications');
     if (saved) {
       const parsed = JSON.parse(saved);
       setNotifications(parsed);
-      setUnreadCount(parsed.filter((n: Notification) => !n.read).length);
+      const count = parsed.filter((n: Notification) => !n.read).length;
+      setUnreadCount(count);
     } else {
-      // Notifications de démonstration
-      const demoNotifications: Notification[] = [
-        {
-          id: '1',
-          type: 'info',
-          title: 'Bienvenue',
-          message: 'Bienvenue sur la plateforme de gestion RH',
-          date: new Date().toISOString(),
-          read: false
-        }
-      ];
-      setNotifications(demoNotifications);
-      localStorage.setItem('app-notifications', JSON.stringify(demoNotifications));
-      setUnreadCount(1);
+      // Pas de notifications de démonstration, démarrer avec une liste vide
+      setNotifications([]);
+      setUnreadCount(0);
     }
   };
 
   const saveNotifications = (newNotifications: Notification[]) => {
     setNotifications(newNotifications);
     localStorage.setItem('app-notifications', JSON.stringify(newNotifications));
-    setUnreadCount(newNotifications.filter(n => !n.read).length);
+    // Le compteur sera mis à jour via useEffect
   };
 
   const addNotification = (notification: Notification) => {
+    // Vérifier si les notifications push sont activées
+    if (!preferences.notifications) {
+      console.log('Notifications désactivées, notification ignorée');
+      return;
+    }
+    
+    // Éviter les doublons (même message pour le même personnel dans la dernière minute)
+    const now = Date.now();
+    const isDuplicate = notifications.some(n => 
+      n.title === notification.title && 
+      n.personnelId === notification.personnelId &&
+      now - new Date(n.date).getTime() < 60000 // 1 minute
+    );
+    
+    if (isDuplicate) {
+      console.log('Notification en double ignorée');
+      return;
+    }
+    
+    // Ajouter la nouvelle notification au début de la liste
     const newNotifications = [notification, ...notifications];
+    
+    // Limiter le nombre de notifications à 50 maximum
+    if (newNotifications.length > 50) {
+      newNotifications.pop();
+    }
+    
     saveNotifications(newNotifications);
     
-    // Afficher une alerte toast
+    // Afficher le toast
     showToast(notification);
+    
+    // Mettre à jour le compteur dans le localStorage
+    const currentCount = parseInt(localStorage.getItem('notification-unread-count') || '0');
+    localStorage.setItem('notification-unread-count', (currentCount + 1).toString());
   };
 
   const showToast = (notification: Notification) => {
-    // Créer un élément toast
     const toast = document.createElement('div');
     toast.className = `toast-notification toast-${notification.type}`;
     toast.innerHTML = `
@@ -118,9 +180,7 @@ const NotificationBell: React.FC = () => {
     `;
     document.body.appendChild(toast);
     
-    setTimeout(() => {
-      toast.classList.add('show');
-    }, 100);
+    setTimeout(() => toast.classList.add('show'), 100);
     
     setTimeout(() => {
       toast.classList.remove('show');
@@ -129,28 +189,29 @@ const NotificationBell: React.FC = () => {
   };
 
   const checkExpiredSituations = async () => {
+    if (!preferences.notifications) return;
+    
     try {
       const response = await api.get('/situation-personnels');
       const situations = response.data;
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       
-      const expiredNotifications: Notification[] = [];
-      
       situations.forEach((s: any) => {
         if (!s.date_fin || s.situation === 'activite') return;
         
         const finDate = new Date(s.date_fin);
         finDate.setHours(0, 0, 0, 0);
-        const diffTime = finDate.getTime() - today.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const diffDays = Math.ceil((finDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
         
-        // Vérifier si déjà notifié (stocké dans localStorage)
-        const lastCheck = localStorage.getItem(`notif-expired-${s.id_disposition}`);
+        const lastCheckKey = `notif-expired-${s.id_disposition}`;
+        const lastCheck = localStorage.getItem(lastCheckKey);
         const todayStr = today.toISOString().split('T')[0];
         
+        let notification: Notification | null = null;
+        
         if (diffDays < 0 && lastCheck !== todayStr) {
-          expiredNotifications.push({
+          notification = {
             id: `expired-${s.id_disposition}-${Date.now()}`,
             type: 'error',
             title: '⚠️ Situation expirée',
@@ -160,10 +221,10 @@ const NotificationBell: React.FC = () => {
             link: '/situation-personnels',
             personnelId: s.id_personnel,
             personnelName: `${s.personnel_prenom} ${s.personnel_nom}`
-          });
-          localStorage.setItem(`notif-expired-${s.id_disposition}`, todayStr);
+          };
+          localStorage.setItem(lastCheckKey, todayStr);
         } else if (diffDays <= 7 && diffDays > 0 && lastCheck !== todayStr) {
-          expiredNotifications.push({
+          notification = {
             id: `near-expiry-${s.id_disposition}-${Date.now()}`,
             type: 'warning',
             title: '⏰ Retour prochain',
@@ -173,13 +234,13 @@ const NotificationBell: React.FC = () => {
             link: '/situation-personnels',
             personnelId: s.id_personnel,
             personnelName: `${s.personnel_prenom} ${s.personnel_nom}`
-          });
-          localStorage.setItem(`notif-expired-${s.id_disposition}`, todayStr);
+          };
+          localStorage.setItem(lastCheckKey, todayStr);
         }
-      });
-      
-      expiredNotifications.forEach(notif => {
-        addNotification(notif);
+        
+        if (notification) {
+          addNotification(notification);
+        }
       });
       
     } catch (error) {
@@ -247,7 +308,7 @@ const NotificationBell: React.FC = () => {
         onClick={() => setIsOpen(!isOpen)}
       >
         <FontAwesomeIcon icon={faBell} />
-        {unreadCount > 0 && <span className="notification-count">{unreadCount > 9 ? '9+' : unreadCount}</span>}
+        {unreadCount > 0 && <span className="notification-count">{unreadCount > 99 ? '99+' : unreadCount}</span>}
       </button>
       
       {isOpen && (
@@ -286,7 +347,7 @@ const NotificationBell: React.FC = () => {
                     <div className="notif-time">{formatDate(notif.date)}</div>
                   </div>
                   {notif.link && (
-                    <Link to={notif.link} className="notif-link">
+                    <Link to={notif.link} className="notif-link" onClick={(e) => e.stopPropagation()}>
                       Voir
                     </Link>
                   )}
@@ -350,8 +411,22 @@ export const triggerNotification = (
   personnelId?: number,
   personnelName?: string
 ) => {
+  // Vérifier si les notifications sont activées avant d'envoyer
+  const savedPrefs = localStorage.getItem('notificationPreferences');
+  let notificationsEnabled = true;
+  
+  if (savedPrefs) {
+    const prefs = JSON.parse(savedPrefs);
+    notificationsEnabled = prefs.notifications !== undefined ? prefs.notifications : true;
+  }
+  
+  if (!notificationsEnabled) {
+    console.log('triggerNotification: Notifications désactivées');
+    return;
+  }
+  
   const notification: Notification = {
-    id: `${Date.now()}-${Math.random()}`,
+    id: `${Date.now()}-${Math.random()}-${performance.now()}`,
     type,
     title,
     message,
@@ -362,6 +437,7 @@ export const triggerNotification = (
     personnelName
   };
   
+  console.log('Envoi de la notification:', notification);
   window.dispatchEvent(new CustomEvent('new-notification', { detail: notification }));
 };
 
