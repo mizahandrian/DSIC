@@ -3,12 +3,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faBell, faCheckCircle, faExclamationTriangle, 
-  faInfoCircle, faTimes, faUserPlus, faUserEdit,
-  faUserMinus, faExchangeAlt, faClock, faBuilding,
-  faTrashAlt, faCheck
+  faInfoCircle, faTimes, faTrashAlt
 } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
-import api from '../Service/api';
 
 interface Notification {
   id: string;
@@ -18,67 +15,41 @@ interface Notification {
   date: string;
   read: boolean;
   link?: string;
-  action?: string;
-  personnelId?: number;
-  personnelName?: string;
-}
-
-interface NotificationPreferences {
-  notifications: boolean;
-  emailNotifications: boolean;
-  smsNotifications: boolean;
 }
 
 const NotificationBell: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
-  const [preferences, setPreferences] = useState<NotificationPreferences>({
-    notifications: true,
-    emailNotifications: true,
-    smsNotifications: false
-  });
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Charger les notifications depuis localStorage
+  // Charger les notifications au démarrage
   useEffect(() => {
     loadNotifications();
-    loadPreferences();
-    
-    // Écouter les événements de notification
-    const handleNewNotification = (event: CustomEvent<Notification>) => {
-      console.log('Nouvelle notification reçue:', event.detail);
-      addNotification(event.detail);
-    };
-    
-    // Écouter les changements de paramètres
-    const handleSettingsChange = (event: CustomEvent<NotificationPreferences>) => {
-      setPreferences(event.detail);
-    };
-    
-    window.addEventListener('new-notification', handleNewNotification as EventListener);
-    window.addEventListener('notificationSettingsChanged', handleSettingsChange as EventListener);
-    
-    // Vérifier les situations expirées toutes les heures
-    checkExpiredSituations();
-    const interval = setInterval(checkExpiredSituations, 3600000);
-    
-    return () => {
-      window.removeEventListener('new-notification', handleNewNotification as EventListener);
-      window.removeEventListener('notificationSettingsChanged', handleSettingsChange as EventListener);
-      clearInterval(interval);
-    };
   }, []);
 
-  // Mettre à jour le compteur à chaque changement des notifications
+  // Sauvegarder les notifications à chaque changement
   useEffect(() => {
     const count = notifications.filter(n => !n.read).length;
     setUnreadCount(count);
-    // Sauvegarder le compteur dans localStorage pour persistance
-    localStorage.setItem('notification-unread-count', count.toString());
+    localStorage.setItem('app-notifications', JSON.stringify(notifications));
   }, [notifications]);
 
-  // Fermer le dropdown quand on clique dehors
+  // Écouter les nouvelles notifications
+  useEffect(() => {
+    const handleNewNotification = (event: CustomEvent<Notification>) => {
+      console.log('Notification reçue:', event.detail);
+      addNotification(event.detail);
+    };
+    
+    window.addEventListener('new-notification', handleNewNotification as EventListener);
+    
+    return () => {
+      window.removeEventListener('new-notification', handleNewNotification as EventListener);
+    };
+  }, [notifications]);
+
+  // Fermer le dropdown en cliquant dehors
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -89,77 +60,38 @@ const NotificationBell: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const loadPreferences = () => {
-    const saved = localStorage.getItem('notificationPreferences');
-    if (saved) {
-      setPreferences(JSON.parse(saved));
-    } else {
-      const defaultPrefs = {
-        notifications: true,
-        emailNotifications: true,
-        smsNotifications: false
-      };
-      setPreferences(defaultPrefs);
-      localStorage.setItem('notificationPreferences', JSON.stringify(defaultPrefs));
-    }
-  };
-
   const loadNotifications = () => {
     const saved = localStorage.getItem('app-notifications');
     if (saved) {
       const parsed = JSON.parse(saved);
       setNotifications(parsed);
-      const count = parsed.filter((n: Notification) => !n.read).length;
-      setUnreadCount(count);
     } else {
-      // Pas de notifications de démonstration, démarrer avec une liste vide
       setNotifications([]);
-      setUnreadCount(0);
     }
-  };
-
-  const saveNotifications = (newNotifications: Notification[]) => {
-    setNotifications(newNotifications);
-    localStorage.setItem('app-notifications', JSON.stringify(newNotifications));
-    // Le compteur sera mis à jour via useEffect
   };
 
   const addNotification = (notification: Notification) => {
-    // Vérifier si les notifications push sont activées
-    if (!preferences.notifications) {
-      console.log('Notifications désactivées, notification ignorée');
-      return;
-    }
-    
-    // Éviter les doublons (même message pour le même personnel dans la dernière minute)
-    const now = Date.now();
-    const isDuplicate = notifications.some(n => 
-      n.title === notification.title && 
-      n.personnelId === notification.personnelId &&
-      now - new Date(n.date).getTime() < 60000 // 1 minute
-    );
-    
-    if (isDuplicate) {
-      console.log('Notification en double ignorée');
-      return;
-    }
-    
-    // Ajouter la nouvelle notification au début de la liste
-    const newNotifications = [notification, ...notifications];
-    
-    // Limiter le nombre de notifications à 50 maximum
-    if (newNotifications.length > 50) {
-      newNotifications.pop();
-    }
-    
-    saveNotifications(newNotifications);
+    setNotifications(prev => {
+      // Éviter les doublons (même titre et message dans les dernières 30 secondes)
+      const now = Date.now();
+      const isDuplicate = prev.some(n => 
+        n.title === notification.title && 
+        n.message === notification.message &&
+        now - new Date(n.date).getTime() < 30000
+      );
+      
+      if (isDuplicate) {
+        console.log('Notification en double ignorée');
+        return prev;
+      }
+      
+      // Ajouter en tête et limiter à 30 notifications
+      const newNotifications = [notification, ...prev].slice(0, 30);
+      return newNotifications;
+    });
     
     // Afficher le toast
     showToast(notification);
-    
-    // Mettre à jour le compteur dans le localStorage
-    const currentCount = parseInt(localStorage.getItem('notification-unread-count') || '0');
-    localStorage.setItem('notification-unread-count', (currentCount + 1).toString());
   };
 
   const showToast = (notification: Notification) => {
@@ -167,106 +99,50 @@ const NotificationBell: React.FC = () => {
     toast.className = `toast-notification toast-${notification.type}`;
     toast.innerHTML = `
       <div class="toast-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <circle cx="12" cy="12" r="10"/>
           <line x1="12" y1="8" x2="12" y2="12"/>
           <line x1="12" y1="16" x2="12.01" y2="16"/>
         </svg>
       </div>
       <div class="toast-content">
-        <strong>${notification.title}</strong>
-        <p>${notification.message}</p>
+        <strong>${escapeHtml(notification.title)}</strong>
+        <p>${escapeHtml(notification.message)}</p>
       </div>
     `;
     document.body.appendChild(toast);
     
-    setTimeout(() => toast.classList.add('show'), 100);
-    
+    setTimeout(() => toast.classList.add('show'), 10);
     setTimeout(() => {
       toast.classList.remove('show');
       setTimeout(() => toast.remove(), 300);
-    }, 5000);
+    }, 4000);
   };
 
-  const checkExpiredSituations = async () => {
-    if (!preferences.notifications) return;
-    
-    try {
-      const response = await api.get('/situation-personnels');
-      const situations = response.data;
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      situations.forEach((s: any) => {
-        if (!s.date_fin || s.situation === 'activite') return;
-        
-        const finDate = new Date(s.date_fin);
-        finDate.setHours(0, 0, 0, 0);
-        const diffDays = Math.ceil((finDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-        
-        const lastCheckKey = `notif-expired-${s.id_disposition}`;
-        const lastCheck = localStorage.getItem(lastCheckKey);
-        const todayStr = today.toISOString().split('T')[0];
-        
-        let notification: Notification | null = null;
-        
-        if (diffDays < 0 && lastCheck !== todayStr) {
-          notification = {
-            id: `expired-${s.id_disposition}-${Date.now()}`,
-            type: 'error',
-            title: '⚠️ Situation expirée',
-            message: `${s.personnel_prenom} ${s.personnel_nom} aurait dû revenir de ${s.destination} le ${new Date(s.date_fin).toLocaleDateString('fr-FR')}`,
-            date: new Date().toISOString(),
-            read: false,
-            link: '/situation-personnels',
-            personnelId: s.id_personnel,
-            personnelName: `${s.personnel_prenom} ${s.personnel_nom}`
-          };
-          localStorage.setItem(lastCheckKey, todayStr);
-        } else if (diffDays <= 7 && diffDays > 0 && lastCheck !== todayStr) {
-          notification = {
-            id: `near-expiry-${s.id_disposition}-${Date.now()}`,
-            type: 'warning',
-            title: '⏰ Retour prochain',
-            message: `${s.personnel_prenom} ${s.personnel_nom} doit revenir de ${s.destination} dans ${diffDays} jour${diffDays > 1 ? 's' : ''}`,
-            date: new Date().toISOString(),
-            read: false,
-            link: '/situation-personnels',
-            personnelId: s.id_personnel,
-            personnelName: `${s.personnel_prenom} ${s.personnel_nom}`
-          };
-          localStorage.setItem(lastCheckKey, todayStr);
-        }
-        
-        if (notification) {
-          addNotification(notification);
-        }
-      });
-      
-    } catch (error) {
-      console.error('Erreur vérification situations:', error);
-    }
+  const escapeHtml = (text: string) => {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   };
 
   const markAsRead = (id: string) => {
-    const updated = notifications.map(n => 
-      n.id === id ? { ...n, read: true } : n
+    setNotifications(prev =>
+      prev.map(n => n.id === id ? { ...n, read: true } : n)
     );
-    saveNotifications(updated);
   };
 
   const markAllAsRead = () => {
-    const updated = notifications.map(n => ({ ...n, read: true }));
-    saveNotifications(updated);
+    setNotifications(prev =>
+      prev.map(n => ({ ...n, read: true }))
+    );
   };
 
   const deleteNotification = (id: string) => {
-    const updated = notifications.filter(n => n.id !== id);
-    saveNotifications(updated);
+    setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
   const clearAll = () => {
-    saveNotifications([]);
+    setNotifications([]);
   };
 
   const getIcon = (type: string) => {
@@ -358,7 +234,7 @@ const NotificationBell: React.FC = () => {
                       deleteNotification(notif.id);
                     }}
                   >
-                    <FontAwesomeIcon icon={faTimes} />
+                    <FontAwesomeIcon icon={faTrashAlt} />
                   </button>
                 </div>
               ))
@@ -366,38 +242,6 @@ const NotificationBell: React.FC = () => {
           </div>
         </div>
       )}
-      
-      <style>{`
-        .toast-notification {
-          position: fixed;
-          bottom: 20px;
-          right: 20px;
-          background: white;
-          border-radius: 12px;
-          padding: 1rem;
-          display: flex;
-          gap: 0.75rem;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-          z-index: 1100;
-          min-width: 300px;
-          max-width: 400px;
-          transform: translateX(400px);
-          transition: transform 0.3s ease;
-          border-left: 4px solid;
-        }
-        .toast-notification.show {
-          transform: translateX(0);
-        }
-        .toast-notification.toast-success { border-left-color: #10b981; }
-        .toast-notification.toast-warning { border-left-color: #f59e0b; }
-        .toast-notification.toast-error { border-left-color: #ef4444; }
-        .toast-notification.toast-info { border-left-color: #3b82f6; }
-        .toast-icon svg { width: 20px; height: 20px; }
-        .toast-content strong { display: block; font-size: 0.875rem; margin-bottom: 0.25rem; }
-        .toast-content p { font-size: 0.75rem; color: #64748b; margin: 0; }
-        body.dark-mode .toast-notification { background: #1e293b; }
-        body.dark-mode .toast-content p { color: #94a3b8; }
-      `}</style>
     </div>
   );
 };
@@ -407,37 +251,19 @@ export const triggerNotification = (
   type: 'success' | 'warning' | 'info' | 'error',
   title: string,
   message: string,
-  link?: string,
-  personnelId?: number,
-  personnelName?: string
+  link?: string
 ) => {
-  // Vérifier si les notifications sont activées avant d'envoyer
-  const savedPrefs = localStorage.getItem('notificationPreferences');
-  let notificationsEnabled = true;
-  
-  if (savedPrefs) {
-    const prefs = JSON.parse(savedPrefs);
-    notificationsEnabled = prefs.notifications !== undefined ? prefs.notifications : true;
-  }
-  
-  if (!notificationsEnabled) {
-    console.log('triggerNotification: Notifications désactivées');
-    return;
-  }
-  
   const notification: Notification = {
-    id: `${Date.now()}-${Math.random()}-${performance.now()}`,
+    id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     type,
     title,
     message,
     date: new Date().toISOString(),
     read: false,
-    link,
-    personnelId,
-    personnelName
+    link
   };
   
-  console.log('Envoi de la notification:', notification);
+  console.log('Dispatching notification:', notification);
   window.dispatchEvent(new CustomEvent('new-notification', { detail: notification }));
 };
 
