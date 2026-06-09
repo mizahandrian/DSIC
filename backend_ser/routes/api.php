@@ -18,6 +18,7 @@ use App\Http\Controllers\EtatController;
 use App\Http\Controllers\LiaisonController;
 use App\Http\Controllers\RecrutementController;
 use Illuminate\Support\Facades\Password;
+use App\Http\Controllers\SituationPersonnelController;
 
 
 
@@ -253,5 +254,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/users/{id}', [UserController::class, 'destroy']);
 
     });
+
+    // situation personnel
+    Route::apiResource('situation-personnels', SituationPersonnelController::class);
 
 });
