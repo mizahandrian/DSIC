@@ -350,9 +350,12 @@ const Recrutement: React.FC = () => {
                   ))}
                 </select>
               </div>
-              <div className="form-group full-width">
-                <label><FontAwesomeIcon icon={faUserTie} /> Poste / Fonction *</label>
-                <input type="text" name="poste" value={formData.poste} onChange={handleChange} placeholder="Ex: Administrateur Réseau, Développeur Full Stack..." required />
+              <div className="form-group">
+                <label><FontAwesomeIcon icon={faBriefcase} /> Poste *</label>
+                <select name="Poste" value={formData.poste} onChange={handleChange} required>
+                  <option value="">(vide)</option>
+
+                </select>
               </div>
             </div>
           </div>
@@ -369,11 +372,19 @@ const Recrutement: React.FC = () => {
               <div className="form-group">
                 <label><FontAwesomeIcon icon={faLayerGroup} /> Catégorie *</label>
                 <select name="categorie" value={formData.categorie} onChange={handleChange} required>
-                  <option value="">Sélectionner</option>
-                  <option value="A1">A1 - Cadres Supérieurs</option>
-                  <option value="A2">A2 - Cadres Moyens</option>
-                  <option value="B1">B1 - Techniciens</option>
-                  <option value="C1">C1 - Agents</option>
+                  <option value="">(vide)</option>
+                  <option value="">I</option>
+                  <option value="">II</option>
+                  <option value="">III</option>
+                  <option value="">IV</option>
+                  <option value="">V</option>
+                  <option value="">VI</option>
+                  <option value="">VII</option>
+                  <option value="">VIII</option>
+                  <option value="">IX</option>
+                  <option value="">X</option>
+                  <option value="">#N/A</option>
+
                 </select>
               </div>
               <div className="form-group">
