@@ -25,6 +25,7 @@
   z-index: 100;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.02);
+  padding-bottom: 2rem;
 }
 
 .sidebar-overlay {
@@ -41,6 +42,7 @@
 /* Sidebar rétracté */
 .sidebar.collapsed {
   width: 80px;
+  padding-bottom: 2rem;
 }
 
 /* Animation du contenu */
@@ -153,12 +155,14 @@
 
 /* Navigation */
 .sidebar-nav {
-  padding:9px 12px;
+  padding:20px 12px;
   transition: padding 0.3s ease;
+  padding-bottom: 30px;
 }
 
 .sidebar.collapsed .sidebar-nav {
   padding: 20px 8px;
+  padding-bottom: 30px;
 }
 
 .nav-item {
