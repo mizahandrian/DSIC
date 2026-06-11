@@ -29,6 +29,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen = false, onMobileClose }
     { path: '/gestion-personnels', name: 'Liste des personnels', icon: faList },
     { path: '/gestion-directions', name: 'Directions', icon: faBuilding },
     { path: '/gestion-services', name: 'Services', icon: faBriefcase },
+    { path: '/gestion-postes', name: 'Postes', icon: faBriefcase },
     { path: '/situation-personnels', name: 'Situation', icon: faExchangeAlt },
     { path: '/base-rohi', name: 'Base ROHI', icon: faDatabase },
     { path: '/base-augure', name: 'Base AUGURE', icon: faDatabase },
@@ -44,7 +45,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen = false, onMobileClose }
           </div>
           <div className="sidebar-brand">
             <h2>INSTAT Madagascar</h2>
-            <p>Gestion RH</p>
+            <p>Gestion Personnels</p>
           </div>
         </div>
 

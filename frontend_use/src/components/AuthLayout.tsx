@@ -35,7 +35,7 @@ const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
         </div>
         <div className="brand-footer">
-          <p>© 2024 INSTAT Madagascar</p>
+          <p>© INSTAT Madagascar</p>
         </div>
       </div>
       <div className="auth-form-container">

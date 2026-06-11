@@ -20,6 +20,7 @@ import SituationPersonnels from './pages/SituationPersonnels';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import api from './Service/api';
+import GestionPostes from './pages/GestionPostes';
 
 import './style/recrutement.css';
 import './style/gestion.css';
@@ -97,7 +98,8 @@ const App: React.FC = () => {
         <Route path="/profile" element={<ProtectedLayout><Profile /></ProtectedLayout>} />
         <Route path="/settings" element={<ProtectedLayout><Settings /></ProtectedLayout>} />
         <Route path="/situation-personnels" element={<ProtectedLayout><SituationPersonnels /></ProtectedLayout>} />
-        
+        <Route path="/gestion-postes" element={<ProtectedLayout><GestionPostes /></ProtectedLayout>} />
+
         {/* Redirections */}
         <Route path="/" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />
         <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />

@@ -357,7 +357,7 @@ const GestionPersonnels: React.FC = () => {
       {/* Header */}
       <div className="gestion-header">
         <div>
-          <h1><FontAwesomeIcon icon={faUsers} /> Gestion des personnels</h1>
+          <h1><FontAwesomeIcon icon={faUsers} /> Liste des personnels</h1>
           <p>Liste complète des employés recrutés</p>
         </div>
         <Link to="/recrutement" className="btn-primary">
@@ -627,17 +627,17 @@ const GestionPersonnels: React.FC = () => {
                     <input type="text" name="matricule" value={editFormData.matricule || ''} onChange={handleEditChange} placeholder="Ex: RH-001" />
                   </div>
                   <div className="form-group">
-                    <label>Nom *</label>
+                    <label>Nom </label>
                     <input type="text" name="nom" value={editFormData.nom || ''} onChange={handleEditChange} />
                   </div>
                 </div>
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Prénom *</label>
+                    <label>Prénom </label>
                     <input type="text" name="prenom" value={editFormData.prenom || ''} onChange={handleEditChange} />
                   </div>
                   <div className="form-group">
-                    <label>CIN *</label>
+                    <label>CIN </label>
                     <input type="text" name="numero_cin" value={editFormData.numero_cin || ''} onChange={handleEditChange} />
                   </div>
                 </div>
@@ -647,7 +647,7 @@ const GestionPersonnels: React.FC = () => {
                     <input type="tel" name="tel" value={editFormData.tel || ''} onChange={handleEditChange} />
                   </div>
                   <div className="form-group">
-                    <label>Genre *</label>
+                    <label>Genre </label>
                     <select name="genre" value={editFormData.genre || 'M'} onChange={handleEditChange}>
                       <option value="M">Masculin</option>
                       <option value="F">Féminin</option>
@@ -656,11 +656,11 @@ const GestionPersonnels: React.FC = () => {
                 </div>
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Date naissance *</label>
+                    <label>Date naissance </label>
                     <input type="date" name="date_naissance" value={editFormData.date_naissance || ''} onChange={handleEditChange} />
                   </div>
                   <div className="form-group">
-                    <label>Date entrée *</label>
+                    <label>Date entrée </label>
                     <input type="date" name="date_entree" value={editFormData.date_entree || ''} onChange={handleEditChange} />
                   </div>
                 </div>
@@ -670,7 +670,7 @@ const GestionPersonnels: React.FC = () => {
                     <input type="text" name="motif_entree" value={editFormData.motif_entree || ''} onChange={handleEditChange} />
                   </div>
                   <div className="form-group">
-                    <label>Direction *</label>
+                    <label>Direction </label>
                     <select name="id_direction" value={editFormData.id_direction || ''} onChange={handleEditChange}>
                       <option value="">Sélectionner</option>
                       {directions.map(d => <option key={d.id_direction} value={d.id_direction}>{d.nom_direction}</option>)}
@@ -679,7 +679,7 @@ const GestionPersonnels: React.FC = () => {
                 </div>
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Service *</label>
+                    <label>Service </label>
                     <select name="id_service" value={editFormData.id_service || ''} onChange={handleEditChange}>
                       <option value="">Sélectionner</option>
                       {services.map(s => <option key={s.id_service} value={s.id_service}>{s.nom_service}</option>)}
@@ -706,7 +706,7 @@ const GestionPersonnels: React.FC = () => {
                     <input type="text" name="grade" value={editFormData.grade || ''} onChange={handleEditChange} placeholder="Ex: Principal, Supérieur..." />
                   </div>
                   <div className="form-group">
-                    <label>État *</label>
+                    <label>État </label>
                     <select name="etat" value={editFormData.etat || 'Actif'} onChange={handleEditChange}>
                       <option value="Actif">Actif</option>
                       <option value="Inactif">Inactif</option>
