@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -7,26 +6,27 @@ use Illuminate\Database\Eloquent\Model;
 class Poste extends Model
 {
     protected $table = 'postes';
+    public $timestamps = false;
     protected $primaryKey = 'id_poste';
 
     protected $fillable = [
         'titre_poste',
-        'indice',
-        'id_service',
-        'id_carriere',
         'description',
-        'nombre_personnels'
+        'id_direction',
+        'id_service',
+        'categorie',
+        'niveau',
+        'salaire_base',
+        'competences',
     ];
 
-    // relation service
-    public function service()
+    public function direction()
     {
-        return $this->belongsTo(Service::class, 'id_service');
+        return $this->belongsTo(Direction::class, 'id_direction', 'id_direction');
     }
 
-    // relation carriere
-    public function carriere()
+    public function service()
     {
-        return $this->belongsTo(Carriere::class, 'id_carriere');
+        return $this->belongsTo(Service::class, 'id_service', 'id_service');
     }
 }

@@ -114,11 +114,10 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 // ==================== ROUTES POSTES ====================
-Route::get('/postes', [PosteController::class, 'index']);
-Route::post('/postes', [PosteController::class, 'store']);
-Route::get('/postes/{id}', [PosteController::class, 'show']);
-Route::put('/postes/{id}', [PosteController::class, 'update']);
-Route::delete('/postes/{id}', [PosteController::class, 'destroy']);
+Route::get('/postes',          [PosteController::class, 'index']);
+Route::post('/postes',         [PosteController::class, 'store']);
+Route::put('/postes/{id}',     [PosteController::class, 'update']);
+Route::delete('/postes/{id}',  [PosteController::class, 'destroy']);
 
 // ==================== ROUTES SERVICES ====================
 Route::get('/services', [ServiceController::class, 'index']);
