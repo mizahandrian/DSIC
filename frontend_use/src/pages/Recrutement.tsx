@@ -25,6 +25,12 @@ interface Service {
   id_direction: number;
 }
 
+interface Poste {
+  id_poste: number;
+  titre_poste: string;
+  id_service: number;
+}
+
 interface Statut {
   id: number;
   nom_statut: string;
@@ -41,6 +47,7 @@ const Recrutement: React.FC = () => {
   const [directions, setDirections] = useState<Direction[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
+  const [filteredPostes, setFilteredPostes] = useState<Poste[]>([]);
   const [statuts, setStatuts] = useState<Statut[]>([]);
 
   const [formData, setFormData] = useState({
@@ -58,7 +65,7 @@ const Recrutement: React.FC = () => {
     motif_entree: '',
     id_direction: '',
     id_service: '',
-    poste: '',
+    id_poste: '',
     
     // Étape 3 - Carrière
     categorie: '',
@@ -84,6 +91,24 @@ const Recrutement: React.FC = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const fetchPostesByService = async (serviceId: number) => {
+  try {
+    const res = await api.get('/postes');
+    const filtered = res.data.filter((p: Poste) => p.id_service === serviceId);
+    setFilteredPostes(filtered);
+  } catch (error) {
+    console.error("Erreur chargement postes:", error);
+  }
+};
+
+useEffect(() => {
+  if (formData.id_service) {
+    fetchPostesByService(parseInt(formData.id_service));
+  } else {
+    setFilteredPostes([]);
+  }
+}, [formData.id_service]);
 
   const fetchServicesByDirection = async (directionId: number) => {
     try {
@@ -135,7 +160,7 @@ const Recrutement: React.FC = () => {
         if (!formData.date_entree) return 'La date d’entrée est requise.';
         if (!formData.id_direction) return 'La direction est requise.';
         if (!formData.id_service) return 'Le service est requis.';
-        if (!formData.poste.trim()) return 'Le poste est requis.';
+        if (!formData.id_poste.trim()) return 'Le poste est requis.';
         return null;
       case 3:
         if (!formData.categorie) return 'La catégorie est requise.';
@@ -202,7 +227,7 @@ const Recrutement: React.FC = () => {
         id_service: formData.id_service ? Number(formData.id_service) : null,
         id_statut: formData.id_statut ? Number(formData.id_statut) : null,
         id_etat: formData.id_etat === 'actif' ? 1 : 2,
-        poste: formData.poste?.trim() || null,
+        id_poste: formData.id_poste ? Number(formData.id_poste) : null,
         categorie: formData.categorie?.trim() || null,
         indice: formData.indice || null,
         corps: formData.corps?.trim() || null,
@@ -251,7 +276,7 @@ const Recrutement: React.FC = () => {
     setCurrentStep(1);
     setFormData({
       matricule: '', nom: '', prenom: '', genre: 'M', numero_cin: '', tel: '', date_naissance: '',
-      date_entree: '', motif_entree: '', id_direction: '', id_service: '', poste: '',
+      date_entree: '', motif_entree: '', id_direction: '', id_service: '', id_poste: '',
       categorie: '', indice: '', corps: '', grade: '', date_effet_carriere: '',
       id_statut: '', id_etat: 'actif', situation: 'activite', date_situation: '', destination: '', commentaire_situation: '',
       ancien_poste: '', ancien_direction: '', commentaire_historique: '',
@@ -352,9 +377,19 @@ const Recrutement: React.FC = () => {
               </div>
               <div className="form-group">
                 <label><FontAwesomeIcon icon={faBriefcase} /> Poste *</label>
-                <select name="Poste" value={formData.poste} onChange={handleChange} required>
-                  <option value="">(vide)</option>
-
+                <select 
+                  name="id_poste" 
+                  value={formData.id_poste} 
+                  onChange={handleChange} 
+                  required 
+                  disabled={!formData.id_service}
+                >
+                  <option value="">
+                    {formData.id_service ? "Sélectionner un poste" : "Choisissez d'abord un service"}
+                  </option>
+                  {filteredPostes.map(p => (
+                    <option key={p.id_poste} value={p.id_poste}>{p.titre_poste}</option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -373,18 +408,17 @@ const Recrutement: React.FC = () => {
                 <label><FontAwesomeIcon icon={faLayerGroup} /> Catégorie *</label>
                 <select name="categorie" value={formData.categorie} onChange={handleChange} required>
                   <option value="">(vide)</option>
-                  <option value="">I</option>
-                  <option value="">II</option>
-                  <option value="">III</option>
-                  <option value="">IV</option>
-                  <option value="">V</option>
-                  <option value="">VI</option>
-                  <option value="">VII</option>
-                  <option value="">VIII</option>
-                  <option value="">IX</option>
-                  <option value="">X</option>
-                  <option value="">#N/A</option>
-
+                  <option value="I">I</option>
+                  <option value="II">II</option>
+                  <option value="III">III</option>
+                  <option value="IV">IV</option>
+                  <option value="V">V</option>
+                  <option value="VI">VI</option>
+                  <option value="VII">VII</option>
+                  <option value="VIII">VIII</option>
+                  <option value="IX">IX</option>
+                  <option value="X">X</option>
+                  <option value="#N/A">#N/A</option>
                 </select>
               </div>
               <div className="form-group">
@@ -495,8 +529,8 @@ const Recrutement: React.FC = () => {
                   <span className="summary-value">{services.find(s => s.id_service.toString() === formData.id_service)?.nom_service || '-'}</span>
                 </div>
                 <div className="summary-item">
-                  <span className="summary-label">Poste :</span>
-                  <span className="summary-value">{formData.poste || '-'}</span>
+                   <span className="summary-label">Poste :</span>
+                  <span className="summary-value">{filteredPostes.find((p: Poste) => p.id_poste.toString() === formData.id_poste)?.titre_poste || '-'}</span>
                 </div>
                 <div className="summary-item">
                   <span className="summary-label">Carrière :</span>
