@@ -1357,3 +1357,52 @@ body.dark-mode .gender-badge.female {
   background: #831843;
   color: #f9a8d4;
 }
+/* ========== STATUS BADGES CORRIGÉS ========== */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.status-active {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.status-inactive {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* ========== SÉPARATION DES LIGNES DU TABLEAU ========== */
+.personnel-row {
+  border-bottom: 1px solid #e2e8f0;
+  transition: background 0.2s;
+}
+
+.personnel-row:hover {
+  background: #f8fafc;
+}
+
+/* Dark mode */
+body.dark-mode .personnel-row {
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .personnel-row:hover {
+  background: #334155;
+}
+
+body.dark-mode .status-active {
+  background: #064e3b;
+  color: #6ee7b7;
+}
+
+body.dark-mode .status-inactive {
+  background: #7f1d1d;
+  color: #fca5a5;
+}
