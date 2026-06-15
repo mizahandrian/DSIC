@@ -91,6 +91,15 @@ const getCategorieRomaine = (categorie: string | null | undefined): string => {
   return map[categorie] || categorie;
 };
 
+const normalizeEtat = (etat?: string | null): string | null => {
+  if (!etat) return null;
+  const cleaned = etat.toString().trim();
+  const lower = cleaned.toLowerCase();
+  if (lower === 'inactif') return 'Inactif';
+  if (lower === 'actif') return 'Actif';
+  return cleaned;
+};
+
 const GestionPersonnels: React.FC = () => {
   const [personnels, setPersonnels] = useState<Personnel[]>([]);
   const [filteredPersonnels, setFilteredPersonnels] = useState<Personnel[]>([]);
@@ -159,15 +168,14 @@ const GestionPersonnels: React.FC = () => {
       const response = await api.get('/personnels');
       const mappedData = response.data.map((p: any) => ({
         ...p,
-        direction: p.direction ?? null,  // ✅ déjà une string
-      service: p.service ?? null,
-        poste: p.poste ?? null, 
-        etat: p.etat ?? null,
+        direction: p.direction ?? null,
+        service: p.service ?? null,
+        poste: p.poste ?? null,
+        etat: normalizeEtat(p.etat) ?? null,
         categorie: p.categorie ?? null,
         corps: p.corps ?? null,
         indice: p.indice ?? null,
         grade: p.grade ?? null,
-        poste: p.poste || (p.poste_nom) || '-',
       }));
       setPersonnels(mappedData);
       setHasMore(false);
@@ -232,7 +240,7 @@ const GestionPersonnels: React.FC = () => {
     }
     if (filters.direction !== 'all') filtered = filtered.filter(p => p.id_direction === parseInt(filters.direction, 10));
     if (filters.service !== 'all') filtered = filtered.filter(p => p.id_service === parseInt(filters.service, 10));
-    if (filters.statut !== 'all') filtered = filtered.filter(p => p.etat === filters.statut);
+    if (filters.statut !== 'all') filtered = filtered.filter(p => normalizeEtat(p.etat) === normalizeEtat(filters.statut));
     if (filters.categorie !== 'all') filtered = filtered.filter(p => p.categorie === filters.categorie);
     filtered.sort((a, b) => {
       const aVal = a[sortField];
@@ -362,7 +370,7 @@ const GestionPersonnels: React.FC = () => {
 
   const statsCards = [
     { title: 'Total personnels', value: personnels.length, icon: faUsers },
-    { title: 'Actifs', value: personnels.filter(p => p.etat === 'Actif').length, icon: faUserCheck },
+    { title: 'Actifs', value: personnels.filter(p => normalizeEtat(p.etat) === 'Actif').length, icon: faUserCheck },
     { title: 'Hommes', value: personnels.filter(p => p.genre === 'M').length, icon: faMars },
     { title: 'Femmes', value: personnels.filter(p => p.genre === 'F').length, icon: faVenus },
   ];
@@ -457,7 +465,7 @@ const GestionPersonnels: React.FC = () => {
                       <td className="code-cell">{personnel.indice || '-'}</td>
                       <td className="code-cell">{personnel.grade || '-'}</td>
                       <td>{new Date(personnel.date_entree).toLocaleDateString('fr-FR')}</td>
-                      <td>{personnel.etat === 'Actif' ? (<span className="status-badge status-active"><FontAwesomeIcon icon={faCheckCircle} /> Actif</span>) : (<span className="status-badge status-inactive"><FontAwesomeIcon icon={faTimesCircle} /> Inactif</span>)}</td>
+                      <td>{normalizeEtat(personnel.etat) === 'Actif' ? (<span className="status-badge status-active"><FontAwesomeIcon icon={faCheckCircle} /> Actif</span>) : (<span className="status-badge status-inactive"><FontAwesomeIcon icon={faTimesCircle} /> Inactif</span>)}</td>
                       <td className="actions"><button className="action-view" onClick={() => handleView(personnel)}><FontAwesomeIcon icon={faEye} /> Voir</button><button className="action-delete" onClick={() => { setSelectedPersonnel(personnel); setShowDeleteModal(true); }}><FontAwesomeIcon icon={faTrashAlt} /> Supprimer</button></td>
                     </tr>
                   ))}
@@ -487,7 +495,7 @@ const GestionPersonnels: React.FC = () => {
           <div className="modal modal-large" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header"><h3><FontAwesomeIcon icon={faUserTie} /> Détails du personnel</h3><button className="modal-close" onClick={() => setShowViewModal(false)}><FontAwesomeIcon icon={faTimes} /></button></div>
             <div className="modal-body">
-              <div className="profile-summary"><div className="avatar"><span>{selectedPersonnel.nom.charAt(0)}{selectedPersonnel.prenom.charAt(0)}</span></div><div><h4>{selectedPersonnel.nom} {selectedPersonnel.prenom}</h4>{selectedPersonnel.etat === 'Actif' ? (<span className="status-badge status-active"><FontAwesomeIcon icon={faCheckCircle} /> Actif</span>) : (<span className="status-badge status-inactive"><FontAwesomeIcon icon={faTimesCircle} /> Inactif</span>)}</div></div>
+              <div className="profile-summary"><div className="avatar"><span>{selectedPersonnel.nom.charAt(0)}{selectedPersonnel.prenom.charAt(0)}</span></div><div><h4>{selectedPersonnel.nom} {selectedPersonnel.prenom}</h4>{normalizeEtat(selectedPersonnel.etat) === 'Actif' ? (<span className="status-badge status-active"><FontAwesomeIcon icon={faCheckCircle} /> Actif</span>) : (<span className="status-badge status-inactive"><FontAwesomeIcon icon={faTimesCircle} /> Inactif</span>)}</div></div>
               <div className="details-grid">
                 <div className="detail"><label><FontAwesomeIcon icon={faIdCard} /> Matricule</label><span>{selectedPersonnel.matricule || selectedPersonnel.id}</span></div>
                 <div className="detail"><label><FontAwesomeIcon icon={faIdCard} /> CIN</label><span>{selectedPersonnel.numero_cin}</span></div>
@@ -662,7 +670,7 @@ const GestionPersonnels: React.FC = () => {
                   <div className="info-row"><label>Poste actuel :</label><span>{selectedPersonnel.poste || 'Non défini'}</span></div>
                   <div className="info-row"><label>Direction :</label><span>{selectedPersonnel.direction || '-'}</span></div>
                   <div className="info-row"><label>Service :</label><span>{selectedPersonnel.service || '-'}</span></div>
-                  <div className="info-row"><label>Statut :</label><span className={selectedPersonnel.etat === 'Actif' ? 'text-success' : 'text-danger'}>{selectedPersonnel.etat || 'Actif'}</span></div>
+                  <div className="info-row"><label>Statut :</label><span className={normalizeEtat(selectedPersonnel.etat) === 'Actif' ? 'text-success' : 'text-danger'}>{normalizeEtat(selectedPersonnel.etat) || 'Actif'}</span></div>
                 </div>
               </div>
 
