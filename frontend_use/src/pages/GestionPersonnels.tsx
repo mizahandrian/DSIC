@@ -152,8 +152,9 @@ const GestionPersonnels: React.FC = () => {
       const response = await api.get('/personnels');
       const mappedData = response.data.map((p: any) => ({
         ...p,
-        direction: p.direction?.nom_direction ?? null,
-        service: p.service?.nom_service ?? null,
+        direction: p.direction ?? null,  // ✅ déjà une string
+      service: p.service ?? null,
+        poste: p.poste ?? null, 
         etat: p.etat ?? null,
         categorie: p.categorie ?? null,
         corps: p.corps ?? null,
@@ -409,7 +410,7 @@ const GestionPersonnels: React.FC = () => {
     { title: 'Total personnels', value: personnels.length, icon: faUsers },
     { title: 'Actifs', value: personnels.filter(p => p.etat === 'Actif').length, icon: faUserCheck },
     { title: 'Hommes', value: personnels.filter(p => p.genre === 'M').length, icon: faMars },
-    { title: 'Femmes', value: personnels.filter(p => p.genre === 'F').length, icon: faVenusMars },
+    { title: 'Femmes', value: personnels.filter(p => p.genre === 'F').length, icon: faVenus },
   ];
 
   const itemsPerPage = 20;

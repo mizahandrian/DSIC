@@ -482,8 +482,8 @@ const GestionPostes: React.FC = () => {
                     <tr key={poste.id_poste}>
                       <td className="id-cell">#{poste.id_poste}</td>
                       <td className="title-cell">{poste.titre_poste}</td>
-                      <td>{getDirectionName(poste.id_direction)}</td>
-                      <td>{getServiceName(poste.id_service)}</td>
+                      <td>{poste.direction_nom || getDirectionName(poste.id_direction)}</td>
+                      <td>{poste.service_nom || getServiceName(poste.id_service)}</td>
                       <td>{poste.categorie || '-'}</td>
                       <td>{poste.niveau || '-'}</td>
                       <td className="actions-cell">
@@ -639,7 +639,7 @@ const GestionPostes: React.FC = () => {
                       <option value="C2">C2 - Agent de Service</option>
                     </select>
                   </div>
-                  {/* <div className="form-group">
+                  <div className="form-group">
                     <label>Niveau</label>
                     <select name="niveau" value={formData.niveau} onChange={handleInputChange}>
                       <option value="">Sélectionner un niveau</option>
@@ -650,7 +650,7 @@ const GestionPostes: React.FC = () => {
                       <option value="Manager">Manager</option>
                       <option value="Directeur">Directeur</option>
                     </select>
-                  </div> */}
+                  </div>
                 </div>
 
                 {/* <div className="form-row">
