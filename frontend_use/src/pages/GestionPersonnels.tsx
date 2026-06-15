@@ -159,15 +159,14 @@ const GestionPersonnels: React.FC = () => {
       const response = await api.get('/personnels');
       const mappedData = response.data.map((p: any) => ({
         ...p,
-        direction: p.direction ?? null,  // ✅ déjà une string
-      service: p.service ?? null,
-        poste: p.poste ?? null, 
-        etat: p.etat ?? null,
+        direction: p.direction?.nom_direction ?? p.direction ?? null,
+        service: p.service?.nom_service ?? p.service ?? null,
+        poste: p.poste?.titre_poste ?? p.poste ?? p.poste_nom ?? '-',
+        etat: p.etat?.nom_etat ?? p.etat ?? null,
         categorie: p.categorie ?? null,
         corps: p.corps ?? null,
         indice: p.indice ?? null,
         grade: p.grade ?? null,
-        poste: p.poste || (p.poste_nom) || '-',
       }));
       setPersonnels(mappedData);
       setHasMore(false);
@@ -289,6 +288,11 @@ const GestionPersonnels: React.FC = () => {
     });
     setIsEditing(false);
     if (personnel.id_direction) fetchServicesByDirection(personnel.id_direction);
+    if (personnel.id_direction && personnel.id_service) {
+      setFilteredPostes(allPostes.filter(p => p.id_direction === personnel.id_direction && p.id_service === personnel.id_service));
+    } else {
+      setFilteredPostes([]);
+    }
     setShowViewModal(true);
   };
 
@@ -392,7 +396,8 @@ const GestionPersonnels: React.FC = () => {
     { value: 'C1', label: 'Catégorie V' }, { value: 'C2', label: 'Catégorie VI' }
   ];
 
-  const getPosteTitre = (idPoste: number | null | undefined) => {
+  const getPosteTitre = (idPoste: number | null | undefined, fallback?: string | null) => {
+    if (fallback) return fallback;
     if (!idPoste) return '-';
     const poste = allPostes.find(p => p.id_poste === idPoste);
     return poste?.titre_poste || '-';
@@ -497,7 +502,7 @@ const GestionPersonnels: React.FC = () => {
                 <div className="detail"><label><FontAwesomeIcon icon={faCalendarAlt} /> Date entrée</label><span>{new Date(selectedPersonnel.date_entree).toLocaleDateString('fr-FR')}</span></div>
                 <div className="detail"><label><FontAwesomeIcon icon={faBuilding} /> Direction</label><span>{selectedPersonnel.direction || '-'}</span></div>
                 <div className="detail"><label><FontAwesomeIcon icon={faBriefcase} /> Service</label><span>{selectedPersonnel.service || '-'}</span></div>
-                <div className="detail"><label><FontAwesomeIcon icon={faUserTie} /> Poste</label><span>{getPosteTitre(selectedPersonnel.id_poste)}</span></div>
+                <div className="detail"><label><FontAwesomeIcon icon={faUserTie} /> Poste</label><span>{getPosteTitre(selectedPersonnel.id_poste, selectedPersonnel.poste)}</span></div>
                 <div className="detail"><label><FontAwesomeIcon icon={faTag} /> Catégorie</label><span>{getCategorieRomaine(selectedPersonnel.categorie)}</span></div>
                 <div className="detail"><label><FontAwesomeIcon icon={faLayerGroup} /> Corps</label><span>{selectedPersonnel.corps || '-'}</span></div>
                 <div className="detail"><label><FontAwesomeIcon icon={faGraduationCap} /> Indice</label><span>{selectedPersonnel.indice || '-'}</span></div>
