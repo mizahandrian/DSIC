@@ -34,18 +34,32 @@ class PosteController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-    'titre_poste'  => 'required|string|max:255',
-    'description'  => 'nullable|string',
-    'id_service'   => 'required|exists:services,id_service',
-    'indice'             => 'nullable|string',
-    'id_carriere'        => 'nullable|exists:carrieres,id_carriere',
-    'nombre_personnels'  => 'nullable|integer|min:0',
-]);
+            'titre_poste'   => 'required|string|max:255',
+            'description'   => 'nullable|string',
+            'id_direction'  => 'required|exists:directions,id_direction',
+            'id_service'    => 'required|exists:services,id_service',
+            'categorie'     => 'nullable|string|max:10',
+            'niveau'        => 'nullable|string|max:50',
+            'salaire_base'  => 'nullable|numeric|min:0',
+            'competences'   => 'nullable|string',
+        ]);
 
         $poste = Poste::create($validated);
         $poste->load(['direction', 'service']);
 
-        return response()->json($poste, 201);
+        return response()->json([
+            'id_poste'      => $poste->id_poste,
+            'titre_poste'   => $poste->titre_poste,
+            'description'   => $poste->description,
+            'id_direction'  => $poste->id_direction,
+            'id_service'    => $poste->id_service,
+            'direction_nom' => $poste->direction?->nom_direction,
+            'service_nom'   => $poste->service?->nom_service,
+            'categorie'     => $poste->categorie,
+            'niveau'        => $poste->niveau,
+            'salaire_base'  => $poste->salaire_base,
+            'competences'   => $poste->competences,
+        ], 201);
     }
 
     // PUT /api/postes/{id}
@@ -67,7 +81,19 @@ class PosteController extends Controller
         $poste->update($validated);
         $poste->load(['direction', 'service']);
 
-        return response()->json($poste);
+        return response()->json([
+            'id_poste'      => $poste->id_poste,
+            'titre_poste'   => $poste->titre_poste,
+            'description'   => $poste->description,
+            'id_direction'  => $poste->id_direction,
+            'id_service'    => $poste->id_service,
+            'direction_nom' => $poste->direction?->nom_direction,
+            'service_nom'   => $poste->service?->nom_service,
+            'categorie'     => $poste->categorie,
+            'niveau'        => $poste->niveau,
+            'salaire_base'  => $poste->salaire_base,
+            'competences'   => $poste->competences,
+        ]);
     }
 
     // DELETE /api/postes/{id}

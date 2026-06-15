@@ -210,7 +210,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
 //recrutement 
 Route::apiResource('recrutement', RecrutementController::class);
-Route::apiResource('postes', PosteController::class);
 Route::apiResource('carrieres', CarriereController::class);
 Route::apiResource('statuts', StatutController::class);
 
@@ -219,7 +218,6 @@ Route::apiResource('statuts', StatutController::class);
 
 //route personnel vaovao
 Route::get('/directions', [DirectionController::class, 'index']);
-Route::get('/postes', [PosteController::class, 'index']);
 Route::get('/carrieres', [CarriereController::class, 'index']);
 Route::get('/statuts', [StatutController::class, 'index']);
 Route::get('/etats', [EtatController::class, 'index']);
