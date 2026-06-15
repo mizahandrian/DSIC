@@ -70,6 +70,14 @@ interface Service {
   id_direction: number;
 }
 
+interface Poste {
+  id_poste: number;
+  titre_poste: string;
+  id_direction: number;
+  id_service: number;
+  description?: string;
+}
+
 const getCategorieRomaine = (categorie: string | null | undefined): string => {
   if (!categorie) return '-';
   const map: Record<string, string> = {
@@ -108,10 +116,13 @@ const GestionPersonnels: React.FC = () => {
   
   const [directions, setDirections] = useState<Direction[]>([]);
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
+  const [allPostes, setAllPostes] = useState<Poste[]>([]);
+  const [filteredPostes, setFilteredPostes] = useState<Poste[]>([]);
 
   useEffect(() => {
     fetchPersonnels();
     fetchSelectData();
+    fetchPostes();
   }, []);
 
   useEffect(() => {
@@ -127,6 +138,21 @@ const GestionPersonnels: React.FC = () => {
     return () => observerRef.current?.disconnect();
   }, [filteredPersonnels, hasMore, loadingMore]);
 
+  // Filtrer les postes en fonction de la direction et du service sélectionnés
+  useEffect(() => {
+    let filtered = [...allPostes];
+    
+    if (editFormData.id_direction && editFormData.id_direction !== 0) {
+      filtered = filtered.filter(p => p.id_direction === editFormData.id_direction);
+    }
+    
+    if (editFormData.id_service && editFormData.id_service !== 0) {
+      filtered = filtered.filter(p => p.id_service === editFormData.id_service);
+    }
+    
+    setFilteredPostes(filtered);
+  }, [editFormData.id_direction, editFormData.id_service, allPostes]);
+
   const fetchPersonnels = async () => {
     setLoading(true);
     try {
@@ -140,11 +166,21 @@ const GestionPersonnels: React.FC = () => {
         corps: p.corps ?? null,
         indice: p.indice ?? null,
         grade: p.grade ?? null,
+        poste: p.poste || (p.poste_nom) || '-',
       }));
       setPersonnels(mappedData);
       setHasMore(false);
     } catch (error) { console.error('Erreur:', error); } 
     finally { setLoading(false); }
+  };
+
+  const fetchPostes = async () => {
+    try {
+      const response = await api.get('/postes');
+      setAllPostes(response.data);
+    } catch (error) {
+      console.error('Erreur chargement postes:', error);
+    }
   };
 
   const fetchHistoriquePersonnel = async (personnelId: number) => {
@@ -243,7 +279,13 @@ const GestionPersonnels: React.FC = () => {
 
   const handleView = (personnel: Personnel) => {
     setSelectedPersonnel(personnel);
-    setEditFormData({ ...personnel, poste: personnel.poste || '', corps: personnel.corps || '', indice: personnel.indice || '', grade: personnel.grade || '' });
+    setEditFormData({ 
+      ...personnel, 
+      poste: personnel.poste || '', 
+      corps: personnel.corps || '', 
+      indice: personnel.indice || '', 
+      grade: personnel.grade || '' 
+    });
     setIsEditing(false);
     if (personnel.id_direction) fetchServicesByDirection(personnel.id_direction);
     setShowViewModal(true);
@@ -251,28 +293,44 @@ const GestionPersonnels: React.FC = () => {
 
   const handleEdit = () => setIsEditing(true);
   const handleCancelEdit = () => { setIsEditing(false); setEditFormData(selectedPersonnel!); };
+  
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    const numValue = value ? parseInt(value, 10) : undefined;
+    
     setEditFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: name === 'id_direction' || name === 'id_service' || name === 'id_poste' ? numValue : value
     }));
 
     if (name === 'id_direction') {
       if (value) {
         fetchServicesByDirection(parseInt(value, 10));
+        // Réinitialiser le service et le poste quand la direction change
+        setEditFormData(prev => ({ ...prev, id_service: undefined, id_poste: undefined }));
       } else {
         setFilteredServices([]);
-        setEditFormData(prev => ({ ...prev, id_service: undefined }));
+        setEditFormData(prev => ({ ...prev, id_service: undefined, id_poste: undefined }));
       }
+    }
+    
+    if (name === 'id_service') {
+      // Réinitialiser le poste quand le service change
+      setEditFormData(prev => ({ ...prev, id_poste: undefined }));
     }
   };
 
   const handleSaveEdit = async () => {
     if (!selectedPersonnel) return;
     try {
-      await api.put(`/personnels/${selectedPersonnel.id}`, editFormData);
-      triggerNotification('info', '✏️ Personnel modifié', `Les informations de ${editFormData.prenom} ${editFormData.nom} ont été mises à jour`, '/gestion-personnels');
+      const selectedPoste = allPostes.find(p => p.id_poste === Number(editFormData.id_poste));
+      const posteData = {
+        ...editFormData,
+        poste: selectedPoste?.titre_poste || editFormData.poste
+      };
+      
+      await api.put(`/personnels/${selectedPersonnel.id}`, posteData);
+      triggerNotification('info', '✏️ Personnel modifié', `Les informations de ${posteData.prenom} ${posteData.nom} ont été mises à jour`, '/gestion-personnels');
       fetchPersonnels();
       setIsEditing(false);
       alert('Personnel modifié avec succès');
@@ -332,6 +390,12 @@ const GestionPersonnels: React.FC = () => {
     { value: 'B1', label: 'Catégorie III' }, { value: 'B2', label: 'Catégorie IV' },
     { value: 'C1', label: 'Catégorie V' }, { value: 'C2', label: 'Catégorie VI' }
   ];
+
+  const getPosteTitre = (idPoste: number | null | undefined) => {
+    if (!idPoste) return '-';
+    const poste = allPostes.find(p => p.id_poste === idPoste);
+    return poste?.titre_poste || '-';
+  };
 
   return (
     <div className="gestion-personnels">
@@ -432,7 +496,7 @@ const GestionPersonnels: React.FC = () => {
                 <div className="detail"><label><FontAwesomeIcon icon={faCalendarAlt} /> Date entrée</label><span>{new Date(selectedPersonnel.date_entree).toLocaleDateString('fr-FR')}</span></div>
                 <div className="detail"><label><FontAwesomeIcon icon={faBuilding} /> Direction</label><span>{selectedPersonnel.direction || '-'}</span></div>
                 <div className="detail"><label><FontAwesomeIcon icon={faBriefcase} /> Service</label><span>{selectedPersonnel.service || '-'}</span></div>
-                <div className="detail"><label><FontAwesomeIcon icon={faUserTie} /> Poste</label><span>{selectedPersonnel.poste || '-'}</span></div>
+                <div className="detail"><label><FontAwesomeIcon icon={faUserTie} /> Poste</label><span>{getPosteTitre(selectedPersonnel.id_poste)}</span></div>
                 <div className="detail"><label><FontAwesomeIcon icon={faTag} /> Catégorie</label><span>{getCategorieRomaine(selectedPersonnel.categorie)}</span></div>
                 <div className="detail"><label><FontAwesomeIcon icon={faLayerGroup} /> Corps</label><span>{selectedPersonnel.corps || '-'}</span></div>
                 <div className="detail"><label><FontAwesomeIcon icon={faGraduationCap} /> Indice</label><span>{selectedPersonnel.indice || '-'}</span></div>
@@ -445,7 +509,7 @@ const GestionPersonnels: React.FC = () => {
         </div>
       )}
 
-      {/* Edit Modal - AVEC FORMULAIRE COMPLET */}
+      {/* Edit Modal */}
       {showViewModal && selectedPersonnel && isEditing && (
         <div className="modal-overlay" onClick={() => setIsEditing(false)}>
           <div className="modal modal-large" onClick={(e) => e.stopPropagation()}>
@@ -529,10 +593,16 @@ const GestionPersonnels: React.FC = () => {
                       <option value="">Sélectionner</option>
                       {filteredServices.map(s => (<option key={s.id_service} value={s.id_service}>{s.nom_service}</option>))}
                     </select>
+                    {!editFormData.id_direction && <small className="form-hint">Choisissez d'abord une direction</small>}
                   </div>
                   <div className="form-group">
                     <label>Poste *</label>
-                    <input type="text" name="poste" value={editFormData.poste || ''} onChange={handleEditChange} />
+                    <select name="id_poste" value={editFormData.id_poste || ''} onChange={handleEditChange} disabled={!editFormData.id_service}>
+                      <option value="">Sélectionner un poste</option>
+                      {filteredPostes.map(p => (<option key={p.id_poste} value={p.id_poste}>{p.titre_poste}</option>))}
+                    </select>
+                    {!editFormData.id_service && editFormData.id_direction && <small className="form-hint">Choisissez d'abord un service</small>}
+                    {filteredPostes.length === 0 && editFormData.id_service && <small className="form-hint warning">Aucun poste disponible pour ce service</small>}
                   </div>
                 </div>
 
@@ -581,7 +651,7 @@ const GestionPersonnels: React.FC = () => {
               <button className="modal-close" onClick={() => setShowHistoriqueModal(false)}><FontAwesomeIcon icon={faTimes} /></button>
             </div>
             <div className="modal-body historique-body">
-
+              
               {/* Section 1: Identité et poste actuel */}
               <div className="historique-card">
                 <div className="card-header"><div className="card-icon"><FontAwesomeIcon icon={faUserTie} /></div><h4>Identité et poste actuel</h4></div>

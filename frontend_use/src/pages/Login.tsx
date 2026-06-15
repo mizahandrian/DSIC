@@ -68,9 +68,13 @@ const Login: React.FC = () => {
           {error}
         </div>
       )}
-
+      
+      <div className='login-title'>
+        <h1>Connexion</h1>
+        <p>Accédez à votre espace de gestion des personnels</p>
+      </div>
       <div className="input-group">
-        <label>Email professionnel</label>
+        <label>Email </label>
         <div className="input-icon-wrapper">
           <FontAwesomeIcon icon={faEnvelope} className="input-icon" />
           <input
