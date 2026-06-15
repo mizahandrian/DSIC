@@ -134,9 +134,9 @@ Route::delete('/directions/{id}', [DirectionController::class, 'destroy']);
 // ==================== ROUTES PERSONNELS ====================
 Route::get('/personnels', [PersonnelController::class, 'index']);
 Route::post('/personnels', [PersonnelController::class, 'store']);
+Route::get('/personnels/{id}/anciennete', [PersonnelController::class, 'getAnciennete']);
 Route::put('/personnels/{id}', [PersonnelController::class, 'update']);
 Route::delete('/personnels/{id}', [PersonnelController::class, 'destroy']);
-Route::get('/personnels/stats', [PersonnelController::class, 'stats']);
 
 // ==================== ROUTES CARRIERES ====================
 Route::get('/carrieres', [CarriereController::class, 'index']);

@@ -78,9 +78,15 @@ class PersonnelController extends Controller
 
     public function destroy($id)
     {
-        $personnel = Personnel::findOrFail($id);
-        $personnel->delete();
-        return response()->json(['message' => 'Supprimé']);
+        try {
+            $personnel = Personnel::findOrFail($id);
+            $personnel->delete();
+            return response()->json(['message' => 'Supprimé']);
+        } catch (\Exception $e) {
+            // Journaliser l'erreur complète pour investigation
+            logger()->error('Erreur suppression personnel', ['id' => $id, 'error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['message' => 'Erreur serveur lors de la suppression', 'error' => $e->getMessage()], 500);
+        }
     }
 }*/
 use App\Models\Personnel;
@@ -173,8 +179,45 @@ class PersonnelController extends Controller
 
     public function destroy($id)
     {
-        $personnel = Personnel::findOrFail($id);
-        $personnel->delete();
-        return response()->json(['message' => 'Supprimé']);
+        try {
+            $personnel = Personnel::findOrFail($id);
+            $personnel->delete();
+            return response()->json(['message' => 'Supprimé']);
+        } catch (\Exception $e) {
+            logger()->error('Erreur suppression personnel', ['id' => $id, 'error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['message' => 'Erreur serveur lors de la suppression', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getAnciennete($id)
+    {
+        try {
+            $historique = \App\Models\Historique::where('id_personnel', $id)->first();
+            
+            if (!$historique) {
+                return response()->json([
+                    'ancien_poste' => null,
+                    'ancien_direction' => null,
+                    'ancien_service' => null,
+                    'ancien_employeur' => null,
+                    'date_debut' => null,
+                    'date_fin' => null,
+                    'motif_depart' => null
+                ]);
+            }
+            
+            return response()->json([
+                'ancien_poste' => $historique->ancien_poste,
+                'ancien_direction' => $historique->ancien_direction,
+                'ancien_service' => null,
+                'ancien_employeur' => null,
+                'date_debut' => null,
+                'date_fin' => null,
+                'motif_depart' => $historique->motif_changement
+            ]);
+        } catch (\Exception $e) {
+            logger()->error('Erreur récupération ancienneté', ['id' => $id, 'error' => $e->getMessage()]);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }
