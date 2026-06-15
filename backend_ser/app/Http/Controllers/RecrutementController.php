@@ -34,6 +34,30 @@ class RecrutementController extends Controller
         try {
             DB::beginTransaction();
 
+            // Si l'utilisateur a sélectionné un poste par son id, on récupère son intitulé
+            $posteTitre = null;
+            if ($request->filled('id_poste')) {
+                $poste = \App\Models\Poste::find($request->id_poste);
+                $posteTitre = $poste?->titre_poste;
+            }
+
+            $etatValue = $request->filled('etat') ? trim($request->etat) : null;
+            if ($request->filled('id_etat')) {
+                $etatModel = \App\Models\Etat::find($request->id_etat);
+                $etatValue = $etatModel?->nom_etat ?? $etatValue;
+            }
+
+            if ($etatValue === null || $etatValue === '') {
+                $etatValue = 'Actif';
+            } else {
+                $lower = strtolower($etatValue);
+                if ($lower === 'actif') {
+                    $etatValue = 'Actif';
+                } elseif ($lower === 'inactif') {
+                    $etatValue = 'Inactif';
+                }
+            }
+
             // ✅ 1. Créer le PERSONNEL
             $personnel = Personnel::create([
                 'matricule'              => $request->matricule ?? null,
@@ -48,12 +72,12 @@ class RecrutementController extends Controller
 
                 'id_direction'           => $request->id_direction ?: null,
                 'id_service'             => $request->id_service ?: null,
-                'id_poste'               => null,
+                'id_poste'               => $request->id_poste ?: null,
                 'id_carriere'            => null,
                 'id_etat'                => $request->id_etat ?: null,
                 'id_statut'              => $request->id_statut ?: null,
 
-                'poste'                  => $request->poste ?? null,
+                'poste'                  => $posteTitre ?? $request->poste ?? null,
                 'service'                => $request->service ?? null,
                 'direction'              => $request->direction ?? null,
 
@@ -64,7 +88,7 @@ class RecrutementController extends Controller
                 'date_effet_carriere'    => $parseDate($request->date_effet_carriere),  // ✅
 
                 'statut'                 => $request->statut ?? null,
-                'etat'                   => $request->etat ?? 'actif',
+                'etat'                   => ucfirst(strtolower($etatValue ?? 'actif')),
 
                 'situation'              => $request->situation ?? null,
                 'date_situation'         => $parseDate($request->date_situation),       // ✅

@@ -34,13 +34,15 @@ class PosteController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-    'titre_poste'  => 'required|string|max:255',
-    'description'  => 'nullable|string',
-    'id_service'   => 'required|exists:services,id_service',
-    'indice'             => 'nullable|string',
-    'id_carriere'        => 'nullable|exists:carrieres,id_carriere',
-    'nombre_personnels'  => 'nullable|integer|min:0',
-]);
+            'titre_poste'  => 'required|string|max:255',
+            'description'  => 'nullable|string',
+            'id_direction' => 'required|exists:directions,id_direction',
+            'id_service'   => 'required|exists:services,id_service',
+            'categorie'    => 'nullable|string|max:10',
+            'niveau'       => 'nullable|string|max:50',
+            'salaire_base' => 'nullable|numeric|min:0',
+            'competences'  => 'nullable|string',
+        ]);
 
         $poste = Poste::create($validated);
         $poste->load(['direction', 'service']);

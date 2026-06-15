@@ -88,9 +88,47 @@ use Illuminate\Http\Request;
 
 class PersonnelController extends Controller
 {
+    private function normalizeEtat(?string $etat): ?string
+    {
+        if ($etat === null) {
+            return null;
+        }
+
+        $etat = trim($etat);
+        if ($etat === '') {
+            return null;
+        }
+
+        $lower = strtolower($etat);
+        if ($lower === 'inactif') {
+            return 'Inactif';
+        }
+
+        if ($lower === 'actif') {
+            return 'Actif';
+        }
+
+        return $etat;
+    }
+
     public function store(Request $request)
     {
-        $personnel = Personnel::create($request->all());
+        $data = $request->all();
+        
+        // Récupérer le titre du poste depuis id_poste
+        if (!empty($data['id_poste'])) {
+            $poste = \App\Models\Poste::find($data['id_poste']);
+            $data['poste'] = $poste?->titre_poste;
+        }
+
+        if (!empty($data['id_etat'])) {
+            $etatModel = \App\Models\Etat::find($data['id_etat']);
+            $data['etat'] = $etatModel?->nom_etat ?? $this->normalizeEtat($data['etat'] ?? 'Actif');
+        } else {
+            $data['etat'] = $this->normalizeEtat($data['etat'] ?? 'Actif');
+        }
+        
+        $personnel = Personnel::create($data);
 
         return response()->json([
             'message' => 'OK',
@@ -98,16 +136,38 @@ class PersonnelController extends Controller
         ]);
     }
 
-    public function index()
+   public function index()
 {
-    
-    return Personnel::with(['direction', 'service'])->get();
+    return Personnel::with(['directionRelation', 'serviceRelation', 'posteRelation'])
+        ->get()
+        ->map(fn($p) => array_merge($p->toArray(), [
+            'direction' => $p->directionRelation?->nom_direction ?? $p->direction,
+            'service'   => $p->serviceRelation?->nom_service ?? $p->service,
+            'poste'     => $p->posteRelation?->titre_poste ?? $p->poste,
+            'etat'      => $this->normalizeEtat($p->etat),
+        ]));
 }
 
     public function update(Request $request, $id)
     {
         $personnel = Personnel::findOrFail($id);
-        $personnel->update($request->all());
+        $data = $request->all();
+
+        if (!empty($data['id_etat'])) {
+            $etatModel = \App\Models\Etat::find($data['id_etat']);
+            if ($etatModel) {
+                $data['etat'] = $etatModel->nom_etat;
+            }
+        } elseif (array_key_exists('etat', $data)) {
+            $data['etat'] = $this->normalizeEtat($data['etat'] ?? 'Actif');
+        }
+
+        if (!empty($data['id_poste'])) {
+            $poste = \App\Models\Poste::find($data['id_poste']);
+            $data['poste'] = $poste?->titre_poste;
+        }
+
+        $personnel->update($data);
         return response()->json($personnel);
     }
 
