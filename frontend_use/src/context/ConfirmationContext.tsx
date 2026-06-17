@@ -4,7 +4,7 @@ import ConfirmationToast from '../components/ConfirmationToast';
 
 interface ConfirmationContextType {
   showConfirmation: (
-    message: string, 
+    message: string,
     type?: 'success' | 'error' | 'warning' | 'info',
     duration?: number
   ) => void;
