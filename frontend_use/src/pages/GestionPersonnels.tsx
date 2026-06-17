@@ -1,4 +1,4 @@
-// src/pages/GestionPersonnels.tsx
+﻿// src/pages/GestionPersonnels.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -13,6 +13,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 import { triggerNotification } from '../components/NotificationBell';
+import { useConfirmation } from '../context/ConfirmationContext';
 
 interface Personnel {
   id: number;
@@ -118,6 +119,7 @@ const GestionPersonnels: React.FC = () => {
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
   const [allPostes, setAllPostes] = useState<Poste[]>([]);
   const [filteredPostes, setFilteredPostes] = useState<Poste[]>([]);
+  const { showConfirmation } = useConfirmation();
 
   useEffect(() => {
     fetchPersonnels();
@@ -159,18 +161,18 @@ const GestionPersonnels: React.FC = () => {
       const response = await api.get('/personnels');
       const mappedData = response.data.map((p: any) => ({
         ...p,
-        direction: p.direction?.nom_direction ?? p.direction ?? null,
-        service: p.service?.nom_service ?? p.service ?? null,
-        poste: p.poste?.titre_poste ?? p.poste ?? p.poste_nom ?? '-',
-        etat: p.etat?.nom_etat ?? p.etat ?? null,
+        direction: typeof p.direction === 'string' ? p.direction : p.direction?.nom_direction ?? null,
+        service: typeof p.service === 'string' ? p.service : p.service?.nom_service ?? null,
+        etat: typeof p.etat === 'string' ? p.etat : p.etat?.nom_etat ?? null,
         categorie: p.categorie ?? null,
         corps: p.corps ?? null,
         indice: p.indice ?? null,
         grade: p.grade ?? null,
+        poste: typeof p.poste === 'string' ? p.poste : p.poste?.titre_poste ?? p.poste_nom ?? '-',
       }));
       setPersonnels(mappedData);
       setHasMore(false);
-    } catch (error) { console.error('Erreur:', error); } 
+    } catch (error) { console.error('Erreur:', error); }
     finally { setLoading(false); }
   };
 
@@ -267,6 +269,7 @@ const GestionPersonnels: React.FC = () => {
   };
 
   const handleDelete = async () => {
+    showConfirmation('Personnel supprimé avec succès', 'success');
     if (!selectedPersonnel) return;
     try {
       await api.delete(`/personnels/${selectedPersonnel.id}`);
@@ -288,11 +291,6 @@ const GestionPersonnels: React.FC = () => {
     });
     setIsEditing(false);
     if (personnel.id_direction) fetchServicesByDirection(personnel.id_direction);
-    if (personnel.id_direction && personnel.id_service) {
-      setFilteredPostes(allPostes.filter(p => p.id_direction === personnel.id_direction && p.id_service === personnel.id_service));
-    } else {
-      setFilteredPostes([]);
-    }
     setShowViewModal(true);
   };
 
@@ -338,8 +336,8 @@ const GestionPersonnels: React.FC = () => {
       triggerNotification('info', '✏️ Personnel modifié', `Les informations de ${posteData.prenom} ${posteData.nom} ont été mises à jour`, '/gestion-personnels');
       fetchPersonnels();
       setIsEditing(false);
-      alert('Personnel modifié avec succès');
-    } catch (error) { console.error('Erreur:', error); alert('Erreur lors de la modification'); }
+      showConfirmation('Personnel modifié avec succès', 'success');
+    } catch (error) { console.error('Erreur:', error); showConfirmation('Erreur lors de la modification', 'error'); }
   };
 
   const getSortIcon = (field: keyof Personnel) => {
@@ -396,8 +394,7 @@ const GestionPersonnels: React.FC = () => {
     { value: 'C1', label: 'Catégorie V' }, { value: 'C2', label: 'Catégorie VI' }
   ];
 
-  const getPosteTitre = (idPoste: number | null | undefined, fallback?: string | null) => {
-    if (fallback) return fallback;
+  const getPosteTitre = (idPoste: number | null | undefined) => {
     if (!idPoste) return '-';
     const poste = allPostes.find(p => p.id_poste === idPoste);
     return poste?.titre_poste || '-';
@@ -502,7 +499,7 @@ const GestionPersonnels: React.FC = () => {
                 <div className="detail"><label><FontAwesomeIcon icon={faCalendarAlt} /> Date entrée</label><span>{new Date(selectedPersonnel.date_entree).toLocaleDateString('fr-FR')}</span></div>
                 <div className="detail"><label><FontAwesomeIcon icon={faBuilding} /> Direction</label><span>{selectedPersonnel.direction || '-'}</span></div>
                 <div className="detail"><label><FontAwesomeIcon icon={faBriefcase} /> Service</label><span>{selectedPersonnel.service || '-'}</span></div>
-                <div className="detail"><label><FontAwesomeIcon icon={faUserTie} /> Poste</label><span>{getPosteTitre(selectedPersonnel.id_poste, selectedPersonnel.poste)}</span></div>
+                <div className="detail"><label><FontAwesomeIcon icon={faUserTie} /> Poste</label><span>{getPosteTitre(selectedPersonnel.id_poste)}</span></div>
                 <div className="detail"><label><FontAwesomeIcon icon={faTag} /> Catégorie</label><span>{getCategorieRomaine(selectedPersonnel.categorie)}</span></div>
                 <div className="detail"><label><FontAwesomeIcon icon={faLayerGroup} /> Corps</label><span>{selectedPersonnel.corps || '-'}</span></div>
                 <div className="detail"><label><FontAwesomeIcon icon={faGraduationCap} /> Indice</label><span>{selectedPersonnel.indice || '-'}</span></div>
@@ -662,12 +659,12 @@ const GestionPersonnels: React.FC = () => {
               <div className="historique-card">
                 <div className="card-header"><div className="card-icon"><FontAwesomeIcon icon={faUserTie} /></div><h4>Identité et poste actuel</h4></div>
                 <div className="card-body">
-                  <div className="info-row"><label>Matricule :</label><span>{selectedPersonnel.matricule || `#${selectedPersonnel.id}`}</span></div>
-                  <div className="info-row"><label>Nom complet :</label><span>{selectedPersonnel.nom} {selectedPersonnel.prenom}</span></div>
-                  <div className="info-row"><label>Poste actuel :</label><span>{selectedPersonnel.poste || 'Non défini'}</span></div>
-                  <div className="info-row"><label>Direction :</label><span>{selectedPersonnel.direction || '-'}</span></div>
-                  <div className="info-row"><label>Service :</label><span>{selectedPersonnel.service || '-'}</span></div>
-                  <div className="info-row"><label>Statut :</label><span className={selectedPersonnel.etat === 'Actif' ? 'text-success' : 'text-danger'}>{selectedPersonnel.etat || 'Actif'}</span></div>
+                  <div className="info-row"><label>Matricule : </label><span>{selectedPersonnel.matricule || `#${selectedPersonnel.id}`}</span></div>
+                  <div className="info-row"><label>Nom complet : </label><span>{selectedPersonnel.nom} {selectedPersonnel.prenom}</span></div>
+                  <div className="info-row"><label>Poste actuel : </label><span>{selectedPersonnel.poste || 'Non défini'}</span></div>
+                  <div className="info-row"><label>Direction : </label><span>{selectedPersonnel.direction || '-'}</span></div>
+                  <div className="info-row"><label>Service : </label><span>{selectedPersonnel.service || '-'}</span></div>
+                  <div className="info-row"><label>Statut : </label><span className={selectedPersonnel.etat === 'Actif' ? 'text-success' : 'text-danger'}>{selectedPersonnel.etat || 'Actif'}</span></div>
                 </div>
               </div>
 
@@ -677,13 +674,13 @@ const GestionPersonnels: React.FC = () => {
                 <div className="card-body">
                   {(anciennete && (anciennete.ancien_poste || anciennete.ancien_direction || anciennete.ancien_employeur)) ? (
                     <div className="anciennete-grid">
-                      {anciennete.ancien_employeur && <div className="info-row"><label>Employeur précédent :</label><span>{anciennete.ancien_employeur}</span></div>}
+                      {anciennete.ancien_employeur && <div className="info-row"><label>Employeur précédent : </label><span>{anciennete.ancien_employeur}</span></div>}
                       {anciennete.ancien_poste && <div className="info-row"><label>Poste occupé :</label><span>{anciennete.ancien_poste}</span></div>}
-                      {anciennete.ancien_direction && <div className="info-row"><label>Direction / Service :</label><span>{anciennete.ancien_direction}</span></div>}
-                      {(anciennete.date_debut || anciennete.date_fin) && <div className="info-row"><label>Période :</label><span>{formatDate(anciennete.date_debut)} - {formatDate(anciennete.date_fin) || 'Présent'}</span></div>}
-                      {anciennete.motif_depart && <div className="info-row"><label>Motif du départ :</label><span>{anciennete.motif_depart}</span></div>}
+                      {anciennete.ancien_direction && <div className="info-row"><label>Direction / Service : </label><span>{anciennete.ancien_direction}</span></div>}
+                      {(anciennete.date_debut || anciennete.date_fin) && <div className="info-row"><label>Période : </label><span>{formatDate(anciennete.date_debut)} - {formatDate(anciennete.date_fin) || 'Présent'}</span></div>}
+                      {anciennete.motif_depart && <div className="info-row"><label>Motif du départ : </label><span>{anciennete.motif_depart}</span></div>}
                     </div>
-                  ) : (<div className="empty-message"><FontAwesomeIcon icon={faBriefcase} /><p>Aucune information sur l'ancienneté disponible</p></div>)}
+                  ) : (<div className="empty-message"><FontAwesomeIcon icon={faBriefcase} /><p>Aucune information sur l'ancienneté disponible </p></div>)}
                 </div>
               </div>
 
@@ -691,11 +688,11 @@ const GestionPersonnels: React.FC = () => {
               <div className="historique-card">
                 <div className="card-header"><div className="card-icon"><FontAwesomeIcon icon={faUserPlus} /></div><h4>Recrutement à l'INSTAT</h4></div>
                 <div className="card-body">
-                  <div className="info-row"><label>Date d'entrée :</label><span>{formatDate(selectedPersonnel.date_entree)}</span></div>
-                  <div className="info-row"><label>Motif d'entrée :</label><span>{selectedPersonnel.motif_entree || '-'}</span></div>
-                  <div className="info-row"><label>Direction d'affectation :</label><span>{selectedPersonnel.direction || '-'}</span></div>
-                  <div className="info-row"><label>Service d'affectation :</label><span>{selectedPersonnel.service || '-'}</span></div>
-                  <div className="info-row"><label>Poste à l'arrivée :</label><span>{selectedPersonnel.poste || '-'}</span></div>
+                  <div className="info-row"><label>Date d'entrée : </label><span>{formatDate(selectedPersonnel.date_entree)}</span></div>
+                  <div className="info-row"><label>Motif d'entrée : </label><span>{selectedPersonnel.motif_entree || '-'}</span></div>
+                  <div className="info-row"><label>Direction d'affectation : </label><span>{selectedPersonnel.direction || '-'}</span></div>
+                  <div className="info-row"><label>Service d'affectation : </label><span>{selectedPersonnel.service || '-'}</span></div>
+                  <div className="info-row"><label>Poste à l'arrivée : </label><span>{selectedPersonnel.poste || '-'}</span></div>
                 </div>
               </div>
 
@@ -704,10 +701,10 @@ const GestionPersonnels: React.FC = () => {
                 <div className="card-header"><div className="card-icon"><FontAwesomeIcon icon={faChartLine} /></div><h4>Évolution de carrière</h4></div>
                 <div className="card-body">
                   <div className="carriere-items">
-                    <div className="carriere-item"><label>Catégorie</label><span className="categorie-value">{getCategorieRomaine(selectedPersonnel.categorie)}</span></div>
-                    <div className="carriere-item"><label>Corps</label><span>{selectedPersonnel.corps || '-'}</span></div>
-                    <div className="carriere-item"><label>Indice</label><span>{selectedPersonnel.indice || '-'}</span></div>
-                    <div className="carriere-item"><label>Grade</label><span>{selectedPersonnel.grade || '-'}</span></div>
+                    <div className="carriere-item"><label>Catégorie : </label><span className="categorie-value">{getCategorieRomaine(selectedPersonnel.categorie)}</span></div>
+                    <div className="carriere-item"><label>Corps : </label><span>{selectedPersonnel.corps || '-'}</span></div>
+                    <div className="carriere-item"><label>Indice : </label><span>{selectedPersonnel.indice || '-'}</span></div>
+                    <div className="carriere-item"><label>Grade : </label><span>{selectedPersonnel.grade || '-'}</span></div>
                   </div>
                 </div>
               </div>
@@ -739,10 +736,10 @@ const GestionPersonnels: React.FC = () => {
               <div className="historique-card">
                 <div className="card-header"><div className="card-icon"><FontAwesomeIcon icon={faIdCard} /></div><h4>Informations personnelles</h4></div>
                 <div className="card-body">
-                  <div className="info-row"><label>CIN :</label><span>{selectedPersonnel.numero_cin}</span></div>
-                  <div className="info-row"><label>Téléphone :</label><span>{selectedPersonnel.tel || '-'}</span></div>
-                  <div className="info-row"><label>Genre :</label><span>{selectedPersonnel.genre === 'M' ? 'Masculin' : 'Féminin'}</span></div>
-                  <div className="info-row"><label>Date de naissance :</label><span>{formatDate(selectedPersonnel.date_naissance)}</span></div>
+                  <div className="info-row"><label>CIN : </label><span>{selectedPersonnel.numero_cin}</span></div>
+                  <div className="info-row"><label>Téléphone : </label><span>{selectedPersonnel.tel || '-'}</span></div>
+                  <div className="info-row"><label>Genre : </label><span>{selectedPersonnel.genre === 'M' ? 'Masculin' : 'Féminin'}</span></div>
+                  <div className="info-row"><label>Date de naissance : </label><span>{formatDate(selectedPersonnel.date_naissance)}</span></div>
                 </div>
               </div>
 

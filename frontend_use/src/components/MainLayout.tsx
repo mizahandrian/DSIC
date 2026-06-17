@@ -1,26 +1,34 @@
 // src/components/MainLayout.tsx
 import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
-import '../style/dashboard.css';
+import PageTransition from './PageTransition'; // Import par défaut
 
-const MainLayout: React.FC = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+interface MainLayoutProps {
+  children: React.ReactNode;
+}
 
-  const handleMenuClick = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const location = useLocation();
+  
+  const token = localStorage.getItem('token');
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <div className="dashboard-container">
       <Sidebar 
-        isMobileOpen={isSidebarOpen} 
-        onMobileClose={() => setIsSidebarOpen(false)} 
+        isMobileOpen={isMobileOpen}
+        onMobileClose={() => setIsMobileOpen(false)}
       />
-      <Header onMenuClick={handleMenuClick} />
+      <Header onMenuClick={() => setIsMobileOpen(!isMobileOpen)} />
       <main className="main-content">
-        <Outlet />
+        <PageTransition key={location.pathname}>
+          {children}
+        </PageTransition>
       </main>
     </div>
   );

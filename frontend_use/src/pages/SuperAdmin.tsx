@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../Service/api';
 import '../style/superadmin.css';
+import { useConfirmation } from '../context/ConfirmationContext';
 
 interface User {
   id: number;
@@ -16,6 +17,7 @@ interface User {
 }
 
 const SuperAdmin: React.FC = () => {
+  const { showConfirmation } = useConfirmation();
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -132,6 +134,7 @@ const SuperAdmin: React.FC = () => {
     };
 
     try {
+      showConfirmation('Utilisateur ajouté avec succès', 'success');
       if (editingUser) {
         await api.put(`/users/${editingUser.id}`, payload);
       } else {
@@ -145,6 +148,7 @@ const SuperAdmin: React.FC = () => {
       handleCancel();
     } catch (error) {
       console.error('Erreur:', error);
+      showConfirmation('Erreur lors de l\'ajout de l\'utilisateur', 'error');
     } finally {
       setSubmitting(false);
     }

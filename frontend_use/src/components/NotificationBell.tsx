@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faBell, faCheckCircle, faExclamationTriangle, 
-  faInfoCircle, faTimes, faTrashAlt
+  faInfoCircle, faTimes, faTrashAlt, faUser
 } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 
@@ -15,6 +15,8 @@ interface Notification {
   date: string;
   read: boolean;
   link?: string;
+  userId?: string;
+  userName?: string;
 }
 
 const NotificationBell: React.FC = () => {
@@ -44,8 +46,24 @@ const NotificationBell: React.FC = () => {
     
     window.addEventListener('new-notification', handleNewNotification as EventListener);
     
+    // Vérifier les notifications dans localStorage toutes les 2 secondes
+    const interval = setInterval(() => {
+      const saved = localStorage.getItem('app-notifications');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed.length !== notifications.length) {
+            setNotifications(parsed);
+          }
+        } catch (e) {
+          console.error('Erreur parsing notifications:', e);
+        }
+      }
+    }, 2000);
+    
     return () => {
       window.removeEventListener('new-notification', handleNewNotification as EventListener);
+      clearInterval(interval);
     };
   }, [notifications]);
 
@@ -63,20 +81,49 @@ const NotificationBell: React.FC = () => {
   const loadNotifications = () => {
     const saved = localStorage.getItem('app-notifications');
     if (saved) {
-      const parsed = JSON.parse(saved);
-      setNotifications(parsed);
+      try {
+        const parsed = JSON.parse(saved);
+        setNotifications(parsed);
+      } catch (e) {
+        setNotifications([]);
+      }
     } else {
-      setNotifications([]);
+      // Notifications de démonstration
+      const demoNotifications: Notification[] = [
+        {
+          id: '1',
+          type: 'info',
+          title: 'Bienvenue',
+          message: 'Bienvenue sur la plateforme de gestion RH',
+          date: new Date().toISOString(),
+          read: false,
+          userId: 'system',
+          userName: 'Système'
+        }
+      ];
+      setNotifications(demoNotifications);
+      localStorage.setItem('app-notifications', JSON.stringify(demoNotifications));
     }
   };
 
   const addNotification = (notification: Notification) => {
+    // Récupérer l'utilisateur courant
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const userName = user.prenom ? `${user.prenom} ${user.nom}` : user.name || 'Utilisateur';
+    
+    const notificationWithUser: Notification = {
+      ...notification,
+      userId: user.id || user.email || 'unknown',
+      userName: userName
+    };
+
     setNotifications(prev => {
-      // Éviter les doublons (même titre et message dans les dernières 30 secondes)
+      // Éviter les doublons
       const now = Date.now();
       const isDuplicate = prev.some(n => 
         n.title === notification.title && 
         n.message === notification.message &&
+        n.userId === notificationWithUser.userId &&
         now - new Date(n.date).getTime() < 30000
       );
       
@@ -86,12 +133,12 @@ const NotificationBell: React.FC = () => {
       }
       
       // Ajouter en tête et limiter à 30 notifications
-      const newNotifications = [notification, ...prev].slice(0, 30);
+      const newNotifications = [notificationWithUser, ...prev].slice(0, 30);
       return newNotifications;
     });
     
     // Afficher le toast
-    showToast(notification);
+    showToast(notificationWithUser);
   };
 
   const showToast = (notification: Notification) => {
@@ -143,6 +190,7 @@ const NotificationBell: React.FC = () => {
 
   const clearAll = () => {
     setNotifications([]);
+    localStorage.removeItem('app-notifications');
   };
 
   const getIcon = (type: string) => {
@@ -177,6 +225,15 @@ const NotificationBell: React.FC = () => {
     return `Il y a ${days} j`;
   };
 
+  const isSuperAdmin = () => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    return user.role === 'superadmin' || user.role === 'super_admin';
+  };
+
+  const getCurrentUser = () => {
+    return JSON.parse(localStorage.getItem('user') || '{}');
+  };
+
   return (
     <div className="notification-bell" ref={dropdownRef}>
       <button 
@@ -208,36 +265,60 @@ const NotificationBell: React.FC = () => {
                 <p>Aucune notification</p>
               </div>
             ) : (
-              notifications.map(notif => (
-                <div 
-                  key={notif.id} 
-                  className={`notification-item ${!notif.read ? 'unread' : ''}`}
-                  onClick={() => markAsRead(notif.id)}
-                >
-                  <div className="notif-icon" style={{ background: `${getIconColor(notif.type)}20`, color: getIconColor(notif.type) }}>
-                    <FontAwesomeIcon icon={getIcon(notif.type)} />
-                  </div>
-                  <div className="notif-content">
-                    <div className="notif-title">{notif.title}</div>
-                    <div className="notif-message">{notif.message}</div>
-                    <div className="notif-time">{formatDate(notif.date)}</div>
-                  </div>
-                  {notif.link && (
-                    <Link to={notif.link} className="notif-link" onClick={(e) => e.stopPropagation()}>
-                      Voir
-                    </Link>
-                  )}
-                  <button 
-                    className="notif-delete"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteNotification(notif.id);
-                    }}
+              notifications.map(notif => {
+                const currentUser = getCurrentUser();
+                const isOwn = currentUser && (currentUser.id === notif.userId || currentUser.email === notif.userId);
+                const isAdmin = isSuperAdmin();
+                
+                return (
+                  <div 
+                    key={notif.id} 
+                    className={`notification-item ${!notif.read ? 'unread' : ''}`}
+                    onClick={() => markAsRead(notif.id)}
                   >
-                    <FontAwesomeIcon icon={faTrashAlt} />
-                  </button>
-                </div>
-              ))
+                    <div className="notif-icon" style={{ background: `${getIconColor(notif.type)}20`, color: getIconColor(notif.type) }}>
+                      <FontAwesomeIcon icon={getIcon(notif.type)} />
+                    </div>
+                    <div className="notif-content">
+                      <div className="notif-title">{notif.title}</div>
+                      <div className="notif-message">{notif.message}</div>
+                      <div className="notif-time">{formatDate(notif.date)}</div>
+                      {notif.userName && (
+                        <div className="notif-user" style={{ fontSize: '0.6rem', color: '#94a3b8', marginTop: '0.25rem' }}>
+                          <FontAwesomeIcon icon={faUser} style={{ marginRight: '0.25rem', fontSize: '0.5rem' }} />
+                          {isOwn ? 'Par vous' : `Par: ${notif.userName}`}
+                          {(isAdmin || isOwn) && (
+                            <span style={{ 
+                              marginLeft: '0.5rem', 
+                              background: isOwn ? '#dbeafe' : '#fef3c7', 
+                              padding: '0.1rem 0.4rem', 
+                              borderRadius: '4px', 
+                              fontSize: '0.5rem', 
+                              color: isOwn ? '#2563eb' : '#d97706' 
+                            }}>
+                              {isOwn ? 'Vous' : 'Admin'}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    {notif.link && (
+                      <Link to={notif.link} className="notif-link" onClick={(e) => e.stopPropagation()}>
+                        Voir
+                      </Link>
+                    )}
+                    <button 
+                      className="notif-delete"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteNotification(notif.id);
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faTrashAlt} />
+                    </button>
+                  </div>
+                );
+              })
             )}
           </div>
         </div>
@@ -253,6 +334,10 @@ export const triggerNotification = (
   message: string,
   link?: string
 ) => {
+  // Récupérer l'utilisateur courant
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const userName = user.prenom ? `${user.prenom} ${user.nom}` : user.name || 'Utilisateur';
+  
   const notification: Notification = {
     id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     type,
@@ -260,10 +345,39 @@ export const triggerNotification = (
     message,
     date: new Date().toISOString(),
     read: false,
-    link
+    link,
+    userId: user.id || user.email || 'unknown',
+    userName: userName
   };
   
   console.log('Dispatching notification:', notification);
+  
+  // Enregistrer immédiatement dans localStorage
+  const saved = localStorage.getItem('app-notifications');
+  let existingNotifications: Notification[] = [];
+  if (saved) {
+    try {
+      existingNotifications = JSON.parse(saved);
+    } catch (e) {
+      existingNotifications = [];
+    }
+  }
+  
+  // Vérifier les doublons
+  const now = Date.now();
+  const isDuplicate = existingNotifications.some((n: Notification) => 
+    n.title === notification.title && 
+    n.message === notification.message &&
+    n.userId === notification.userId &&
+    now - new Date(n.date).getTime() < 30000
+  );
+  
+  if (!isDuplicate) {
+    const newNotifications = [notification, ...existingNotifications].slice(0, 30);
+    localStorage.setItem('app-notifications', JSON.stringify(newNotifications));
+  }
+  
+  // Dispatch pour mise à jour en temps réel
   window.dispatchEvent(new CustomEvent('new-notification', { detail: notification }));
 };
 

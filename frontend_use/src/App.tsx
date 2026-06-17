@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AuthLayout from './components/AuthLayout';
+import MainLayout from './components/MainLayout';
+import { ConfirmationProvider } from './context/ConfirmationContext';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import SuperAdmin from './pages/SuperAdmin';
@@ -17,11 +19,8 @@ import BaseAugure from './pages/BaseAugure';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import SituationPersonnels from './pages/SituationPersonnels';
-import Sidebar from './components/Sidebar';
-import Header from './components/Header';
-import api from './Service/api';
 import GestionPostes from './pages/GestionPostes';
-
+import api from './Service/api';
 import './style/recrutement.css';
 import './style/gestion.css';
 
@@ -55,56 +54,60 @@ const App: React.FC = () => {
     );
   }
 
-  // Layout pour pages protégées
-  const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
-    const [isMobileOpen, setIsMobileOpen] = useState(false);
-    
-    if (!isAuthenticated) {
-      return <Navigate to="/login" replace />;
-    }
-
-    return (
-      <div className="dashboard-container">
-        <Sidebar 
-          isMobileOpen={isMobileOpen}
-          onMobileClose={() => setIsMobileOpen(false)}
-        />
-        <Header onMenuClick={() => setIsMobileOpen(!isMobileOpen)} />
-        <main className="main-content">
-          {children}
-        </main>
-      </div>
-    );
-  };
-
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Routes publiques */}
-        <Route path="/login" element={<AuthLayout><Login /></AuthLayout>} />
-        <Route path="/forgot-password" element={<AuthLayout><ForgotPassword /></AuthLayout>} />
-        <Route path="/verify-code" element={<AuthLayout><VerifyCode /></AuthLayout>} />
-        <Route path="/reset-password" element={<AuthLayout><ResetPassword /></AuthLayout>} />
-        
-        {/* Routes protégées */}
-        <Route path="/dashboard" element={<ProtectedLayout><Dashboard /></ProtectedLayout>} />
-        <Route path="/super-admin" element={<ProtectedLayout><SuperAdmin /></ProtectedLayout>} />
-        <Route path="/recrutement" element={<ProtectedLayout><Recrutement /></ProtectedLayout>} />
-        <Route path="/gestion-personnels" element={<ProtectedLayout><GestionPersonnels /></ProtectedLayout>} />
-        <Route path="/gestion-directions" element={<ProtectedLayout><GestionDirections /></ProtectedLayout>} />
-        <Route path="/gestion-services" element={<ProtectedLayout><GestionServices /></ProtectedLayout>} />
-        <Route path="/base-rohi" element={<ProtectedLayout><BaseRohi /></ProtectedLayout>} />
-        <Route path="/base-augure" element={<ProtectedLayout><BaseAugure /></ProtectedLayout>} />
-        <Route path="/profile" element={<ProtectedLayout><Profile /></ProtectedLayout>} />
-        <Route path="/settings" element={<ProtectedLayout><Settings /></ProtectedLayout>} />
-        <Route path="/situation-personnels" element={<ProtectedLayout><SituationPersonnels /></ProtectedLayout>} />
-        <Route path="/gestion-postes" element={<ProtectedLayout><GestionPostes /></ProtectedLayout>} />
-
-        {/* Redirections */}
-        <Route path="/" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />
-        <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />
-      </Routes>
-    </BrowserRouter>
+    <ConfirmationProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Routes publiques */}
+          <Route path="/login" element={<AuthLayout><Login /></AuthLayout>} />
+          <Route path="/forgot-password" element={<AuthLayout><ForgotPassword /></AuthLayout>} />
+          <Route path="/verify-code" element={<AuthLayout><VerifyCode /></AuthLayout>} />
+          <Route path="/reset-password" element={<AuthLayout><ResetPassword /></AuthLayout>} />
+          
+          {/* Routes protégées */}
+          <Route path="/dashboard" element={
+            <MainLayout><Dashboard /></MainLayout>
+          } />
+          <Route path="/super-admin" element={
+            <MainLayout><SuperAdmin /></MainLayout>
+          } />
+          <Route path="/recrutement" element={
+            <MainLayout><Recrutement /></MainLayout>
+          } />
+          <Route path="/gestion-personnels" element={
+            <MainLayout><GestionPersonnels /></MainLayout>
+          } />
+          <Route path="/gestion-directions" element={
+            <MainLayout><GestionDirections /></MainLayout>
+          } />
+          <Route path="/gestion-services" element={
+            <MainLayout><GestionServices /></MainLayout>
+          } />
+          <Route path="/gestion-postes" element={
+            <MainLayout><GestionPostes /></MainLayout>
+          } />
+          <Route path="/base-rohi" element={
+            <MainLayout><BaseRohi /></MainLayout>
+          } />
+          <Route path="/base-augure" element={
+            <MainLayout><BaseAugure /></MainLayout>
+          } />
+          <Route path="/profile" element={
+            <MainLayout><Profile /></MainLayout>
+          } />
+          <Route path="/settings" element={
+            <MainLayout><Settings /></MainLayout>
+          } />
+          <Route path="/situation-personnels" element={
+            <MainLayout><SituationPersonnels /></MainLayout>
+          } />
+          
+          {/* Redirection */}
+          <Route path="/" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />
+          <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />
+        </Routes>
+      </BrowserRouter>
+    </ConfirmationProvider>
   );
 };
 

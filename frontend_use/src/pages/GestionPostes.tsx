@@ -468,7 +468,6 @@ const GestionPostes: React.FC = () => {
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>ID</th>
                     <th>Intitulé du poste</th>
                     <th>Direction</th>
                     <th>Service</th>
@@ -480,7 +479,7 @@ const GestionPostes: React.FC = () => {
                 <tbody>
                   {paginatedPostes.map((poste) => (
                     <tr key={poste.id_poste}>
-                      <td className="id-cell">#{poste.id_poste}</td>
+                      {/* <td className="id-cell">#{poste.id_poste}</td> */}
                       <td className="title-cell">{poste.titre_poste}</td>
                       <td>{poste.direction_nom || getDirectionName(poste.id_direction)}</td>
                       <td>{poste.service_nom || getServiceName(poste.id_service)}</td>
@@ -631,12 +630,14 @@ const GestionPostes: React.FC = () => {
                     <label>Catégorie</label>
                     <select name="categorie" value={formData.categorie} onChange={handleInputChange}>
                       <option value="">Sélectionner une catégorie</option>
-                      <option value="A1">A1 - Cadre Supérieur</option>
-                      <option value="A2">A2 - Cadre Moyen</option>
-                      <option value="B1">B1 - Technicien Supérieur</option>
-                      <option value="B2">B2 - Technicien</option>
-                      <option value="C1">C1 - Agent d'Exécution</option>
-                      <option value="C2">C2 - Agent de Service</option>
+                      <option value="I"> I </option>
+                      <option value="II"> II </option>
+                      <option value="III"> III</option>
+                      <option value="IV"> IV</option>
+                      <option value="V"> V </option>
+                      <option value="VI"> VI </option>
+                      <option value="VII"> VII </option>
+                      <option value="VIII"> VIII </option>
                     </select>
                   </div>
                   <div className="form-group">

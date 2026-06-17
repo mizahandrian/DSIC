@@ -23,6 +23,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 import '../style/dashboard.css';
+import { useConfirmation } from '../context/ConfirmationContext';
 
 ChartJS.register(
   CategoryScale,
@@ -48,6 +49,7 @@ interface DashboardStats {
 }
 
 const Dashboard: React.FC = () => {
+  const { showConfirmation } = useConfirmation();
   const [stats, setStats] = useState<DashboardStats>({
     totalPersonnels: 0,
     totalDirections: 0,
@@ -71,6 +73,8 @@ const Dashboard: React.FC = () => {
         api.get('/directions'),
         api.get('/services')
       ]);
+
+       showConfirmation('Données du tableau de bord chargées', 'success', 2000);
 
       const personnels = personnelsRes.data.map((p: any) => ({
         ...p,
@@ -103,7 +107,8 @@ const Dashboard: React.FC = () => {
         recents: [...personnels].slice(0, 5)
       });
     } catch (error) {
-      console.error('Erreur:', error);
+        console.error('Erreur:', error);
+        showConfirmation('Erreur lors du chargement des données', 'error');
     } finally {
       setLoading(false);
     }
