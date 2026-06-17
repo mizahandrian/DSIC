@@ -119,7 +119,7 @@ const GestionPersonnels: React.FC = () => {
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
   const [allPostes, setAllPostes] = useState<Poste[]>([]);
   const [filteredPostes, setFilteredPostes] = useState<Poste[]>([]);
-  const { showConfirmation } = useConfirmation();
+  
 
   useEffect(() => {
     fetchPersonnels();
@@ -269,11 +269,9 @@ const GestionPersonnels: React.FC = () => {
   };
 
   const handleDelete = async () => {
-    showConfirmation('Personnel supprimé avec succès', 'success');
     if (!selectedPersonnel) return;
     try {
       await api.delete(`/personnels/${selectedPersonnel.id}`);
-      triggerNotification('warning', '🗑️ Personnel supprimé', `${selectedPersonnel.prenom} ${selectedPersonnel.nom} a été supprimé de la base`, '/gestion-personnels');
       fetchPersonnels();
       setShowDeleteModal(false);
       setSelectedPersonnel(null);
@@ -336,8 +334,8 @@ const GestionPersonnels: React.FC = () => {
       triggerNotification('info', '✏️ Personnel modifié', `Les informations de ${posteData.prenom} ${posteData.nom} ont été mises à jour`, '/gestion-personnels');
       fetchPersonnels();
       setIsEditing(false);
-      showConfirmation('Personnel modifié avec succès', 'success');
-    } catch (error) { console.error('Erreur:', error); showConfirmation('Erreur lors de la modification', 'error'); }
+  
+    } catch (error) { console.error('Erreur:', error);  }
   };
 
   const getSortIcon = (field: keyof Personnel) => {

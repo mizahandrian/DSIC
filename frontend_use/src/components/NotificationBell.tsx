@@ -207,7 +207,7 @@ const NotificationBell: React.FC = () => {
       case 'success': return '#10b981';
       case 'warning': return '#f59e0b';
       case 'error': return '#ef4444';
-      default: return '#3b82f6';
+      default: return '#0f4eb4';
     }
   };
 

@@ -22,7 +22,7 @@
 }
 
 .settings-header h1 svg {
-  color: #4f46e5;
+  color: #2F4E68;
   font-size: 1.5rem;
 }
 
@@ -70,7 +70,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #4f46e5;
+  color: #2F4E68;
   font-size: 1.125rem;
   border: 1px solid #e2e8f0;
 }
@@ -125,7 +125,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #4f46e5;
+  color: #2F4E68;
   font-size: 0.875rem;
 }
 
@@ -167,8 +167,8 @@
 }
 
 .toggle-btn.active {
-  background: #4f46e5;
-  border-color: #4f46e5;
+  background: #2F4E68;
+  border-color: #2F4E68;
   color: white;
 }
 
@@ -227,9 +227,7 @@
   animation: fadeIn 0.3s ease;
 }
 
-/* ============================================
-   MODE SOMBRE - STYLES
-   ============================================ */
+/* ========= mode sombre========  */
 body.dark-mode {
   background: #0f172a;
 }
@@ -265,9 +263,9 @@ body.dark-mode .card-title p {
 }
 
 body.dark-mode .card-icon {
-  background: #475569;
-  border-color: #64748b;
-  color: #818cf8;
+  background: #4B6F8C;
+  border-color: #4B6F8C;
+  color: #6FA0C2;
 }
 
 body.dark-mode .settings-item {
@@ -280,7 +278,7 @@ body.dark-mode .settings-item:hover {
 
 body.dark-mode .item-icon {
   background: #475569;
-  color: #818cf8;
+  color: #6FA0C2;
 }
 
 body.dark-mode .item-text label {
@@ -298,8 +296,8 @@ body.dark-mode .toggle-btn {
 }
 
 body.dark-mode .toggle-btn.active {
-  background: #4f46e5;
-  border-color: #4f46e5;
+  background: #4B6F8C;
+  border-color: #4B6F8C;
   color: white;
 }
 

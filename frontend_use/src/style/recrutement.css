@@ -22,7 +22,7 @@
 }
 
 .recrutement-header h1 svg {
-  color: #4f46e5;
+  color: #2F4E68;
   font-size: 1.5rem;
 }
 
@@ -93,7 +93,7 @@
 
 .step-wrapper.completed:hover .step-circle:not(.active) {
   transform: scale(1.05);
-  border-color: #4f46e5;
+  border-color: #3A6382;
   background: #f0f0ff;
 }
 
@@ -115,11 +115,11 @@
 }
 
 .step-circle.active {
-  background: #4f46e5;
-  border-color: #4f46e5;
+  background: #2F4E68;
+  border-color: #2F4E68;
   color: white;
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 4px 12px rgba(56, 78, 199, 0.3);
 }
 
 .step-circle.done {
@@ -140,7 +140,7 @@
 }
 
 .step-wrapper .step-circle.active + .step-label {
-  color: #4f46e5;
+  color: #2F4E68;
   font-weight: 600;
 }
 
@@ -224,7 +224,7 @@
 }
 
 .form-group label svg {
-  color: #4f46e5;
+  color: #2F4E68;
   font-size: 0.75rem;
 }
 
@@ -241,8 +241,8 @@
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  border-color: #2F4E68;
+  box-shadow: 0 0 0 3px rgba(56, 78, 199, 0.1);
   background: white;
 }
 
@@ -340,14 +340,14 @@
 }
 
 .btn-next {
-  background: #4f46e5;
+  background: #2F4E68;
   border: none;
   color: white;
   margin-left: auto;
 }
 
 .btn-next:hover {
-  background: #4338ca;
+  background: #3A6382;
   transform: translateX(2px);
 }
 
@@ -454,8 +454,8 @@ body.dark-mode .step-circle {
 }
 
 body.dark-mode .step-circle.active {
-  background: #4f46e5;
-  border-color: #4f46e5;
+  background: #4B6F8C;
+  border-color: #0F1C28;
   color: white;
 }
 
@@ -483,15 +483,15 @@ body.dark-mode .form-group label {
 
 body.dark-mode .form-group input,
 body.dark-mode .form-group select {
-  background: #334155;
-  border-color: #475569;
+  background: #4B6F8C;
+  border-color: #4B6F8C;
   color: #f1f5f9;
 }
 
 body.dark-mode .form-group input:focus,
 body.dark-mode .form-group select:focus {
   background: #475569;
-  border-color: #4f46e5;
+  border-color: #D0CCC9;
 }
 
 body.dark-mode .info-box {
@@ -510,7 +510,7 @@ body.dark-mode .summary-box h4 {
 }
 
 body.dark-mode .summary-item {
-  border-bottom-color: #475569;
+  border-bottom-color: #4B6F8C;
 }
 
 body.dark-mode .summary-label {
@@ -522,7 +522,7 @@ body.dark-mode .summary-value {
 }
 
 body.dark-mode .form-navigation {
-  border-top-color: #334155;
+  border-top-color: #4B6F8C;
 }
 
 body.dark-mode .btn-prev {

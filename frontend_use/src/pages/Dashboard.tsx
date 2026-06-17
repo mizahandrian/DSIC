@@ -23,7 +23,6 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 import '../style/dashboard.css';
-import { useConfirmation } from '../context/ConfirmationContext';
 
 ChartJS.register(
   CategoryScale,
@@ -49,7 +48,7 @@ interface DashboardStats {
 }
 
 const Dashboard: React.FC = () => {
-  const { showConfirmation } = useConfirmation();
+  
   const [stats, setStats] = useState<DashboardStats>({
     totalPersonnels: 0,
     totalDirections: 0,
@@ -74,7 +73,6 @@ const Dashboard: React.FC = () => {
         api.get('/services')
       ]);
 
-       showConfirmation('Données du tableau de bord chargées', 'success', 2000);
 
       const personnels = personnelsRes.data.map((p: any) => ({
         ...p,
@@ -108,7 +106,6 @@ const Dashboard: React.FC = () => {
       });
     } catch (error) {
         console.error('Erreur:', error);
-        showConfirmation('Erreur lors du chargement des données', 'error');
     } finally {
       setLoading(false);
     }
@@ -121,8 +118,8 @@ const Dashboard: React.FC = () => {
       {
         label: 'Personnels',
         data: stats.directionsData.map(d => d.count),
-        backgroundColor: '#11212D',
-        borderColor: '#11212D',
+        backgroundColor: '#2F4E68',
+        borderColor: '#06141B',
         borderWidth: 1,
         borderRadius: 8,
         barPercentage: 0.65,
@@ -139,7 +136,7 @@ const Dashboard: React.FC = () => {
         position: 'top' as const,
         labels: {
           font: { size: 11 },
-          color: '#64748b',
+          color: '#06141B',
           boxWidth: 10,
           usePointStyle: true,
           pointStyle: 'circle',
@@ -148,7 +145,7 @@ const Dashboard: React.FC = () => {
       tooltip: {
         backgroundColor: '#1e293b',
         titleColor: '#ffffff',
-        bodyColor: '#94a3b8',
+        bodyColor: '#06141B',
         callbacks: {
           label: (context: any) => `Personnels: ${context.raw}`,
         },
@@ -173,7 +170,7 @@ const Dashboard: React.FC = () => {
     },
   };
 
-  // Graphique en ligne - violet
+  // Graphique en ligne - bleu 
   const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
   const evolutionData = months.map((_, i) => {
     return Math.max(1, Math.round(stats.totalPersonnels * (i + 1) / 12));
@@ -185,10 +182,10 @@ const Dashboard: React.FC = () => {
       {
         label: 'Effectifs',
         data: evolutionData,
-        borderColor: '#06141B',
+        borderColor: '#2F4E68',
         backgroundColor: 'rgba(79, 70, 229, 0.05)',
         borderWidth: 2,
-        pointBackgroundColor: '#11212D',
+        pointBackgroundColor: '#5B87A8',
         pointBorderColor: '#ffffff',
         pointBorderWidth: 2,
         pointRadius: 4,
@@ -207,14 +204,14 @@ const Dashboard: React.FC = () => {
         position: 'top' as const,
         labels: {
           font: { size: 11 },
-          color: '#11212D',
+          color: '#2F4E68',
           boxWidth: 10,
           usePointStyle: true,
           pointStyle: 'circle',
         },
       },
       tooltip: {
-        backgroundColor: '#1e293b',
+        backgroundColor: '#5B87A8',
         titleColor: '#ffffff',
         bodyColor: '#94a3b8',
         callbacks: {
@@ -242,10 +239,10 @@ const Dashboard: React.FC = () => {
   };
 
   const statCards = [
-    { title: 'Personnels', value: stats.totalPersonnels, icon: faUsers, color: '#11212D', bg: '#e0e7ff' },
-    { title: 'Directions', value: stats.totalDirections, icon: faBuilding, color: '#11212D', bg: '#e0e7ff' },
-    { title: 'Services', value: stats.totalServices, icon: faBriefcase, color: '#11212D', bg: '#e0e7ff' },
-    { title: 'Postes', value: stats.totalPostes, icon: faUserTie, color: '#11212D', bg: '#e0e7ff' },
+    { title: 'Personnels', value: stats.totalPersonnels, icon: faUsers, color: '#2F4E68', bg: '#e0e7ff' },
+    { title: 'Directions', value: stats.totalDirections, icon: faBuilding, color: '#2F4E68', bg: '#e0e7ff' },
+    { title: 'Services', value: stats.totalServices, icon: faBriefcase, color: '#2F4E68', bg: '#e0e7ff' },
+    { title: 'Postes', value: stats.totalPostes, icon: faUserTie, color: '#2F4E68', bg: '#e0e7ff' },
   ];
 
   const quickActions = [
