@@ -479,7 +479,9 @@ const GestionPostes: React.FC = () => {
                 <tbody>
                   {paginatedPostes.map((poste) => (
                     <tr key={poste.id_poste}>
+
                       {/* <td className="id-cell">#{poste.id_poste}</td> */}
+
                       <td className="title-cell">{poste.titre_poste}</td>
                       <td>{poste.direction_nom || getDirectionName(poste.id_direction)}</td>
                       <td>{poste.service_nom || getServiceName(poste.id_service)}</td>
