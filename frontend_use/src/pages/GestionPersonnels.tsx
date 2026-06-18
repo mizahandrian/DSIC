@@ -55,9 +55,14 @@ interface Anciennete {
   ancien_direction: string | null;
   ancien_service: string | null;
   ancien_employeur: string | null;
+  ancien_categorie: string | null;
+  ancien_grade: string | null;
+  ancien_corps: string | null;
+  ancien_indice: string | null;
   date_debut: string | null;
   date_fin: string | null;
   motif_depart: string | null;
+  commentaire_historique: string | null;
 }
 
 interface Direction {
@@ -673,10 +678,16 @@ const GestionPersonnels: React.FC = () => {
                   {(anciennete && (anciennete.ancien_poste || anciennete.ancien_direction || anciennete.ancien_employeur)) ? (
                     <div className="anciennete-grid">
                       {anciennete.ancien_employeur && <div className="info-row"><label>Employeur précédent : </label><span>{anciennete.ancien_employeur}</span></div>}
-                      {anciennete.ancien_poste && <div className="info-row"><label>Poste occupé :</label><span>{anciennete.ancien_poste}</span></div>}
-                      {anciennete.ancien_direction && <div className="info-row"><label>Direction / Service : </label><span>{anciennete.ancien_direction}</span></div>}
+                      {anciennete.ancien_poste && <div className="info-row"><label>Poste occupé : </label><span>{anciennete.ancien_poste}</span></div>}
+                      {anciennete.ancien_direction && <div className="info-row"><label>Ancienne direction : </label><span>{anciennete.ancien_direction}</span></div>}
+                      {anciennete.ancien_service && <div className="info-row"><label>Ancien service : </label><span>{anciennete.ancien_service}</span></div>}
+                      {anciennete.ancien_categorie && <div className="info-row"><label>Ancienne catégorie : </label><span>{anciennete.ancien_categorie}</span></div>}
+                      {anciennete.ancien_corps && <div className="info-row"><label>Ancien corps : </label><span>{anciennete.ancien_corps}</span></div>}
+                      {anciennete.ancien_indice && <div className="info-row"><label>Ancien indice : </label><span>{anciennete.ancien_indice}</span></div>}
+                      {anciennete.ancien_grade && <div className="info-row"><label>Ancien grade : </label><span>{anciennete.ancien_grade}</span></div>}
                       {(anciennete.date_debut || anciennete.date_fin) && <div className="info-row"><label>Période : </label><span>{formatDate(anciennete.date_debut)} - {formatDate(anciennete.date_fin) || 'Présent'}</span></div>}
                       {anciennete.motif_depart && <div className="info-row"><label>Motif du départ : </label><span>{anciennete.motif_depart}</span></div>}
+                      {anciennete.commentaire_historique && <div className="info-row"><label>Commentaire : </label><span>{anciennete.commentaire_historique}</span></div>}
                     </div>
                   ) : (<div className="empty-message"><FontAwesomeIcon icon={faBriefcase} /><p>Aucune information sur l'ancienneté disponible </p></div>)}
                 </div>
