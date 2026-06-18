@@ -42,6 +42,10 @@ class RecrutementController extends Controller
             }
 
             $etatValue = $request->filled('etat') ? trim($request->etat) : null;
+            if ($etatValue === null && $request->filled('statut')) {
+                $etatValue = trim($request->statut);
+            }
+
             if ($request->filled('id_etat')) {
                 $etatModel = \App\Models\Etat::find($request->id_etat);
                 $etatValue = $etatModel?->nom_etat ?? $etatValue;
@@ -115,11 +119,20 @@ class RecrutementController extends Controller
             }
 
             // ✅ 3. Créer l'HISTORIQUE
-if ($request->filled('ancien_poste') || $request->filled('ancien_direction')) {
+if ($request->filled('ancien_poste') || $request->filled('ancien_direction') || $request->filled('ancien_employeur')) {
     Historique::create([
-        'personnel_id'     => $personnel->id,  // ← corrigé : personnel_id → id_personnel
+        'id_personnel'     => $personnel->id,
         'ancien_poste'     => $request->ancien_poste ?? null,
         'ancien_direction' => $request->ancien_direction ?? null,
+        'ancien_service'   => $request->ancien_service ?? null,
+        'ancien_employeur' => $request->ancien_employeur ?? null,
+        'ancien_categorie' => $request->ancien_categorie ?? null,
+        'ancien_grade'     => $request->ancien_grade ?? null,
+        'ancien_corps'     => $request->ancien_corps ?? null,
+        'ancien_indice'    => $request->ancien_indice ?? null,
+        'date_debut'       => $parseDate($request->date_debut_ancien),
+        'date_fin'         => $parseDate($request->date_fin_ancien),
+        'motif_depart'     => $request->motif_depart ?? null,
         'motif_changement' => $request->commentaire_historique ?? null,
         'date_changement'  => now()->format('Y-m-d'),
     ]);

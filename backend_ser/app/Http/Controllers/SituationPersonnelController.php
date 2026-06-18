@@ -80,4 +80,32 @@ class SituationPersonnelController extends Controller
         $situation->delete();
         return response()->json(null, 204);
     }
+    private function formatHistorique(SituationPersonnel $s): array
+{
+    $today = now()->startOfDay();
+    $statut = 'en_cours';
+    if ($s->date_fin) {
+        $statut = $s->date_fin->startOfDay()->lt($today) ? 'depasse' : 'en_cours';
+    }
+
+    return [
+        'id_disposition' => $s->id_disposition,
+        'type_mobilite'  => $s->type_mobilite,
+        'provenance'     => $s->provenance,
+        'destination'    => $s->destination,
+        'date_debut'     => $s->date_debut?->format('Y-m-d'),
+        'date_fin'       => $s->date_fin?->format('Y-m-d'),
+        'statut'         => $statut,
+    ];
+}
+
+public function getByPersonnel($id)
+{
+    $situations = SituationPersonnel::where('id_personnel', $id)
+        ->orderByDesc('date_debut')
+        ->get()
+        ->map(fn($s) => $this->formatHistorique($s));
+
+    return response()->json($situations);
+}
 }

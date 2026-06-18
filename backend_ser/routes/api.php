@@ -253,6 +253,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     // situation personnel
+    Route::get('situation-personnels/personnel/{id}', [SituationPersonnelController::class, 'getByPersonnel']);
     Route::apiResource('situation-personnels', SituationPersonnelController::class);
 
 });

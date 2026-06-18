@@ -190,34 +190,46 @@ class PersonnelController extends Controller
     }
 
     public function getAnciennete($id)
-    {
-        try {
-            $historique = \App\Models\Historique::where('id_personnel', $id)->first();
-            
-            if (!$historique) {
-                return response()->json([
-                    'ancien_poste' => null,
-                    'ancien_direction' => null,
-                    'ancien_service' => null,
-                    'ancien_employeur' => null,
-                    'date_debut' => null,
-                    'date_fin' => null,
-                    'motif_depart' => null
-                ]);
-            }
-            
+{
+    try {
+        $historique = \App\Models\Historique::where('id_personnel', $id)
+            ->orderByDesc('id')
+            ->first();
+
+        if (!$historique) {
             return response()->json([
-                'ancien_poste' => $historique->ancien_poste,
-                'ancien_direction' => $historique->ancien_direction,
+                'ancien_poste' => null,
+                'ancien_direction' => null,
                 'ancien_service' => null,
                 'ancien_employeur' => null,
+                'ancien_categorie' => null,
+                'ancien_grade' => null,
+                'ancien_corps' => null,
+                'ancien_indice' => null,
                 'date_debut' => null,
                 'date_fin' => null,
-                'motif_depart' => $historique->motif_changement
+                'motif_depart' => null,
+                'commentaire_historique' => null,
             ]);
-        } catch (\Exception $e) {
-            logger()->error('Erreur récupération ancienneté', ['id' => $id, 'error' => $e->getMessage()]);
-            return response()->json(['error' => $e->getMessage()], 500);
         }
+
+        return response()->json([
+            'ancien_poste' => $historique->ancien_poste,
+            'ancien_direction' => $historique->ancien_direction,
+            'ancien_service' => $historique->ancien_service,
+            'ancien_employeur' => $historique->ancien_employeur,
+            'ancien_categorie' => $historique->ancien_categorie,
+            'ancien_grade' => $historique->ancien_grade,
+            'ancien_corps' => $historique->ancien_corps,
+            'ancien_indice' => $historique->ancien_indice,
+            'date_debut' => $historique->date_debut,
+            'date_fin' => $historique->date_fin,
+            'motif_depart' => $historique->motif_depart,
+            'commentaire_historique' => $historique->motif_changement,
+        ]);
+    } catch (\Exception $e) {
+        logger()->error('Erreur récupération ancienneté', ['id' => $id, 'error' => $e->getMessage()]);
+        return response()->json(['error' => $e->getMessage()], 500);
     }
+}
 }

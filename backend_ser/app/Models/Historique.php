@@ -9,15 +9,24 @@ class Historique extends Model
     protected $table = 'historiques';
 
     protected $fillable = [
-        'personnel_id',       // ✅ correspond à la vraie colonne en base
-        'ancien_poste',
-        'ancien_direction',
-        'motif_changement',
-        'date_changement',
-    ];
+    'id_personnel',
+    'ancien_poste',
+    'ancien_direction',
+    'ancien_service',
+    'ancien_employeur',
+    'ancien_categorie',
+    'ancien_grade',
+    'ancien_corps',
+    'ancien_indice',
+    'date_debut',
+    'date_fin',
+    'motif_depart',
+    'motif_changement',
+    'date_changement',
+];
 
     public function personnel()
     {
-        return $this->belongsTo(Personnel::class, 'personnel_id'); // ✅
+        return $this->belongsTo(Personnel::class, 'id_personnel');
     }
 }
