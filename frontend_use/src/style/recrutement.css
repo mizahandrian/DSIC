@@ -543,3 +543,68 @@ body.dark-mode .success-toast {
 .step-wrapper:active .step-circle {
   transform: scale(0.95);
 }
+
+.statut-group {
+  grid-column: span 2;
+}
+
+.statut-toggle {
+  display: flex;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.statut-btn {
+  padding: 8px 20px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statut-btn.active {
+  background: #28a745;
+  color: white;
+  border-color: #28a745;
+}
+
+.statut-btn.inactive {
+  background: #dc3545;
+  color: white;
+  border-color: #dc3545;
+}
+
+.statut-indicator {
+  margin-top: 10px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.badge-success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.badge-danger {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.text-success {
+  color: #28a745;
+}
+
+.text-danger {
+  color: #dc3545;
+}

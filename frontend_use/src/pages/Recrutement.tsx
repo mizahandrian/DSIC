@@ -8,10 +8,12 @@ import {
   faCheckCircle, faHistory, faArrowLeft, faArrowRight,
   faSave, faUserCheck, faExchangeAlt, faInfoCircle,
   faTag, faLayerGroup, faGraduationCap, faCheck,
-  faUserPlus, faComment, faHome
+  faUserPlus, faComment, faHome, faToggleOn, faToggleOff
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 import { triggerNotification } from '../components/NotificationBell';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faTimesCircle } from '@fortawesome/free-solid-svg-icons';
 
 interface Direction {
   id_direction: number;
@@ -67,6 +69,7 @@ const Recrutement: React.FC = () => {
     corps: '',
     grade: '',
     date_effet_carriere: '',
+    statut: 'actif', // Nouvel état : 'actif' ou 'inactif'
     
     // Étape 4 - Historique / Parcours professionnel
     ancien_employeur: '',
@@ -224,6 +227,7 @@ const Recrutement: React.FC = () => {
         corps: formData.corps?.trim() || null,
         grade: formData.grade?.trim() || null,
         date_effet_carriere: formData.date_effet_carriere || null,
+        statut: formData.statut, // Ajout du statut
         
         // Historique / Ancienneté
         ancien_employeur: formData.ancien_employeur || null,
@@ -273,6 +277,7 @@ const Recrutement: React.FC = () => {
       matricule: '', nom: '', prenom: '', genre: 'M', numero_cin: '', tel: '', date_naissance: '',
       date_entree: '', motif_entree: '', id_direction: '', id_service: '', id_poste: '',
       categorie: '', indice: '', corps: '', grade: '', date_effet_carriere: '',
+      statut: 'actif',
       ancien_employeur: '', ancien_poste: '', ancien_direction: '', ancien_categorie: '',
       ancien_grade: '', ancien_corps: '', ancien_indice: '',
       date_debut_ancien: '', date_fin_ancien: '', motif_depart: '', commentaire_historique: '',
@@ -432,6 +437,38 @@ const Recrutement: React.FC = () => {
                 <label><FontAwesomeIcon icon={faCalendarAlt} /> Date d'effet *</label>
                 <input type="date" name="date_effet_carriere" value={formData.date_effet_carriere} onChange={handleChange} required />
               </div>
+              <div className="form-group statut-group">
+                <label><FontAwesomeIcon icon={formData.statut === 'actif' ? faToggleOn : faToggleOff} /> Statut *</label>
+                <div className="statut-toggle">
+                  <button 
+                    type="button" 
+                    className={`statut-btn ${formData.statut === 'actif' ? 'active' : ''}`}
+                    onClick={() => setFormData(prev => ({ ...prev, statut: 'actif' }))}
+                  >
+                    <FontAwesomeIcon icon={faCheck} />
+                    Actif
+                  </button>
+                  <button 
+                    type="button" 
+                    className={`statut-btn ${formData.statut === 'inactif' ? 'inactive' : ''}`}
+                    onClick={() => setFormData(prev => ({ ...prev, statut: 'inactif' }))}
+                  >
+                    <FontAwesomeIcon icon={faTimes} />
+                    Inactif
+                  </button>
+                </div>
+                <div className="statut-indicator">
+                  {formData.statut === 'actif' ? (
+                    <span className="badge badge-success">
+                      <FontAwesomeIcon icon={faCheckCircle} /> Actif
+                    </span>
+                  ) : (
+                    <span className="badge badge-danger">
+                      <FontAwesomeIcon icon={faTimesCircle} /> Inactif
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         );
@@ -536,6 +573,12 @@ const Recrutement: React.FC = () => {
                 <div className="summary-item">
                   <span className="summary-label">Carrière :</span>
                   <span className="summary-value">{formData.categorie} - {formData.corps} ({formData.grade})</span>
+                </div>
+                <div className="summary-item">
+                  <span className="summary-label">Statut :</span>
+                  <span className={`summary-value ${formData.statut === 'actif' ? 'text-success' : 'text-danger'}`}>
+                    {formData.statut === 'actif' ? '✅ Actif' : '❌ Inactif'}
+                  </span>
                 </div>
                 <div className="summary-item">
                   <span className="summary-label">Ancien employeur :</span>
