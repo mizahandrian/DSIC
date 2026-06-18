@@ -228,6 +228,7 @@ const Recrutement: React.FC = () => {
         grade: formData.grade?.trim() || null,
         date_effet_carriere: formData.date_effet_carriere || null,
         statut: formData.statut, // Ajout du statut
+        etat: formData.statut, // Envoi également le statut comme état
         
         // Historique / Ancienneté
         ancien_employeur: formData.ancien_employeur || null,
