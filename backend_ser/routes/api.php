@@ -17,243 +17,160 @@ use App\Http\Controllers\SituationAdminController;
 use App\Http\Controllers\EtatController;
 use App\Http\Controllers\LiaisonController;
 use App\Http\Controllers\RecrutementController;
-use Illuminate\Support\Facades\Password;
 use App\Http\Controllers\SituationPersonnelController;
-
-
-
-//test 
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Mail;
-
-Route::get('/test-mail', function () {
-    Mail::raw('Test Mailtrap OK', function ($msg) {
-        $msg->to('test@mail.com')
-            ->subject('Test');
-    });
-
-    return 'Email envoyé';
-});
-
-
-//mot de pass
-//use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Carbon\Carbon;
 use App\Models\User;
 
+// ==================== TEST MAIL ====================
+Route::get('/test-mail', function () {
+    Mail::raw('Test Mailtrap OK', function ($msg) {
+        $msg->to('test@mail.com')->subject('Test');
+    });
+    return 'Email envoyé';
+});
+
+// ==================== MOT DE PASSE ====================
 Route::post('/forgot-password', function (Request $request) {
-
     $request->validate(['email' => 'required|email']);
-
     $user = User::where('email', $request->email)->first();
-
-    if (!$user) {
-        return response()->json(['message' => 'Email introuvable'], 404);
-    }
-
+    if (!$user) return response()->json(['message' => 'Email introuvable'], 404);
     $otp = rand(100000, 999999);
-
     $user->otp_code = $otp;
     $user->otp_expires_at = Carbon::now()->addMinutes(10);
     $user->save();
-
     Mail::raw("Votre code est : $otp", function ($message) use ($user) {
-        $message->to($user->email)
-                ->subject('Code de réinitialisation');
+        $message->to($user->email)->subject('Code de réinitialisation');
     });
-
     return response()->json(['message' => 'Code envoyé']);
 });
 
-//verifier le code
-
 Route::post('/verify-code', function (Request $request) {
-
-    $request->validate([
-        'email' => 'required|email',
-        'otp' => 'required'
-    ]);
-
+    $request->validate(['email' => 'required|email', 'otp' => 'required']);
     $user = User::where('email', $request->email)->first();
-
-    if (!$user || $user->otp_code != $request->otp) {
-        return response()->json(['message' => 'Code invalide'], 400);
-    }
-
-    if (now()->greaterThan($user->otp_expires_at)) {
-        return response()->json(['message' => 'Code expiré'], 400);
-    }
-
+    if (!$user || $user->otp_code != $request->otp) return response()->json(['message' => 'Code invalide'], 400);
+    if (now()->greaterThan($user->otp_expires_at)) return response()->json(['message' => 'Code expiré'], 400);
     return response()->json(['message' => 'Code valide']);
 });
-//reset mot de passe
-use Illuminate\Support\Facades\Hash;
 
 Route::post('/reset-password', function (Request $request) {
-
-    $request->validate([
-        'email' => 'required|email',
-        'password' => 'required|min:6|confirmed',
-    ]);
-
+    $request->validate(['email' => 'required|email', 'password' => 'required|min:6|confirmed']);
     $user = User::where('email', $request->email)->first();
-
-    if (!$user) {
-        return response()->json(['message' => 'Utilisateur introuvable'], 404);
-    }
-
+    if (!$user) return response()->json(['message' => 'Utilisateur introuvable'], 404);
     $user->password = Hash::make($request->password);
     $user->otp_code = null;
     $user->otp_expires_at = null;
     $user->save();
-
     return response()->json(['message' => 'Mot de passe changé']);
 });
 
-// ==================== ROUTES AUTH ====================
+// ==================== AUTH ====================
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// ==================== ROUTES POSTES ====================
-Route::get('/postes',          [PosteController::class, 'index']);
-Route::post('/postes',         [PosteController::class, 'store']);
-Route::put('/postes/{id}',     [PosteController::class, 'update']);
-Route::delete('/postes/{id}',  [PosteController::class, 'destroy']);
-
-// ==================== ROUTES SERVICES ====================
-Route::get('/services', [ServiceController::class, 'index']);
-Route::get('/services/direction/{id}', [ServiceController::class, 'getByDirection']);
-Route::post('/services', [ServiceController::class, 'store']);
-Route::put('/services/{id}', [ServiceController::class, 'update']);
-Route::delete('/services/{id}', [ServiceController::class, 'destroy']);
-// ==================== ROUTES DIRECTIONS ====================
+// ==================== DIRECTIONS ====================
 Route::get('/directions', [DirectionController::class, 'index']);
 Route::post('/directions', [DirectionController::class, 'store']);
 Route::put('/directions/{id}', [DirectionController::class, 'update']);
 Route::delete('/directions/{id}', [DirectionController::class, 'destroy']);
 
-// ==================== ROUTES PERSONNELS ====================
+// ==================== SERVICES ====================
+Route::get('/services', [ServiceController::class, 'index']);
+Route::get('/services/direction/{id}', [ServiceController::class, 'getByDirection']);
+Route::post('/services', [ServiceController::class, 'store']);
+Route::put('/services/{id}', [ServiceController::class, 'update']);
+Route::delete('/services/{id}', [ServiceController::class, 'destroy']);
+
+// ==================== POSTES ====================
+Route::get('/postes', [PosteController::class, 'index']);
+Route::post('/postes', [PosteController::class, 'store']);
+Route::put('/postes/{id}', [PosteController::class, 'update']);
+Route::delete('/postes/{id}', [PosteController::class, 'destroy']);
+
+// ==================== PERSONNELS ====================
 Route::get('/personnels', [PersonnelController::class, 'index']);
 Route::post('/personnels', [PersonnelController::class, 'store']);
 Route::get('/personnels/{id}/anciennete', [PersonnelController::class, 'getAnciennete']);
 Route::put('/personnels/{id}', [PersonnelController::class, 'update']);
 Route::delete('/personnels/{id}', [PersonnelController::class, 'destroy']);
 
-// ==================== ROUTES CARRIERES ====================
+// ==================== CARRIERES ====================
 Route::get('/carrieres', [CarriereController::class, 'index']);
 Route::post('/carrieres', [CarriereController::class, 'store']);
 Route::put('/carrieres/{id}', [CarriereController::class, 'update']);
 Route::delete('/carrieres/{id}', [CarriereController::class, 'destroy']);
+Route::apiResource('carrieres', CarriereController::class);
 
-// ==================== ROUTES HISTORIQUE ====================
+// ==================== HISTORIQUES ====================
 Route::get('/historiques', [HistoriqueController::class, 'index']);
 Route::post('/historiques', [HistoriqueController::class, 'store']);
 Route::get('/historiques/{id}', [HistoriqueController::class, 'show']);
 Route::put('/historiques/{id}', [HistoriqueController::class, 'update']);
 Route::delete('/historiques/{id}', [HistoriqueController::class, 'destroy']);
 
-// ==================== ROUTES BASE ROHI ====================
-// Route::get('/base-rohi', [BaseRohiController::class, 'index']);
-// Route::post('/base-rohi', [BaseRohiController::class, 'store']);
-// Route::put('/base-rohi/{id}', [BaseRohiController::class, 'update']);
-// Route::delete('/base-rohi/{id}', [BaseRohiController::class, 'destroy']);
-
-// Route::get('/personnels', [PersonnelController::class, 'index']);
-
-// Route::get('/personnels-rohi', [LiaisonController::class, 'index']);
-// Route::post('/personnels-rohi', [LiaisonController::class, 'store']);
-// Route::delete('/personnels-rohi/{personnelId}/{rohiId}', [LiaisonController::class, 'destroy']);
-//nouveaux
+// ==================== BASE ROHI ====================
 Route::apiResource('base-rohi', BaseRohiController::class);
 
-// ==================== ROUTES BASE AUGURE ====================
-// Route::get('/base-augure', [BaseAugureController::class, 'index']);
-// Route::post('/base-augure', [BaseAugureController::class, 'store']);
-// Route::put('/base-augure/{id}', [BaseAugureController::class, 'update']);
-// Route::delete('/base-augure/{id}', [BaseAugureController::class, 'destroy']);
-
-// Route::get('/personnels', [PersonnelController::class, 'index']);
-
-// Route::get('/personnels-augure', [LiaisonController::class, 'index']);
-// Route::post('/personnels-augure', [LiaisonController::class, 'store']);
-//Route::delete('/personnels-augure/{personnelId}/{augureId}', [LiaisonController::class, 'destroy']);
-//nouveaux
+// ==================== BASE AUGURE ====================
 Route::apiResource('base-augure', BaseAugureController::class);
-// ==================== ROUTES STATUTS ADMIN ====================
+
+// ==================== STATUTS ====================
 Route::get('/statuts', [StatutController::class, 'index']);
 Route::post('/statuts', [StatutController::class, 'store']);
 Route::put('/statuts/{id}', [StatutController::class, 'update']);
 Route::delete('/statuts/{id}', [StatutController::class, 'destroy']);
+Route::apiResource('statuts', StatutController::class);
 
-// ==================== ROUTES SITUATIONS ADMIN ====================
+// ==================== SITUATIONS ADMIN ====================
 Route::get('/situations-admin', [SituationAdminController::class, 'index']);
 Route::post('/situations-admin', [SituationAdminController::class, 'store']);
 Route::put('/situations-admin/{id}', [SituationAdminController::class, 'update']);
 Route::delete('/situations-admin/{id}', [SituationAdminController::class, 'destroy']);
 
-// ==================== ROUTES ETATS ====================
+// ==================== ETATS ====================
 Route::get('/etats', [EtatController::class, 'index']);
 Route::post('/etats', [EtatController::class, 'store']);
 Route::put('/etats/{id}', [EtatController::class, 'update']);
 Route::delete('/etats/{id}', [EtatController::class, 'destroy']);
 
-// ==================== ROUTES AUTH ====================
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+// ==================== RECRUTEMENT ====================
+Route::post('/recrutement', [RecrutementController::class, 'store']);
+Route::apiResource('recrutement', RecrutementController::class);
 
-// ==================== ROUTES PROTÉGÉES ====================
-Route::middleware('auth:sanctum')->group(function () {
+// ==================== NOTIFICATIONS (sans auth) ====================
+Route::get('/notifications', [NotificationController::class, 'index']);
+Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead']);
+Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead']);
+Route::post('/notifications', [NotificationController::class, 'store']);
+Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
+Route::delete('/notifications', [NotificationController::class, 'clearAll']);
+
+// ==================== ROUTES PROTEGEES ====================
+Route::middleware(['auth:sanctum'])->group(function () {
+
     Route::get('/me', [AuthController::class, 'getUser']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user/check-initialized', [AuthController::class, 'checkInitialized']);
     Route::post('/user/complete-setup', [AuthController::class, 'completeSetup']);
-});
 
-//recrutement 
-Route::apiResource('recrutement', RecrutementController::class);
-Route::apiResource('carrieres', CarriereController::class);
-Route::apiResource('statuts', StatutController::class);
-
-// ==================== ROUTES USERS ====================
-// Route::get('/users', [UserController::class, 'index']);
-
-//route personnel vaovao
-Route::get('/directions', [DirectionController::class, 'index']);
-Route::get('/carrieres', [CarriereController::class, 'index']);
-Route::get('/statuts', [StatutController::class, 'index']);
-Route::get('/etats', [EtatController::class, 'index']);
-
-Route::get('/services/direction/{id}', [ServiceController::class, 'getByDirection']);
-
-Route::post('/personnels', [PersonnelController::class, 'store']);
-Route::post('/historiques', [HistoriqueController::class, 'store']);
-
-// recrutement
-Route::post('/recrutement', [RecrutementController::class, 'store']);
-//Route::get('/personnels', [PersonnelController::class, 'index']);
-//role admin
-
-Route::middleware(['auth:sanctum'])->group(function () {
-
-    // USER + SUPERADMIN
     Route::post('/formulaire', [\App\Http\Controllers\FormController::class, 'store']);
 
-    // USER + SUPERADMIN peuvent voir leur profil (optionnel)
     Route::get('/me', function (Request $request) {
         return $request->user();
     });
 
-    // 🔐 SUPERADMIN ONLY (gestion users)
+    // SUPERADMIN ONLY
     Route::middleware([\App\Http\Middleware\RoleMiddleware::class . ':superadmin'])->group(function () {
-
         Route::get('/users', [UserController::class, 'index']);
         Route::post('/users', [UserController::class, 'store']);
         Route::put('/users/{id}', [UserController::class, 'update']);
         Route::delete('/users/{id}', [UserController::class, 'destroy']);
-
     });
 
-    // situation personnel
+    // SITUATION PERSONNELS
     Route::get('situation-personnels/personnel/{id}', [SituationPersonnelController::class, 'getByPersonnel']);
     Route::apiResource('situation-personnels', SituationPersonnelController::class);
-
 });
