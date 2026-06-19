@@ -206,6 +206,8 @@ const GestionPersonnels: React.FC = () => {
 
   const openHistoriqueModal = async (personnel: Personnel) => {
     setSelectedPersonnel(personnel);
+    setHistoriqueMobilites([]);
+    setAnciennete(null);
     await Promise.all([fetchHistoriquePersonnel(personnel.id), fetchAnciennetePersonnel(personnel.id)]);
     setShowHistoriqueModal(true);
   };

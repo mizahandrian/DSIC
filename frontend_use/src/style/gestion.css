@@ -568,7 +568,7 @@
   font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
-  color: #64748b;
+  color: #2F4E68;
 }
 
 .form-group input,
@@ -584,8 +584,8 @@
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+  border-color: #2F4E68;
+  box-shadow: 0 0 0 2px rgba(47, 78, 104, 0.1);
   background: white;
 }
 
@@ -624,7 +624,7 @@
 
 .btn-edit {
   padding: 0.5rem 1rem;
-  background: #4f46e5;
+  background: #2F4E68;
   border: none;
   border-radius: 6px;
   color: white;
@@ -638,7 +638,7 @@
 }
 
 .btn-edit:hover {
-  background: #4338ca;
+  background: #3A6382;
 }
 
 .btn-save {

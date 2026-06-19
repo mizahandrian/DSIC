@@ -13,11 +13,14 @@ import {
   faSave,
   faTimes,
   faUserCircle,
-  faCamera
+  faCamera,
+  faShieldAlt,
+  faUserTag,
+  faCrown
 } from '@fortawesome/free-solid-svg-icons';
 import '../style/profile.css';
 
-const compressImage = (file: File, maxWidth = 100): Promise<string> => {
+const compressImage = (file: File, maxWidth = 400): Promise<string> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
@@ -133,8 +136,8 @@ const Profile: React.FC = () => {
 
   setUploadingAvatar(true);
   try {
-    // Compression via canvas
-    const compressed = await compressImage(avatarFile, 100);
+    // Compression avec taille 4x plus grande (400px au lieu de 100px)
+    const compressed = await compressImage(avatarFile, 400);
 
     const updatedProfile = { ...profile, avatar: compressed };
     setProfile(updatedProfile);
@@ -178,6 +181,30 @@ const Profile: React.FC = () => {
     setLoading(false);
   }
 };
+
+  // Fonction pour déterminer le badge de rôle
+  const getRoleBadge = (role: string) => {
+    const isSuperAdmin = role?.toLowerCase().includes('superadmin') || 
+                         role?.toLowerCase().includes('super admin') ||
+                         role?.toLowerCase().includes('administrateur') ||
+                         role?.toLowerCase() === 'admin';
+    
+    if (isSuperAdmin) {
+      return {
+        icon: faCrown,
+        label: 'Super Admin',
+        className: 'badge-superadmin'
+      };
+    }
+    
+    return {
+      icon: faUserTag,
+      label: 'Utilisateur',
+      className: 'badge-user'
+    };
+  };
+
+  const roleBadge = getRoleBadge(profile.role);
 
   if (loading) {
     return (
@@ -369,11 +396,32 @@ const Profile: React.FC = () => {
                 {profile.prenom.charAt(0)}{profile.name.charAt(0)}
               </div>
             )}
+            {/* Badge de rôle sur l'avatar */}
+            {/* <div className={`avatar-role-badge ${roleBadge.className}`}>
+              <FontAwesomeIcon icon={roleBadge.icon} />
+            </div> */}
           </div>
           <div className="profile-hero-info">
-            <h1>{profile.prenom} {profile.name}</h1>
+            <div className="profile-name-container">
+              <h1>{profile.prenom} {profile.name}</h1>
+              {/* Badge de rôle à côté du nom */}
+              <span className={`role-badge ${roleBadge.className}`}>
+                <FontAwesomeIcon icon={roleBadge.icon} />
+                {roleBadge.label}
+              </span>
+            </div>
             <p className="profile-role">{profile.role}</p>
-            <p className="profile-location">{profile.direction} • {profile.service}</p>
+            <div className="profile-location-container">
+              <span className="profile-location-item">
+                <FontAwesomeIcon icon={faBuilding} />
+                {profile.direction || 'Non spécifié'}
+              </span>
+              <span className="profile-location-separator">•</span>
+              <span className="profile-location-item">
+                <FontAwesomeIcon icon={faBriefcase} />
+                {profile.service || 'Non spécifié'}
+              </span>
+            </div>
           </div>
           <button className="btn-edit-profile" onClick={() => setIsEditing(true)}>
             <FontAwesomeIcon icon={faEdit} />
@@ -431,15 +479,24 @@ const Profile: React.FC = () => {
               </h3>
               <div className="info-item">
                 <label>Direction</label>
-                <p>{profile.direction}</p>
+                <p className="info-value-with-icon">
+                  <FontAwesomeIcon icon={faBuilding} className="info-icon" />
+                  {profile.direction || 'Non spécifié'}
+                </p>
               </div>
               <div className="info-item">
                 <label>Service</label>
-                <p>{profile.service}</p>
+                <p className="info-value-with-icon">
+                  <FontAwesomeIcon icon={faBriefcase} className="info-icon" />
+                  {profile.service || 'Non spécifié'}
+                </p>
               </div>
               <div className="info-item">
                 <label>Rôle</label>
-                <p>{profile.role}</p>
+                <p className="info-value-with-icon">
+                  <FontAwesomeIcon icon={faUserTag} className="info-icon" />
+                  {profile.role}
+                </p>
               </div>
             </div>
           </div>

@@ -242,8 +242,13 @@ const SituationPersonnels: React.FC = () => {
       const personnel = personnels.find(p => p.id === parseInt(formData.id_personnel));
       const personnelName = personnel ? `${personnel.prenom} ${personnel.nom}` : 'Un personnel';
       
+      const payload = {
+        ...formData,
+        date_fin: formData.date_fin ? formData.date_fin : null,
+      };
+
       if (editingSituation) {
-        await api.put(`/situation-personnels/${editingSituation.id_disposition}`, formData);
+        await api.put(`/situation-personnels/${editingSituation.id_disposition}`, payload);
         
         // === NOTIFICATION DE MODIFICATION ===
         triggerNotification(
@@ -254,7 +259,7 @@ const SituationPersonnels: React.FC = () => {
         );
         // ================================
       } else {
-        await api.post('/situation-personnels', formData);
+        await api.post('/situation-personnels', payload);
         
         // === NOTIFICATION D'AJOUT ===
         triggerNotification(

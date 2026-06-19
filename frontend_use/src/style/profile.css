@@ -520,3 +520,126 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+/* Avatar avec badge */
+.profile-avatar-large {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.avatar-role-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid white;
+  font-size: 14px;
+}
+
+.avatar-role-badge.badge-superadmin {
+  background: #D4AF37;
+  color: #1a1a1a;
+}
+
+.avatar-role-badge.badge-user {
+  background: #007BFF;
+  color: white;
+}
+
+/* Badge à côté du nom */
+.profile-name-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.role-badge.badge-superadmin {
+  background: #D4AF37;
+  color: #1a1a1a;
+}
+
+.role-badge.badge-user {
+  background: #007BFF;
+  color: white;
+}
+
+/* Localisation avec icônes */
+.profile-location-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.profile-location-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.profile-location-item svg {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.profile-location-separator {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Informations avec icônes dans la carte */
+.info-value-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.info-value-with-icon .info-icon {
+  color: #6c757d;
+  font-size: 14px;
+  width: 16px;
+}
+
+/* Ajustements responsive */
+@media (max-width: 768px) {
+  .profile-avatar-large {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .avatar-role-badge {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+  
+  .role-badge {
+    font-size: 10px;
+    padding: 3px 10px;
+  }
+  
+  .profile-name-container {
+    gap: 8px;
+  }
+}

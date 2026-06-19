@@ -111,7 +111,7 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Graphique en barres - violet
+  // Graphique en barres - en bleu
   const barChartData = {
     labels: stats.directionsData.map(d => d.name),
     datasets: [

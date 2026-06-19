@@ -65,8 +65,8 @@
 }
 
 .sidebar-logo {
-  width: 80px;
-  height: 80px;
+  width: 105px;
+  height: 105px;
   margin: 0 auto 16px;
   background: #f8fafc;
   border-radius: 50%;
@@ -83,21 +83,21 @@
 }
 
 .sidebar-logo.collapsed {
-  width: 48px;
-  height: 48px;
+  width: 50px;
+  height: 50px;
   margin: 0 auto;
 }
 
 .sidebar-logo img {
-  width: 55px;
-  height: 55px;
+  width: 100px;
+  height: 100px;
   object-fit: contain;
   transition: width 0.3s ease, height 0.3s ease;
 }
 
 .sidebar-logo.collapsed img {
-  width: 32px;
-  height: 32px;
+  width: 50px;
+  height: 50px;
 }
 
 .sidebar-header h2 {
@@ -356,7 +356,7 @@
 }
 
 .dropdown-item.logout {
-  color: #9BA8AB;
+  color: #DC2626;
   border-top: 1px solid #eef2f6;
 }
 
@@ -1207,11 +1207,11 @@ body.dark-mode .badge-inactive {
 }
 
 .status-card.active:hover {
-  border-color: #4A5C6A;
+  border-color: #2F4E68;
 }
 
 .status-card.inactive:hover {
-  border-color: #94a3b8;
+  border-color: #2F4E68;
 }
 
 .status-info {
@@ -1241,13 +1241,13 @@ body.dark-mode .badge-inactive {
 
 .progress-fill {
   height: 100%;
-  background: #4A5C6A;
+  background: #2F4E68;
   border-radius: 3px;
   transition: width 0.5s ease;
 }
 
 .status-card.inactive .progress-fill {
-  background: #9BA8AB;
+  background: #2F4E68;
 }
 
 /* Quick Actions */
@@ -1607,7 +1607,7 @@ body.dark-mode .recent-table .name {
 }
 
 .bell-button.has-notifications {
-  color: #4f46e5;
+  color: #0066eb;
 }
 
 .notification-count {
