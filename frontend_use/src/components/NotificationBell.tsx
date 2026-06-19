@@ -19,6 +19,13 @@ interface Notification {
   userName?: string;
 }
 
+const API = 'http://localhost:8000/api';
+
+const getUserId = () => {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  return user.id || user.email || 'unknown';
+};
+
 const NotificationBell: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -27,8 +34,14 @@ const NotificationBell: React.FC = () => {
 
   // Charger les notifications au démarrage
   useEffect(() => {
-    loadNotifications();
-  }, []);
+  loadNotifications();
+  const interval = setInterval(loadNotifications, 10000);
+  window.addEventListener('refresh-notifications', loadNotifications);
+  return () => {
+    clearInterval(interval);
+    window.removeEventListener('refresh-notifications', loadNotifications);
+  };
+}, []);
 
   // Sauvegarder les notifications à chaque changement
   useEffect(() => {
@@ -78,33 +91,15 @@ const NotificationBell: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const loadNotifications = () => {
-    const saved = localStorage.getItem('app-notifications');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setNotifications(parsed);
-      } catch (e) {
-        setNotifications([]);
-      }
-    } else {
-      // Notifications de démonstration
-      const demoNotifications: Notification[] = [
-        {
-          id: '1',
-          type: 'info',
-          title: 'Bienvenue',
-          message: 'Bienvenue sur la plateforme de gestion RH',
-          date: new Date().toISOString(),
-          read: false,
-          userId: 'system',
-          userName: 'Système'
-        }
-      ];
-      setNotifications(demoNotifications);
-      localStorage.setItem('app-notifications', JSON.stringify(demoNotifications));
-    }
-  };
+  const loadNotifications = async () => {
+  try {
+    const res = await fetch(`${API}/notifications?user_id=${getUserId()}`);
+    const data = await res.json();
+    setNotifications(data);
+  } catch (e) {
+    console.error('Erreur chargement notifications:', e);
+  }
+};
 
   const addNotification = (notification: Notification) => {
     // Récupérer l'utilisateur courant
@@ -172,26 +167,33 @@ const NotificationBell: React.FC = () => {
     return div.innerHTML;
   };
 
-  const markAsRead = (id: string) => {
-    setNotifications(prev =>
-      prev.map(n => n.id === id ? { ...n, read: true } : n)
-    );
-  };
+  const markAsRead = async (id: string) => {
+  setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+  await fetch(`${API}/notifications/${id}/read`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: getUserId() }),
+  });
+};
 
-  const markAllAsRead = () => {
-    setNotifications(prev =>
-      prev.map(n => ({ ...n, read: true }))
-    );
-  };
+  const markAllAsRead = async () => {
+  setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  await fetch(`${API}/notifications/read-all`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: getUserId() }),
+  });
+};
 
-  const deleteNotification = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  };
+  const deleteNotification = async (id: string) => {
+  setNotifications(prev => prev.filter(n => n.id !== id));
+  await fetch(`${API}/notifications/${id}`, { method: 'DELETE' });
+};
 
-  const clearAll = () => {
-    setNotifications([]);
-    localStorage.removeItem('app-notifications');
-  };
+  const clearAll = async () => {
+  setNotifications([]);
+  await fetch(`${API}/notifications`, { method: 'DELETE' });
+};
 
   const getIcon = (type: string) => {
     switch(type) {
@@ -328,57 +330,26 @@ const NotificationBell: React.FC = () => {
 };
 
 // Fonction utilitaire pour déclencher une notification
-export const triggerNotification = (
+export const triggerNotification = async (
   type: 'success' | 'warning' | 'info' | 'error',
   title: string,
   message: string,
   link?: string
 ) => {
-  // Récupérer l'utilisateur courant
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const userName = user.prenom ? `${user.prenom} ${user.nom}` : user.name || 'Utilisateur';
-  
-  const notification: Notification = {
-    id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    type,
-    title,
-    message,
-    date: new Date().toISOString(),
-    read: false,
-    link,
-    userId: user.id || user.email || 'unknown',
-    userName: userName
-  };
-  
-  console.log('Dispatching notification:', notification);
-  
-  // Enregistrer immédiatement dans localStorage
-  const saved = localStorage.getItem('app-notifications');
-  let existingNotifications: Notification[] = [];
-  if (saved) {
-    try {
-      existingNotifications = JSON.parse(saved);
-    } catch (e) {
-      existingNotifications = [];
-    }
-  }
-  
-  // Vérifier les doublons
-  const now = Date.now();
-  const isDuplicate = existingNotifications.some((n: Notification) => 
-    n.title === notification.title && 
-    n.message === notification.message &&
-    n.userId === notification.userId &&
-    now - new Date(n.date).getTime() < 30000
-  );
-  
-  if (!isDuplicate) {
-    const newNotifications = [notification, ...existingNotifications].slice(0, 30);
-    localStorage.setItem('app-notifications', JSON.stringify(newNotifications));
-  }
-  
-  // Dispatch pour mise à jour en temps réel
-  window.dispatchEvent(new CustomEvent('new-notification', { detail: notification }));
+
+  await fetch(`${API}/notifications`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      type, title, message, link,
+      userId: user.id || user.email || 'unknown',
+      userName,
+    }),
+  });
+
+  window.dispatchEvent(new CustomEvent('refresh-notifications'));
 };
 
 export default NotificationBell;
