@@ -15,6 +15,8 @@ import {
   faExchangeAlt
 } from '@fortawesome/free-solid-svg-icons';
 import logoInstat from '../assets/image/Logo-INSTAT.png';
+import { icon } from '@fortawesome/fontawesome-svg-core';
+import { faUserSlash } from '@fortawesome/free-solid-svg-icons';
 
 interface SidebarProps {
   isMobileOpen?: boolean;
@@ -27,10 +29,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen = false, onMobileClose }
     { path: '/super-admin', name: 'Super Admin', icon: faUserShield },
     { path: '/recrutement', name: 'Ajout Personnel', icon: faUserPlus },
     { path: '/gestion-personnels', name: 'Liste des personnels', icon: faList },
+    { path: '/gestion-retraites', name: 'Gestion Retraites', icon: faUserSlash },
+    { path: '/situation-personnels', name: 'Mobilite', icon: faExchangeAlt },
     { path: '/gestion-directions', name: 'Directions', icon: faBuilding },
     { path: '/gestion-services', name: 'Services', icon: faBriefcase },
     { path: '/gestion-postes', name: 'Postes', icon: faBriefcase },
-    { path: '/situation-personnels', name: 'Situation', icon: faExchangeAlt },
     { path: '/base-rohi', name: 'Base ROHI', icon: faDatabase },
     { path: '/base-augure', name: 'Base AUGURE', icon: faDatabase },
     { path: '/settings', name: 'Paramètres', icon: faCog },

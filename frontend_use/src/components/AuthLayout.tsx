@@ -23,7 +23,7 @@ const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               </div>
               <span>Gestion centralisée du personnel</span>
             </div>
-            <div className="feature">
+            {/* <div className="feature">
               <div className="feature-icon">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
@@ -31,7 +31,7 @@ const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 </svg>
               </div>
               <span>Suivi des carrières et promotions</span>
-            </div>
+            </div> */}
           </div>
         </div>
         <div className="brand-footer">

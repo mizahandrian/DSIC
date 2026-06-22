@@ -44,8 +44,8 @@
 }
 
 .brand-logo-large img {
-  width: 160px;
-  height: 160px;
+  width: 200px;
+  height: 200px;
   object-fit: contain;
   filter: brightness(0) invert(1);
   transition: transform 0.3s ease;

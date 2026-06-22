@@ -20,6 +20,7 @@ import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import SituationPersonnels from './pages/SituationPersonnels';
 import GestionPostes from './pages/GestionPostes';
+import GestionRetraites from './pages/GestionRetraites'; // Ajout de l'import
 import api from './Service/api';
 import './style/recrutement.css';
 import './style/gestion.css';
@@ -65,42 +66,19 @@ const App: React.FC = () => {
           <Route path="/reset-password" element={<AuthLayout><ResetPassword /></AuthLayout>} />
           
           {/* Routes protégées */}
-          <Route path="/dashboard" element={
-            <MainLayout><Dashboard /></MainLayout>
-          } />
-          <Route path="/super-admin" element={
-            <MainLayout><SuperAdmin /></MainLayout>
-          } />
-          <Route path="/recrutement" element={
-            <MainLayout><Recrutement /></MainLayout>
-          } />
-          <Route path="/gestion-personnels" element={
-            <MainLayout><GestionPersonnels /></MainLayout>
-          } />
-          <Route path="/gestion-directions" element={
-            <MainLayout><GestionDirections /></MainLayout>
-          } />
-          <Route path="/gestion-services" element={
-            <MainLayout><GestionServices /></MainLayout>
-          } />
-          <Route path="/gestion-postes" element={
-            <MainLayout><GestionPostes /></MainLayout>
-          } />
-          <Route path="/base-rohi" element={
-            <MainLayout><BaseRohi /></MainLayout>
-          } />
-          <Route path="/base-augure" element={
-            <MainLayout><BaseAugure /></MainLayout>
-          } />
-          <Route path="/profile" element={
-            <MainLayout><Profile /></MainLayout>
-          } />
-          <Route path="/settings" element={
-            <MainLayout><Settings /></MainLayout>
-          } />
-          <Route path="/situation-personnels" element={
-            <MainLayout><SituationPersonnels /></MainLayout>
-          } />
+          <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
+          <Route path="/super-admin" element={<MainLayout><SuperAdmin /></MainLayout>} />
+          <Route path="/recrutement" element={<MainLayout><Recrutement /></MainLayout>} />
+          <Route path="/gestion-personnels" element={<MainLayout><GestionPersonnels /></MainLayout>} />
+          <Route path="/gestion-retraites" element={<MainLayout><GestionRetraites /></MainLayout>} />
+          <Route path="/gestion-directions" element={<MainLayout><GestionDirections /></MainLayout>} />
+          <Route path="/gestion-services" element={<MainLayout><GestionServices /></MainLayout>} />
+          <Route path="/gestion-postes" element={<MainLayout><GestionPostes /></MainLayout>} />
+          <Route path="/base-rohi" element={<MainLayout><BaseRohi /></MainLayout>} />
+          <Route path="/base-augure" element={<MainLayout><BaseAugure /></MainLayout>} />
+          <Route path="/profile" element={<MainLayout><Profile /></MainLayout>} />
+          <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />
+          <Route path="/situation-personnels" element={<MainLayout><SituationPersonnels /></MainLayout>} />
           
           {/* Redirection */}
           <Route path="/" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />
