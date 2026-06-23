@@ -91,6 +91,7 @@ class PersonnelController extends Controller
 }*/
 use App\Models\Personnel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PersonnelController extends Controller
 {
@@ -147,6 +148,7 @@ class PersonnelController extends Controller
     return Personnel::with(['directionRelation', 'serviceRelation', 'posteRelation'])
         ->get()
         ->map(fn($p) => array_merge($p->toArray(), [
+            'id_personnel' => $p->id, 
             'direction' => $p->directionRelation?->nom_direction ?? $p->direction,
             'service'   => $p->serviceRelation?->nom_service ?? $p->service,
             'poste'     => $p->posteRelation?->titre_poste ?? $p->poste,
@@ -230,6 +232,72 @@ class PersonnelController extends Controller
     } catch (\Exception $e) {
         logger()->error('Erreur récupération ancienneté', ['id' => $id, 'error' => $e->getMessage()]);
         return response()->json(['error' => $e->getMessage()], 500);
+    }
+
+}
+public function mettreEnRetraite(Request $request)
+{
+    $request->validate([
+        'ids'         => 'required|array',
+        'ids.*'       => 'integer',
+        'date_sortie' => 'required|date',
+        'motif'       => 'required|string',
+    ]);
+
+    DB::beginTransaction();
+    try {
+        // Vérifier que tous ont bien ≥ 60 ans
+        $invalides = DB::table('personnels')
+            ->whereIn('id', $request->ids)
+            ->whereRaw('TIMESTAMPDIFF(YEAR, date_naissance, CURDATE()) < 60')
+            ->pluck('nom');
+
+        if ($invalides->count() > 0) {
+            return response()->json([
+                'message' => 'Ces personnels n\'ont pas encore 60 ans : ' . $invalides->join(', ')
+            ], 422);
+        }
+
+        DB::table('personnels')
+            ->whereIn('id', $request->ids)
+            ->where('statut', '!=', 'retraite')
+            ->update([
+                'statut'       => 'retraite',
+                'etat'         => 'Inactif',
+                'date_sortie'  => $request->date_sortie,
+                'motif_sortie' => $request->motif,
+                'updated_at'   => now(),
+            ]);
+
+        DB::commit();
+        return response()->json([
+            'message' => count($request->ids) . ' personnel(s) mis à la retraite avec succès'
+        ]);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json(['message' => 'Erreur : ' . $e->getMessage()], 500);
+    }
+}
+
+public function annulerRetraite($id)
+{
+    DB::beginTransaction();
+    try {
+        DB::table('personnels')
+            ->where('id', $id)
+            ->update([
+                'statut'       => 'inactif',
+                'etat'         => 'Actif',
+                'date_sortie'  => null,
+                'motif_sortie' => null,
+                'updated_at'   => now(),
+            ]);
+
+        DB::commit();
+        return response()->json(['message' => 'Retraite annulée avec succès']);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json(['message' => 'Erreur : ' . $e->getMessage()], 500);
     }
 }
 }

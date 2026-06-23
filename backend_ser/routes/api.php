@@ -173,4 +173,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // SITUATION PERSONNELS
     Route::get('situation-personnels/personnel/{id}', [SituationPersonnelController::class, 'getByPersonnel']);
     Route::apiResource('situation-personnels', SituationPersonnelController::class);
+
+    //retraite
+    Route::post('personnels/retraite', [PersonnelController::class, 'mettreEnRetraite']);
+    Route::put('personnels/{id}/annuler-retraite', [PersonnelController::class, 'annulerRetraite']);
 });
