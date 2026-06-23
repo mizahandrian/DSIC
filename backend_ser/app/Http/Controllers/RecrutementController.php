@@ -121,7 +121,7 @@ class RecrutementController extends Controller
             // ✅ 3. Créer l'HISTORIQUE
 if ($request->filled('ancien_poste') || $request->filled('ancien_direction') || $request->filled('ancien_employeur')) {
     Historique::create([
-        'id_personnel'     => $personnel->id,
+        'personnel_id'     => $personnel->id,
         'ancien_poste'     => $request->ancien_poste ?? null,
         'ancien_direction' => $request->ancien_direction ?? null,
         'ancien_service'   => $request->ancien_service ?? null,

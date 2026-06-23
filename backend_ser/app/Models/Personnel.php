@@ -51,7 +51,7 @@ class Personnel extends Model
     }
 
     public function historiques()
-{
-    return $this->hasMany(Historique::class, 'id_personnel', 'id');
-}
+    {
+        return $this->hasMany(Historique::class, 'personnel_id', 'id');
+    }
 }

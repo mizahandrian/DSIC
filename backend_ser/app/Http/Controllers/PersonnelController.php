@@ -190,11 +190,11 @@ class PersonnelController extends Controller
     }
 
     public function getAnciennete($id)
-{
-    try {
-        $historique = \App\Models\Historique::where('id_personnel', $id)
-            ->orderByDesc('id')
-            ->first();
+    {
+        try {
+            $historique = \App\Models\Historique::where('personnel_id', $id)
+                ->orderByDesc('id')
+                ->first();
 
         if (!$historique) {
             return response()->json([

@@ -42,7 +42,7 @@ class SituationPersonnelController extends Controller
             'provenance'           => 'required|string',
             'destination'          => 'required|string',
             'date_debut'           => 'required|date',
-            'date_fin'             => 'required|date|after_or_equal:date_debut',
+            'date_fin'             => 'nullable|date|after_or_equal:date_debut',
             'type_mobilite'        => 'required|in:formation,mission,detachement,stage',
             'commentaire'          => 'nullable|string',
         ]);
@@ -63,7 +63,7 @@ class SituationPersonnelController extends Controller
             'provenance'           => 'required|string',
             'destination'          => 'required|string',
             'date_debut'           => 'required|date',
-            'date_fin'             => 'required|date|after_or_equal:date_debut',
+            'date_fin'             => 'nullable|date|after_or_equal:date_debut',
             'type_mobilite'        => 'required|in:formation,mission,detachement,stage',
             'commentaire'          => 'nullable|string',
         ]);

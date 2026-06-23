@@ -9,7 +9,7 @@ class Historique extends Model
     protected $table = 'historiques';
 
     protected $fillable = [
-    'id_personnel',
+    'personnel_id',
     'ancien_poste',
     'ancien_direction',
     'ancien_service',
@@ -27,6 +27,6 @@ class Historique extends Model
 
     public function personnel()
     {
-        return $this->belongsTo(Personnel::class, 'id_personnel');
+        return $this->belongsTo(Personnel::class, 'personnel_id', 'id');
     }
 }
