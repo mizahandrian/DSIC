@@ -246,7 +246,24 @@
   white-space: nowrap;
 }
 
-.action-edit {
+/* generic action button for compatibility with components using .action-btn.* */
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-edit,
+.action-btn.edit,
+.action-btn.password,
+.action-btn.status {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -266,7 +283,9 @@
   color: white;
 }
 
-.action-delete {
+
+.action-delete,
+.action-btn.delete {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
