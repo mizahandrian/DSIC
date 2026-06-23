@@ -632,19 +632,29 @@ const GestionRetraites: React.FC = () => {
                         <td>{p.anciennete} ans</td>
                         <td>{p.direction_nom}</td>
                         <td className="actions-cell">
-                          <button 
+                          {/* <button 
                             className="btn-view"
                             onClick={() => handleViewRetraite(p)}
                             title="Voir les détails"
                           >
                             <FontAwesomeIcon icon={faEye} />
-                          </button>
+                            Voir
+                          </button> */}
                           <button 
                             className="btn-history"
                             onClick={() => handleViewHistorique(p)}
                             title="Voir l'historique"
                           >
                             <FontAwesomeIcon icon={faHistory} />
+                            Historique
+                          </button>
+                          {/* NOUVEAU BOUTON AVEC TEXTE */}
+                          <button 
+                            className="btn-action-text"
+                            onClick={() => handleViewRetraite(p)}
+                          >
+                            <FontAwesomeIcon icon={faInfoCircle} />
+                            Détails
                           </button>
                         </td>
                       </tr>
@@ -705,19 +715,29 @@ const GestionRetraites: React.FC = () => {
                         <td>{p.direction_nom}</td>
                         <td>{p.service_nom}</td>
                         <td className="actions-cell">
-                          <button 
+                          {/* <button 
                             className="btn-view"
                             onClick={() => handleViewRetraite(p)}
                             title="Voir les détails"
                           >
                             <FontAwesomeIcon icon={faEye} />
-                          </button>
+                            Voir
+                          </button> */}
                           <button 
                             className="btn-history"
                             onClick={() => handleViewHistorique(p)}
                             title="Voir l'historique"
                           >
                             <FontAwesomeIcon icon={faHistory} />
+                            Historique
+                          </button>
+                          {/* NOUVEAU BOUTON AVEC TEXTE */}
+                          <button 
+                            className="btn-action-text"
+                            onClick={() => handleViewRetraite(p)}
+                          >
+                            <FontAwesomeIcon icon={faInfoCircle} />
+                            Détails
                           </button>
                           <button 
                             className="btn-undo"

@@ -504,7 +504,6 @@
 }
 
 .actions-cell button {
-  width: 32px;
   height: 32px;
   border: none;
   border-radius: 6px;
@@ -966,5 +965,67 @@
   .badge-retraite {
     font-size: 10px;
     padding: 1px 8px;
+  }
+}
+/* ===== BOUTON ACTION AVEC TEXTE ===== */
+/* Styles spécifiques pour le bouton avec texte - NE MODIFIE PAS les autres boutons */
+
+.btn-action-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: #2F4E68;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  height: 32px;
+  min-width: 80px;
+  justify-content: center;
+}
+
+.btn-action-text:hover {
+  background: #1a3347;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(47, 78, 104, 0.3);
+}
+
+.btn-action-text:active {
+  transform: translateY(0);
+}
+
+.btn-action-text svg {
+  font-size: 13px;
+}
+
+/* Ajustement pour les petits écrans */
+@media (max-width: 768px) {
+  .btn-action-text {
+    padding: 4px 10px;
+    font-size: 12px;
+    height: 28px;
+    min-width: 60px;
+  }
+  
+  .btn-action-text svg {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-action-text {
+    padding: 3px 8px;
+    font-size: 11px;
+    height: 24px;
+    min-width: 50px;
+  }
+  
+  .btn-action-text svg {
+    font-size: 10px;
   }
 }
