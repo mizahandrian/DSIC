@@ -104,11 +104,11 @@ const GestionRetraites: React.FC = () => {
         };
       });
 
-      const actifs = personnelsWithData.filter((p: Personnel) => p.statut === 'actif');
-      setPersonnels(actifs);
+      // Éligibles = tous sauf retraités
+      setPersonnels(personnelsWithData.filter((p: Personnel) => p.statut !== 'retraite'));
 
-      const retraitesList = personnelsWithData.filter((p: Personnel) => p.statut === 'retraite');
-      setRetraites(retraitesList);
+      // Retraités = seulement ceux avec statut retraite
+      setRetraites(personnelsWithData.filter((p: Personnel) => p.statut === 'retraite'));
 
     } catch (error) {
       console.error('Erreur:', error);
