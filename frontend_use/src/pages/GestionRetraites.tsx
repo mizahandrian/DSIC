@@ -27,6 +27,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 import '../style/gestion-retraites.css';
+import { triggerNotification } from '../components/NotificationBell';
 
 interface Personnel {
   id_personnel: number;
@@ -112,6 +113,7 @@ const GestionRetraites: React.FC = () => {
 
     } catch (error) {
       console.error('Erreur:', error);
+      triggerNotification('error', '❌ Erreur', 'Impossible de charger les données');
     } finally {
       setLoading(false);
     }
@@ -255,7 +257,7 @@ const GestionRetraites: React.FC = () => {
 
   const handleMettreEnRetraite = async () => {
     if (selectedPersonnels.size === 0) {
-      alert('Veuillez sélectionner au moins un personnel');
+      triggerNotification('warning', '⚠️ Attention', 'Veuillez sélectionner au moins un personnel');
       return;
     }
 
@@ -272,13 +274,13 @@ const GestionRetraites: React.FC = () => {
         motif: 'retraite'
       });
 
-      alert(`${selectedPersonnels.size} personnel(s) mis à la retraite avec succès`);
+      triggerNotification('success', '✅ Succès', `${selectedPersonnels.size} personnel(s) mis à la retraite avec succès`);
       await fetchData();
       setSelectedPersonnels(new Set());
 
     } catch (error) {
       console.error('Erreur:', error);
-      alert('Erreur lors de la mise à la retraite');
+      triggerNotification('error', '❌ Erreur', 'Erreur lors de la mise à la retraite');
     } finally {
       setLoading(false);
     }
@@ -292,11 +294,11 @@ const GestionRetraites: React.FC = () => {
     setLoading(true);
     try {
       await api.put(`/personnels/${id}/annuler-retraite`);
-      alert('Retraite annulée avec succès');
+      triggerNotification('success', '✅ Succès', 'Retraite annulée avec succès');
       await fetchData();
     } catch (error) {
       console.error('Erreur:', error);
-      alert('Erreur lors de l\'annulation');
+      triggerNotification('error', '❌ Erreur', 'Erreur lors de l\'annulation');
     } finally {
       setLoading(false);
     }
@@ -632,14 +634,6 @@ const GestionRetraites: React.FC = () => {
                         <td>{p.anciennete} ans</td>
                         <td>{p.direction_nom}</td>
                         <td className="actions-cell">
-                          {/* <button 
-                            className="btn-view"
-                            onClick={() => handleViewRetraite(p)}
-                            title="Voir les détails"
-                          >
-                            <FontAwesomeIcon icon={faEye} />
-                            Voir
-                          </button> */}
                           <button 
                             className="btn-history"
                             onClick={() => handleViewHistorique(p)}
@@ -648,7 +642,6 @@ const GestionRetraites: React.FC = () => {
                             <FontAwesomeIcon icon={faHistory} />
                             Historique
                           </button>
-                          {/* NOUVEAU BOUTON AVEC TEXTE */}
                           <button 
                             className="btn-action-text"
                             onClick={() => handleViewRetraite(p)}
@@ -715,14 +708,6 @@ const GestionRetraites: React.FC = () => {
                         <td>{p.direction_nom}</td>
                         <td>{p.service_nom}</td>
                         <td className="actions-cell">
-                          {/* <button 
-                            className="btn-view"
-                            onClick={() => handleViewRetraite(p)}
-                            title="Voir les détails"
-                          >
-                            <FontAwesomeIcon icon={faEye} />
-                            Voir
-                          </button> */}
                           <button 
                             className="btn-history"
                             onClick={() => handleViewHistorique(p)}
@@ -731,7 +716,6 @@ const GestionRetraites: React.FC = () => {
                             <FontAwesomeIcon icon={faHistory} />
                             Historique
                           </button>
-                          {/* NOUVEAU BOUTON AVEC TEXTE */}
                           <button 
                             className="btn-action-text"
                             onClick={() => handleViewRetraite(p)}

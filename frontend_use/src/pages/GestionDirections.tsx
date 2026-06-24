@@ -7,6 +7,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 import '../style/gestion-directions.css';
+import { triggerNotification } from '../components/NotificationBell';
 
 interface Direction {
   id_direction: number;
@@ -49,6 +50,7 @@ const GestionDirections: React.FC = () => {
       setDirections(response.data);
     } catch (error) {
       console.error('Erreur:', error);
+      triggerNotification('error', '❌ Erreur', 'Impossible de charger les directions');
     } finally {
       setLoading(false);
     }
@@ -83,14 +85,16 @@ const GestionDirections: React.FC = () => {
     try {
       if (editingDirection) {
         await api.put(`/directions/${editingDirection.id_direction}`, formData);
+        triggerNotification('success', '✅ Succès', `Direction "${formData.nom_direction}" modifiée avec succès`);
       } else {
         await api.post('/directions', formData);
+        triggerNotification('success', '✅ Succès', `Direction "${formData.nom_direction}" ajoutée avec succès`);
       }
       await fetchDirections();
       closeModal();
     } catch (error) {
       console.error('Erreur:', error);
-      alert('Erreur lors de l\'enregistrement');
+      triggerNotification('error', '❌ Erreur', 'Erreur lors de l\'enregistrement');
     } finally {
       setLoading(false);
     }
@@ -100,11 +104,12 @@ const GestionDirections: React.FC = () => {
     if (!deleteConfirm) return;
     try {
       await api.delete(`/directions/${deleteConfirm.id_direction}`);
+      triggerNotification('success', '✅ Succès', `Direction "${deleteConfirm.nom_direction}" supprimée avec succès`);
       await fetchDirections();
       setDeleteConfirm(null);
     } catch (error) {
       console.error('Erreur:', error);
-      alert('Erreur lors de la suppression');
+      triggerNotification('error', '❌ Erreur', 'Erreur lors de la suppression');
     }
   };
 

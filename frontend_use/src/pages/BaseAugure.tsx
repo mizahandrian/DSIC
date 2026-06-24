@@ -7,6 +7,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 import '../style/base-augure.css';
+import { triggerNotification } from '../components/NotificationBell';
 
 interface BaseAugure {
   id: number;
@@ -76,6 +77,7 @@ const BaseAugure: React.FC = () => {
       setItems(response.data);
     } catch (error) {
       console.error('Erreur:', error);
+      triggerNotification('error', '❌ Erreur', 'Impossible de charger les données AUGURE');
     } finally {
       setLoading(false);
     }
@@ -106,14 +108,16 @@ const BaseAugure: React.FC = () => {
     try {
       if (editingItem) {
         await api.put(`/base-augure/${editingItem.id}`, formData);
+        triggerNotification('success', '✅ Succès', `Entrée AUGURE "${formData.agentNom}" modifiée avec succès`);
       } else {
         await api.post('/base-augure', formData);
+        triggerNotification('success', '✅ Succès', `Entrée AUGURE "${formData.agentNom}" ajoutée avec succès`);
       }
       await fetchItems();
       closeModal();
     } catch (error) {
       console.error('Erreur:', error);
-      alert('Erreur lors de l\'enregistrement');
+      triggerNotification('error', '❌ Erreur', 'Erreur lors de l\'enregistrement');
     } finally {
       setLoading(false);
     }
@@ -123,11 +127,12 @@ const BaseAugure: React.FC = () => {
     if (!deleteConfirm) return;
     try {
       await api.delete(`/base-augure/${deleteConfirm.id}`);
+      triggerNotification('success', '✅ Succès', `Entrée AUGURE "${deleteConfirm.agentNom}" supprimée avec succès`);
       await fetchItems();
       setDeleteConfirm(null);
     } catch (error) {
       console.error('Erreur:', error);
-      alert('Erreur lors de la suppression');
+      triggerNotification('error', '❌ Erreur', 'Erreur lors de la suppression');
     }
   };
 

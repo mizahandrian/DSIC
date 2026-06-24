@@ -4,11 +4,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faDatabase, faSearch, faEdit, faTrashAlt, faPlus, faTimes,
   faSave, faSyncAlt, faChevronLeft, faChevronRight, faSpinner,
-  faBuilding, faBriefcase, faUserTie
+  faBuilding, faBriefcase, faUserTie, faInfoCircle
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 import '../style/base-rohi.css';
-import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
+import { triggerNotification } from '../components/NotificationBell';
 
 interface BaseRohi {
   id_rohi: number;
@@ -121,6 +121,7 @@ const BaseRohi: React.FC = () => {
       setItems(response.data);
     } catch (error) {
       console.error('Erreur:', error);
+      triggerNotification('error', '❌ Erreur', 'Impossible de charger les données ROHI');
     } finally {
       setLoading(false);
     }
@@ -132,6 +133,7 @@ const BaseRohi: React.FC = () => {
       setDirections(response.data);
     } catch (error) {
       console.error('Erreur chargement directions:', error);
+      triggerNotification('error', '❌ Erreur', 'Impossible de charger les directions');
     }
   };
 
@@ -141,6 +143,7 @@ const BaseRohi: React.FC = () => {
       setServices(response.data);
     } catch (error) {
       console.error('Erreur chargement services:', error);
+      triggerNotification('error', '❌ Erreur', 'Impossible de charger les services');
     }
   };
 
@@ -150,6 +153,7 @@ const BaseRohi: React.FC = () => {
       setPostes(response.data);
     } catch (error) {
       console.error('Erreur chargement postes:', error);
+      triggerNotification('error', '❌ Erreur', 'Impossible de charger les postes');
     }
   };
 
@@ -195,14 +199,16 @@ const BaseRohi: React.FC = () => {
     try {
       if (editingItem) {
         await api.put(`/base-rohi/${editingItem.id_rohi}`, formData);
+        triggerNotification('success', '✅ Succès', `Entrée ROHI "${formData.nom} ${formData.prenom}" modifiée avec succès`);
       } else {
         await api.post('/base-rohi', formData);
+        triggerNotification('success', '✅ Succès', `Entrée ROHI "${formData.nom} ${formData.prenom}" ajoutée avec succès`);
       }
       await fetchItems();
       closeModal();
     } catch (error) {
       console.error('Erreur:', error);
-      alert('Erreur lors de l\'enregistrement');
+      triggerNotification('error', '❌ Erreur', 'Erreur lors de l\'enregistrement');
     } finally {
       setLoading(false);
     }
@@ -212,11 +218,12 @@ const BaseRohi: React.FC = () => {
     if (!deleteConfirm) return;
     try {
       await api.delete(`/base-rohi/${deleteConfirm.id_rohi}`);
+      triggerNotification('success', '✅ Succès', `Entrée ROHI "${deleteConfirm.nom} ${deleteConfirm.prenom}" supprimée avec succès`);
       await fetchItems();
       setDeleteConfirm(null);
     } catch (error) {
       console.error('Erreur:', error);
-      alert('Erreur lors de la suppression');
+      triggerNotification('error', '❌ Erreur', 'Erreur lors de la suppression');
     }
   };
 

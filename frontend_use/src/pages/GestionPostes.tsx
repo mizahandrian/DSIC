@@ -8,6 +8,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 import '../style/gestion-postes.css';
+import { triggerNotification } from '../components/NotificationBell';
 
 interface Poste {
   id_poste: number;
@@ -192,6 +193,7 @@ const GestionPostes: React.FC = () => {
       setPostes(response.data);
     } catch (error) {
       console.error('Erreur:', error);
+      triggerNotification('error', '❌ Erreur', 'Impossible de charger les postes');
     } finally {
       setLoading(false);
     }
@@ -203,6 +205,7 @@ const GestionPostes: React.FC = () => {
       setDirections(response.data);
     } catch (error) {
       console.error('Erreur:', error);
+      triggerNotification('error', '❌ Erreur', 'Impossible de charger les directions');
     }
   };
 
@@ -212,6 +215,7 @@ const GestionPostes: React.FC = () => {
       setServices(response.data);
     } catch (error) {
       console.error('Erreur:', error);
+      triggerNotification('error', '❌ Erreur', 'Impossible de charger les services');
     }
   };
 
@@ -221,6 +225,7 @@ const GestionPostes: React.FC = () => {
       setFilteredServices(response.data);
     } catch (error) {
       console.error('Erreur:', error);
+      triggerNotification('error', '❌ Erreur', 'Impossible de charger les services de cette direction');
     }
   };
 
@@ -287,14 +292,16 @@ const GestionPostes: React.FC = () => {
       
       if (editingPoste) {
         await api.put(`/postes/${editingPoste.id_poste}`, posteData);
+        triggerNotification('success', '✅ Succès', `Poste "${formData.titre_poste}" modifié avec succès`);
       } else {
         await api.post('/postes', posteData);
+        triggerNotification('success', '✅ Succès', `Poste "${formData.titre_poste}" ajouté avec succès`);
       }
       await fetchPostes();
       closeModal();
     } catch (error) {
       console.error('Erreur:', error);
-      alert('Erreur lors de l\'enregistrement');
+      triggerNotification('error', '❌ Erreur', 'Erreur lors de l\'enregistrement');
     } finally {
       setLoading(false);
     }
@@ -304,11 +311,12 @@ const GestionPostes: React.FC = () => {
     if (!deleteConfirm) return;
     try {
       await api.delete(`/postes/${deleteConfirm.id_poste}`);
+      triggerNotification('success', '✅ Succès', `Poste "${deleteConfirm.titre_poste}" supprimé avec succès`);
       await fetchPostes();
       setDeleteConfirm(null);
     } catch (error) {
       console.error('Erreur:', error);
-      alert('Erreur lors de la suppression');
+      triggerNotification('error', '❌ Erreur', 'Erreur lors de la suppression');
     }
   };
 
@@ -479,9 +487,6 @@ const GestionPostes: React.FC = () => {
                 <tbody>
                   {paginatedPostes.map((poste) => (
                     <tr key={poste.id_poste}>
-
-                      {/* <td className="id-cell">#{poste.id_poste}</td> */}
-
                       <td className="title-cell">{poste.titre_poste}</td>
                       <td>{poste.direction_nom || getDirectionName(poste.id_direction)}</td>
                       <td>{poste.service_nom || getServiceName(poste.id_service)}</td>
@@ -655,29 +660,6 @@ const GestionPostes: React.FC = () => {
                     </select>
                   </div>
                 </div>
-
-                {/* <div className="form-row">
-                  <div className="form-group">
-                    <label>Salaire de base (Ar)</label>
-                    <input 
-                      type="number" 
-                      name="salaire_base" 
-                      value={formData.salaire_base} 
-                      onChange={handleInputChange}
-                      placeholder="Ex: 750000"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Compétences requises</label>
-                    <input 
-                      type="text" 
-                      name="competences" 
-                      value={formData.competences} 
-                      onChange={handleInputChange}
-                      placeholder="Ex: JavaScript, PHP, SQL, Gestion d'équipe..."
-                    />
-                  </div>
-                </div> */}
 
                 <div className="form-group">
                   <label>Description du poste</label>
