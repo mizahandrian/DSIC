@@ -507,7 +507,7 @@ const GestionRetraites: React.FC = () => {
             className="quick-filter"
             onClick={() => {
               const today = new Date();
-              const debut = new Date(today.getFullYear() - 65, 0, 1);
+              const debut = new Date(today.getFullYear() - 150, 0, 1);
               const fin = new Date(today.getFullYear() - 61, 11, 31);
               setSearchDateDebut(debut.toISOString().split('T')[0]);
               setSearchDateFin(fin.toISOString().split('T')[0]);

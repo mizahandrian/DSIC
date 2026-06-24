@@ -98,7 +98,7 @@
   display: block;
   font-size: 1.5rem;
   font-weight: 700;
-  color: #eef5ff;
+  color: #000;
   line-height: 1.2;
 }
 
@@ -337,7 +337,7 @@
 
 /* make the first stat card match page background (total personnels) */
 .stats-row .stat-card:first-child {
-  background: #f5f7fa;
+  background: #ffff;
   border-color: #f5f7fa;
 }
 
