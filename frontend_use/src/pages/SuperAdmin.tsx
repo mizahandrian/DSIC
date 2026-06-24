@@ -4,6 +4,8 @@ import api from '../Service/api';
 import '../style/superadmin.css';
 import { useConfirmation } from '../context/ConfirmationContext';
 
+import {triggerNotification} from '../components/NotificationBell';
+
 interface User {
   id: number;
   name: string;

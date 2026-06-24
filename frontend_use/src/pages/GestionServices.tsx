@@ -7,6 +7,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 import '../style/gestion-services.css';
+import { triggerNotification } from '../components/NotificationBell';
 
 interface Direction {
   id_direction: number;
@@ -57,6 +58,7 @@ const GestionServices: React.FC = () => {
       setServices(response.data);
     } catch (error) {
       console.error('Erreur:', error);
+      triggerNotification('error', '❌ Erreur', 'Impossible de charger les services');
     } finally {
       setLoading(false);
     }
@@ -68,6 +70,7 @@ const GestionServices: React.FC = () => {
       setDirections(response.data);
     } catch (error) {
       console.error('Erreur:', error);
+      triggerNotification('error', '❌ Erreur', 'Impossible de charger les directions');
     }
   };
 
@@ -105,14 +108,16 @@ const GestionServices: React.FC = () => {
       };
       if (editingService) {
         await api.put(`/services/${editingService.id_service}`, serviceData);
+        triggerNotification('success', '✅ Succès', `Service "${formData.nom_service}" modifié avec succès`);
       } else {
         await api.post('/services', serviceData);
+        triggerNotification('success', '✅ Succès', `Service "${formData.nom_service}" ajouté avec succès`);
       }
       await fetchServices();
       closeModal();
     } catch (error) {
       console.error('Erreur:', error);
-      alert('Erreur lors de l\'enregistrement');
+      triggerNotification('error', '❌ Erreur', 'Erreur lors de l\'enregistrement');
     } finally {
       setLoading(false);
     }
@@ -122,11 +127,12 @@ const GestionServices: React.FC = () => {
     if (!deleteConfirm) return;
     try {
       await api.delete(`/services/${deleteConfirm.id_service}`);
+      triggerNotification('success', '✅ Succès', `Service "${deleteConfirm.nom_service}" supprimé avec succès`);
       await fetchServices();
       setDeleteConfirm(null);
     } catch (error: any) {
       console.error('Erreur:', error);
-      alert(error.response?.data?.message || "Erreur lors de la suppression");
+      triggerNotification('error', '❌ Erreur', error.response?.data?.message || "Erreur lors de la suppression");
     }
   };
 

@@ -160,23 +160,33 @@ class PersonnelController extends Controller
     {
         $personnel = Personnel::findOrFail($id);
         $data = $request->all();
+        
 
-        if (!empty($data['id_etat'])) {
-            $etatModel = \App\Models\Etat::find($data['id_etat']);
-            if ($etatModel) {
-                $data['etat'] = $etatModel->nom_etat;
-            }
-        } elseif (array_key_exists('etat', $data)) {
-            $data['etat'] = $this->normalizeEtat($data['etat'] ?? 'Actif');
+         // Bloquer la modification si déjà retraité
+    if ($personnel->statut === 'retraite') {
+        return response()->json([
+            'message' => 'Ce personnel est retraité et ne peut plus être modifié.'
+        ], 403);
+    }
+
+    $data = $request->all();
+
+    if (!empty($data['id_etat'])) {
+        $etatModel = \App\Models\Etat::find($data['id_etat']);
+        if ($etatModel) {
+            $data['etat'] = $etatModel->nom_etat;
         }
+    } elseif (array_key_exists('etat', $data)) {
+        $data['etat'] = $this->normalizeEtat($data['etat'] ?? 'Actif');
+    }
 
-        if (!empty($data['id_poste'])) {
-            $poste = \App\Models\Poste::find($data['id_poste']);
-            $data['poste'] = $poste?->titre_poste;
-        }
+    if (!empty($data['id_poste'])) {
+        $poste = \App\Models\Poste::find($data['id_poste']);
+        $data['poste'] = $poste?->titre_poste;
+    }
 
-        $personnel->update($data);
-        return response()->json($personnel);
+    $personnel->update($data);
+    return response()->json($personnel);
     }
 
     public function destroy($id)
