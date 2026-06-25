@@ -161,18 +161,25 @@ class PersonnelController extends Controller
         $personnel = Personnel::findOrFail($id);
         $data = $request->all();
 
-        if (!empty($data['id_etat'])) {
-            $etatModel = \App\Models\Etat::find($data['id_etat']);
+        if ($personnel-> statut === 'retraite') {
+            return response()->json(['message' => 'Ce personnel est déjà à la retraite'], 403);
+        }
+         
+            $data = $request->all();
+        
+
+        if (!empty($data['id_data'])) {
+            $etatModel = \App\Models\Etat::find($data['id_data']);
             if ($etatModel) {
                 $data['etat'] = $etatModel->nom_etat;
+            } else if(array_key_exists('etat', $data)) {
+                $data['etat'] = $this->normalizeEtat($data['etat'] ?? 'Actif');
             }
-        } elseif (array_key_exists('etat', $data)) {
-            $data['etat'] = $this->normalizeEtat($data['etat'] ?? 'Actif');
-        }
-
-        if (!empty($data['id_poste'])) {
-            $poste = \App\Models\Poste::find($data['id_poste']);
-            $data['poste'] = $poste?->titre_poste;
+            if (!empty($data['id_poste'])) {
+                $poste = \App\Models\Poste::find($data['id_poste']);
+                $data['poste'] = $poste?->titre_poste;
+            }
+            
         }
 
         $personnel->update($data);
