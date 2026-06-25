@@ -23,6 +23,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 import '../style/dashboard.css';
+import { faUserSlash } from '@fortawesome/free-solid-svg-icons';
 
 ChartJS.register(
   CategoryScale,
@@ -249,7 +250,7 @@ const Dashboard: React.FC = () => {
     { title: 'Ajouter un personnel', icon: faUserPlus, desc: 'Nouveau recrutement', link: '/recrutement' },
     { title: 'Modifier un personnel', icon: faUserEdit, desc: 'Mettre à jour', link: '/gestion-personnels' },
     { title: 'Gérer les situations', icon: faUserCheck, desc: 'Gestion des mobilités', link: '/situation-personnels' },
-    { title: 'Exporter les données', icon: faFileAlt, desc: 'Rapports CSV', link: '/gestion-personnels' },
+    { title: 'Gestion des retraites', icon: faUserSlash, desc: 'Gestion des retraites', link: '/gestion-retraites' },
   ];
 
   if (loading) {

@@ -185,14 +185,24 @@ const NotificationBell: React.FC = () => {
   });
 };
 
-  const deleteNotification = async (id: string) => {
-  setNotifications(prev => prev.filter(n => n.id !== id));
-  await fetch(`${API}/notifications/${id}`, { method: 'DELETE' });
+  const clearAll = async () => {
+  try {
+    await fetch(`${API}/notifications/clear`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: getUserId() }),
+    });
+    setNotifications([]);
+  } catch (e) {
+    console.error('Erreur clearAll:', e);
+  }
 };
 
-  const clearAll = async () => {
-  setNotifications([]);
-  await fetch(`${API}/notifications`, { method: 'DELETE' });
+const deleteNotification = async (id: string) => {
+  setNotifications(prev => prev.filter(n => n.id !== id));
+  await fetch(`${API}/notifications/${id}?user_id=${getUserId()}`, { 
+    method: 'DELETE' 
+  });
 };
 
   const getIcon = (type: string) => {
