@@ -143,10 +143,10 @@ Route::apiResource('recrutement', RecrutementController::class);
 // ==================== NOTIFICATIONS (sans auth) ====================
 Route::get('/notifications', [NotificationController::class, 'index']);
 Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead']);
+Route::post('/notifications/clear', [NotificationController::class, 'clearAll']);
 Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead']);
 Route::post('/notifications', [NotificationController::class, 'store']);
 Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
-Route::delete('/notifications', [NotificationController::class, 'clearAll']);
 
 // ==================== ROUTES PROTEGEES ====================
 Route::middleware(['auth:sanctum'])->group(function () {
