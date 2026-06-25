@@ -19,10 +19,11 @@ import {
   faUsers, faBuilding, faBriefcase, faUserTie,
   faUserPlus, faUserEdit, faUserCheck,
   faFileAlt, faChevronRight, faChartLine, faChartBar,
-  faSpinner
+  faSpinner, 
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 import '../style/dashboard.css';
+import { faUserSlash } from '@fortawesome/free-solid-svg-icons';
 
 ChartJS.register(
   CategoryScale,
@@ -249,7 +250,7 @@ const Dashboard: React.FC = () => {
     { title: 'Ajouter un personnel', icon: faUserPlus, desc: 'Nouveau recrutement', link: '/recrutement' },
     { title: 'Modifier un personnel', icon: faUserEdit, desc: 'Mettre à jour', link: '/gestion-personnels' },
     { title: 'Gérer les situations', icon: faUserCheck, desc: 'Gestion des mobilités', link: '/situation-personnels' },
-    { title: 'Exporter les données', icon: faFileAlt, desc: 'Rapports CSV', link: '/gestion-personnels' },
+    { title: 'Gestion des retraites', icon: faUserSlash, desc: 'Gestion de retraites', link: '/gestion-retraites' },
   ];
 
   if (loading) {
@@ -284,7 +285,7 @@ const Dashboard: React.FC = () => {
         ))}
       </div>
 
-      {/* État des personnels */}
+      {/* État et retraites des personnels*/}
       <div className="status-cards">
         <div className="status-card active">
           <div className="status-info">
@@ -301,9 +302,10 @@ const Dashboard: React.FC = () => {
             <span className="status-label">Personnels inactifs</span>
           </div>
           <div className="status-progress">
-            <div className="progress-fill" style={{ width: `${(stats.personnelsInactifs / (stats.totalPersonnels || 1)) * 100}%`, background: '#cbd5e1' }}></div>
+            <div className="progress-fill" style={{ width: `${(stats.personnelsInactifs / (stats.totalPersonnels || 1)) * 100}%`, }}></div>
           </div>
         </div>
+        
       </div>
 
       {/* Actions rapides */}

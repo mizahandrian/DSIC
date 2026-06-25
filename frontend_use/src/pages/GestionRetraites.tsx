@@ -23,7 +23,13 @@ import {
   faEye,
   faCalendarPlus,
   faCalendarCheck,
-  faFilter
+  faFilter,
+  faCheckCircle,
+  faExclamationTriangle,
+  faUserPlus,
+  faUserMinus,
+  faArrowRight,
+  faSpinner
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 import '../style/gestion-retraites.css';
@@ -78,6 +84,11 @@ const GestionRetraites: React.FC = () => {
   const [searchDateFin, setSearchDateFin] = useState<string>('');
   const [sortField, setSortField] = useState<SortField>('nom');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  
+  // États pour la modal de confirmation
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmData, setConfirmData] = useState<{ ids: number[]; count: number; names: string[] }>({ ids: [], count: 0, names: [] });
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -105,10 +116,7 @@ const GestionRetraites: React.FC = () => {
         };
       });
 
-      // Éligibles = tous sauf retraités
       setPersonnels(personnelsWithData.filter((p: Personnel) => p.statut !== 'retraite'));
-
-      // Retraités = seulement ceux avec statut retraite
       setRetraites(personnelsWithData.filter((p: Personnel) => p.statut === 'retraite'));
 
     } catch (error) {
@@ -255,26 +263,41 @@ const GestionRetraites: React.FC = () => {
     setSelectedPersonnels(newSelected);
   };
 
-  const handleMettreEnRetraite = async () => {
+  const handleMettreEnRetraite = () => {
     if (selectedPersonnels.size === 0) {
       triggerNotification('warning', '⚠️ Attention', 'Veuillez sélectionner au moins un personnel');
       return;
     }
 
-    if (!window.confirm(`Confirmez-vous la mise à la retraite de ${selectedPersonnels.size} personnel(s) ?`)) {
-      return;
-    }
+    const ids = Array.from(selectedPersonnels);
+    const selectedNames = filteredEligibles
+      .filter(p => selectedPersonnels.has(p.id_personnel))
+      .map(p => `${p.prenom} ${p.nom}`);
+    
+    setConfirmData({ 
+      ids, 
+      count: selectedPersonnels.size,
+      names: selectedNames
+    });
+    setShowConfirmModal(true);
+  };
 
-    setLoading(true);
+  const handleConfirmRetraite = async () => {
+    setShowConfirmModal(false);
+    setConfirmLoading(true);
     try {
-      const ids = Array.from(selectedPersonnels);
+      const ids = confirmData.ids;
       await api.post('/personnels/retraite', { 
         ids, 
         date_sortie: new Date().toISOString().split('T')[0],
         motif: 'retraite'
       });
 
-      triggerNotification('success', '✅ Succès', `${selectedPersonnels.size} personnel(s) mis à la retraite avec succès`);
+      const message = confirmData.count === 1 
+        ? `${confirmData.names[0]} a été mis à la retraite avec succès`
+        : `${confirmData.count} personnels ont été mis à la retraite avec succès`;
+      
+      triggerNotification('success', '✅ Retraite effectuée', message);
       await fetchData();
       setSelectedPersonnels(new Set());
 
@@ -282,7 +305,7 @@ const GestionRetraites: React.FC = () => {
       console.error('Erreur:', error);
       triggerNotification('error', '❌ Erreur', 'Erreur lors de la mise à la retraite');
     } finally {
-      setLoading(false);
+      setConfirmLoading(false);
     }
   };
 
@@ -351,7 +374,9 @@ const GestionRetraites: React.FC = () => {
   if (loading) {
     return (
       <div className="retraite-loading">
-        <div className="loading-spinner"></div>
+        <div className="loading-spinner">
+          <FontAwesomeIcon icon={faSpinner} spin />
+        </div>
         <p>Chargement des données...</p>
       </div>
     );
@@ -437,7 +462,7 @@ const GestionRetraites: React.FC = () => {
         </div>
 
         <div className="search-filters">
-          <div className="filter-group date-filter">
+          {/* <div className="filter-group date-filter">
             <FontAwesomeIcon icon={faCalendarDay} className="filter-icon" />
             <input
               type="date"
@@ -454,7 +479,7 @@ const GestionRetraites: React.FC = () => {
               onChange={(e) => setSearchDateFin(e.target.value)}
               className="filter-input"
             />
-          </div>
+          </div> */}
 
           {activeTab === 'eligible' && (
             <>
@@ -509,7 +534,7 @@ const GestionRetraites: React.FC = () => {
             className="quick-filter"
             onClick={() => {
               const today = new Date();
-              const debut = new Date(today.getFullYear() - 65, 0, 1);
+              const debut = new Date(today.getFullYear() - 150, 0, 1);
               const fin = new Date(today.getFullYear() - 61, 11, 31);
               setSearchDateDebut(debut.toISOString().split('T')[0]);
               setSearchDateFin(fin.toISOString().split('T')[0]);
@@ -877,6 +902,88 @@ const GestionRetraites: React.FC = () => {
               <button type="button" className="btn-close" onClick={() => setShowHistoriqueModal(false)}>
                 <FontAwesomeIcon icon={faTimes} />
                 Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmation de mise à la retraite */}
+      {showConfirmModal && (
+        <div className="modal-overlay" onClick={() => setShowConfirmModal(false)}>
+          <div className="modal-container confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="confirm-modal-header">
+              <div className="confirm-icon-wrapper">
+                <FontAwesomeIcon icon={faExclamationTriangle} className="confirm-icon" />
+              </div>
+              <h2>Confirmation de mise à la retraite</h2>
+            </div>
+            <div className="modal-body">
+              <div className="confirm-content">
+                <p className="confirm-question">
+                  Êtes-vous sûr de vouloir mettre à la retraite <strong>{confirmData.count}</strong> personnel(s) ?
+                </p>
+                
+                {confirmData.count <= 5 && confirmData.names && (
+                  <div className="confirm-list">
+                    <p className="confirm-list-title">Personnels concernés :</p>
+                    <ul>
+                      {confirmData.names.map((name, index) => (
+                        <li key={index}>
+                          <FontAwesomeIcon icon={faUserMinus} className="list-icon" />
+                          {name}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                {confirmData.count > 5 && (
+                  <div className="confirm-count-badge">
+                    <FontAwesomeIcon icon={faUserPlus} />
+                    <span>{confirmData.count} personnels seront mis à la retraite</span>
+                  </div>
+                )}
+                
+                <div className="confirm-warning-box">
+                  <FontAwesomeIcon icon={faInfoCircle} />
+                  <span>Cette action est irréversible. Les personnels passeront du statut "Actif" à "Retraité".</span>
+                </div>
+                
+                <div className="confirm-flow">
+                  <span className="flow-label">Actif</span>
+                  <FontAwesomeIcon icon={faArrowRight} className="flow-arrow" />
+                  <span className="flow-label flow-retraite">Retraité</span>
+                </div>
+              </div>
+            </div>
+            <div className="modal-actions confirm-actions">
+              <button 
+                type="button" 
+                className="btn-cancel" 
+                onClick={() => setShowConfirmModal(false)}
+                disabled={confirmLoading}
+              >
+                <FontAwesomeIcon icon={faTimes} />
+                Annuler
+              </button>
+              <button 
+                type="button" 
+                className="btn-confirm-retraite" 
+                onClick={handleConfirmRetraite}
+                disabled={confirmLoading}
+              >
+                {confirmLoading ? (
+                  <>
+                    <FontAwesomeIcon icon={faSpinner} spin />
+                    Traitement...
+                  </>
+                ) : (
+                  <>
+                    <FontAwesomeIcon icon={faCheckCircle} />
+                    Confirmer la retraite
+                  </>
+                )}
               </button>
             </div>
           </div>

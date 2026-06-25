@@ -1647,13 +1647,13 @@ body.dark-mode .recent-table .name {
   align-items: center;
   padding: 0.75rem 1rem;
   border-bottom: 1px solid #eef2f6;
-  background: #fafbfc;
+  background: #334155;
 }
 
 .notification-header h3 {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #1e293b;
+  color: #f1f5f9;
   margin: 0;
 }
 
