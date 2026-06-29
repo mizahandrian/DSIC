@@ -197,11 +197,17 @@ const BaseRohi: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
+
+      const payload = {
+      ...formData,
+      direction: getDirectionName(formData.direction), // ← résoudre le nom
+      service: getServiceName(formData.service),       // ← résoudre le nom
+    };
       if (editingItem) {
-        await api.put(`/base-rohi/${editingItem.id_rohi}`, formData);
+        await api.put(`/base-rohi/${editingItem.id_rohi}`, payload);
         triggerNotification('success', '✅ Succès', `Entrée ROHI "${formData.nom} ${formData.prenom}" modifiée avec succès`);
       } else {
-        await api.post('/base-rohi', formData);
+        await api.post('/base-rohi', payload);
         triggerNotification('success', '✅ Succès', `Entrée ROHI "${formData.nom} ${formData.prenom}" ajoutée avec succès`);
       }
       await fetchItems();
