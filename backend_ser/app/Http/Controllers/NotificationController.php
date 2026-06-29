@@ -15,7 +15,6 @@ class NotificationController extends Controller
         ->take(30)
         ->get()
         ->filter(function ($n) use ($userId) {
-            // Exclure les notifications cachées pour cet utilisateur
             $read = \App\Models\NotificationRead::where('notification_id', $n->id)
                 ->where('user_id', $userId)
                 ->first();
@@ -32,7 +31,7 @@ class NotificationController extends Controller
                 'message'  => $n->message,
                 'link'     => $n->link,
                 'date'     => $n->created_at->toISOString(),
-                'read'     => $read ? (bool) $read->exists() : false,
+                'read'     => $read ? !$read->is_hidden : false,
                 'userId'   => $n->created_by,
                 'userName' => $n->created_by_name,
             ];
