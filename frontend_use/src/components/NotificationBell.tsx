@@ -187,12 +187,14 @@ const NotificationBell: React.FC = () => {
 
   const clearAll = async () => {
   try {
-    await fetch(`${API}/notifications/clear`, {
+    const res = await fetch(`${API}/notifications/clear`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_id: getUserId() }),
     });
-    setNotifications([]);
+    const data = await res.json();
+    console.log('clearAll response:', res.status, data);
+    await loadNotifications();
   } catch (e) {
     console.error('Erreur clearAll:', e);
   }

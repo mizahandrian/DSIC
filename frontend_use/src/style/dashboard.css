@@ -1250,6 +1250,22 @@ body.dark-mode .badge-inactive {
   background: #2F4E68;
 }
 
+/* ===== STATUS CARD RETRAITE ===== */
+
+
+.status-card.retraite:hover {
+  border-color: #2F4E68;
+  box-shadow: 0 4px 12px rgba(47, 78, 104, 0.1);
+}
+
+.status-card.retraite .status-value {
+  color: #1e293b;
+}
+
+.status-card.retraite .progress-fill {
+  background: #2F4E68;
+}
+
 /* Quick Actions */
 .quick-actions {
   display: grid;
@@ -1961,23 +1977,7 @@ body.dark-mode .toast-notification {
 body.dark-mode .toast-content strong {
   color: #f1f5f9;
 }
-/* ===== STATUS CARD RETRAITE ===== */
-.status-card.retraite {
-  border-color: #2F4E68;
-}
 
-.status-card.retraite:hover {
-  border-color: #2F4E68;
-  box-shadow: 0 4px 12px rgba(47, 78, 104, 0.1);
-}
-
-.status-card.retraite .status-value {
-  color: #1e293b;
-}
-
-.status-card.retraite .progress-fill {
-  background: #2F4E68;
-}
 
 /* ===== SECTION RÉSUMÉ ===== */
 .summary-section {
