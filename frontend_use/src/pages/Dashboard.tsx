@@ -19,11 +19,10 @@ import {
   faUsers, faBuilding, faBriefcase, faUserTie,
   faUserPlus, faUserEdit, faUserCheck,
   faFileAlt, faChevronRight, faChartLine, faChartBar,
-  faSpinner, 
+  faSpinner, faUserSlash, faExchangeAlt, faCalendarAlt
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../Service/api';
 import '../style/dashboard.css';
-import { faUserSlash } from '@fortawesome/free-solid-svg-icons';
 
 ChartJS.register(
   CategoryScale,
@@ -44,6 +43,7 @@ interface DashboardStats {
   totalPostes: number;
   personnelsActifs: number;
   personnelsInactifs: number;
+  personnelsRetraites: number;
   directionsData: { name: string; count: number }[];
   recents: any[];
 }
@@ -57,6 +57,7 @@ const Dashboard: React.FC = () => {
     totalPostes: 0,
     personnelsActifs: 0,
     personnelsInactifs: 0,
+    personnelsRetraites: 0,
     directionsData: [],
     recents: []
   });
@@ -68,12 +69,12 @@ const Dashboard: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      const [personnelsRes, directionsRes, servicesRes] = await Promise.all([
+      const [personnelsRes, directionsRes, servicesRes, postesRes] = await Promise.all([
         api.get('/personnels'),
         api.get('/directions'),
-        api.get('/services')
+        api.get('/services'),
+        api.get('/postes')
       ]);
-
 
       const personnels = personnelsRes.data.map((p: any) => ({
         ...p,
@@ -83,9 +84,12 @@ const Dashboard: React.FC = () => {
         etat: p.etat
       }));
       const directions = directionsRes.data;
+      const services = servicesRes.data;
+      const postes = postesRes.data;
 
       const actifs = personnels.filter((p: any) => p.etat === 'Actif').length;
       const inactifs = personnels.filter((p: any) => p.etat === 'Inactif').length;
+      const retraites = personnels.filter((p: any) => p.etat === 'Retraité' || p.statut === 'retraite').length;
 
       const directionsStats = directions
         .map((d: any) => ({
@@ -98,10 +102,11 @@ const Dashboard: React.FC = () => {
       setStats({
         totalPersonnels: personnels.length,
         totalDirections: directions.length,
-        totalServices: servicesRes.data.length,
-        totalPostes: new Set(personnels.map((p: any) => p.poste).filter(Boolean)).size,
+        totalServices: services.length,
+        totalPostes: postes.length,
         personnelsActifs: actifs,
         personnelsInactifs: inactifs,
+        personnelsRetraites: retraites,
         directionsData: directionsStats,
         recents: [...personnels].slice(0, 5)
       });
@@ -253,6 +258,15 @@ const Dashboard: React.FC = () => {
     { title: 'Gestion des retraites', icon: faUserSlash, desc: 'Gestion de retraites', link: '/gestion-retraites' },
   ];
 
+  // Données pour le tableau récapitulatif
+  const summaryData = [
+    { label: 'Mobilité', value: stats.personnelsInactifs || 0, icon: faExchangeAlt, color: '#f59e0b', link: '/situation-personnels' },
+    { label: 'Retraite', value: stats.personnelsRetraites || 0, icon: faUserSlash, color: '#dc3545', link: '/gestion-retraites' },
+    { label: 'Directions', value: stats.totalDirections, icon: faBuilding, color: '#2F4E68', link: '/gestion-directions' },
+    { label: 'Services', value: stats.totalServices, icon: faBriefcase, color: '#17a2b8', link: '/gestion-services' },
+    { label: 'Postes', value: stats.totalPostes, icon: faUserTie, color: '#6c757d', link: '/gestion-postes' },
+  ];
+
   if (loading) {
     return (
       <div className="dashboard-loading">
@@ -285,7 +299,7 @@ const Dashboard: React.FC = () => {
         ))}
       </div>
 
-      {/* État et retraites des personnels*/}
+      {/* État et retraites des personnels */}
       <div className="status-cards">
         <div className="status-card active">
           <div className="status-info">
@@ -302,10 +316,19 @@ const Dashboard: React.FC = () => {
             <span className="status-label">Personnels inactifs</span>
           </div>
           <div className="status-progress">
-            <div className="progress-fill" style={{ width: `${(stats.personnelsInactifs / (stats.totalPersonnels || 1)) * 100}%`, }}></div>
+            <div className="progress-fill" style={{ width: `${(stats.personnelsInactifs / (stats.totalPersonnels || 1)) * 100}%` }}></div>
           </div>
         </div>
-        
+        {/* NOUVEAU - Carte Retraites */}
+        <div className="status-card retraite">
+          <div className="status-info">
+            <span className="status-value">{stats.personnelsRetraites}</span>
+            <span className="status-label">Personnels retraités</span>
+          </div>
+          <div className="status-progress">
+            <div className="progress-fill" style={{ width: `${(stats.personnelsRetraites / (stats.totalPersonnels || 1)) * 100}%` }}></div>
+          </div>
+        </div>
       </div>
 
       {/* Actions rapides */}
@@ -321,7 +344,7 @@ const Dashboard: React.FC = () => {
         ))}
       </div>
 
-      {/* Graphiques */}
+      {/* Graphiques + Résumé */}
       <div className="charts-section">
         <div className="chart-card">
           <div className="chart-header">
@@ -357,6 +380,31 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Section Résumé - Mobilité, Retraite, Directions, Services, Postes */}
+      {/* <div className="summary-section">
+        <div className="summary-header">
+          <h3>
+            <FontAwesomeIcon icon={faFileAlt} />
+            Récapitulatif
+          </h3>
+          <p>Synthèse des données principales</p>
+        </div>
+        <div className="summary-grid">
+          {summaryData.map((item, index) => (
+            <Link to={item.link} key={index} className="summary-card">
+              <div className="summary-icon" style={{ background: `${item.color}15`, color: item.color }}>
+                <FontAwesomeIcon icon={item.icon} />
+              </div>
+              <div className="summary-info">
+                <span className="summary-value">{item.value}</span>
+                <span className="summary-label">{item.label}</span>
+              </div>
+              <FontAwesomeIcon icon={faChevronRight} className="summary-arrow" />
+            </Link>
+          ))}
+        </div>
+      </div> */}
 
       {/* Derniers personnels */}
       <div className="recent-section">

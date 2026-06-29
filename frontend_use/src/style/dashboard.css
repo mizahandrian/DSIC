@@ -1193,7 +1193,7 @@ body.dark-mode .badge-inactive {
 /* Status Cards */
 .status-cards {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
@@ -1960,4 +1960,172 @@ body.dark-mode .toast-notification {
 
 body.dark-mode .toast-content strong {
   color: #f1f5f9;
+}
+/* ===== STATUS CARD RETRAITE ===== */
+.status-card.retraite {
+  border-color: #2F4E68;
+}
+
+.status-card.retraite:hover {
+  border-color: #2F4E68;
+  box-shadow: 0 4px 12px rgba(47, 78, 104, 0.1);
+}
+
+.status-card.retraite .status-value {
+  color: #1e293b;
+}
+
+.status-card.retraite .progress-fill {
+  background: #2F4E68;
+}
+
+/* ===== SECTION RÉSUMÉ ===== */
+.summary-section {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e9ecef;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.summary-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.summary-header h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.summary-header p {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin: 0 0 0 0.5rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.75rem;
+}
+
+.summary-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border-radius: 12px;
+  text-decoration: none;
+  border: 1px solid #e9ecef;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-color: #2F4E68;
+}
+
+.summary-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.summary-info {
+  flex: 1;
+}
+
+.summary-value {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+.summary-label {
+  display: block;
+  font-size: 0.7rem;
+  color: #64748b;
+}
+
+.summary-arrow {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  transition: transform 0.2s ease;
+}
+
+.summary-card:hover .summary-arrow {
+  transform: translateX(4px);
+  color: #2F4E68;
+}
+
+/* Dark Mode pour Summary */
+body.dark-mode .summary-section {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark-mode .summary-header h3 {
+  color: #f1f5f9;
+}
+
+body.dark-mode .summary-card {
+  background: #334155;
+  border-color: #475569;
+}
+
+body.dark-mode .summary-card:hover {
+  border-color: #2F4E68;
+}
+
+body.dark-mode .summary-value {
+  color: #f1f5f9;
+}
+
+body.dark-mode .summary-arrow {
+  color: #64748b;
+}
+
+body.dark-mode .summary-card:hover .summary-arrow {
+  color: #2F4E68;
+}
+
+/* Responsive Summary */
+@media (max-width: 1024px) {
+  .summary-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .summary-card {
+    padding: 0.6rem 0.8rem;
+  }
 }
